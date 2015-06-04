@@ -209,6 +209,11 @@
 					var $wlst = $('#weeks'), $wtpl = $wlst.find('.template').removeClass('template').remove(),
 						$plst = $('#projects'), $ptpl = $plst.find('.template').removeClass('template').remove(),
 						$ttpl = $ptpl.find('.todo').remove(),
+						update = function() {
+							Todos.save(todos);
+							Todos.trigger();
+						},
+						todos,
 						$todo = function(todo, index, project) {
 							var done = todo.done !== undefined && todo.done,
 								$t = $ttpl.clone().data('index', index);
@@ -217,11 +222,11 @@
 							$t.attr('title', todo.description);
 							$t.find('.titre').text(todo.description.substr(0, 75)+(todo.description.length > 75 ? '...' : ''));
 							$t.find('.mylabel').text(project.title).css('background-color', colorFromString(project.title));
-							$t.find('.todook').toggleClass('active', done).on('click', function() { todo.done = !done; Todos.update(); });
-							$t.find('.weekn').on('click', function() { todo.week = cweek.iso; todo.year = cweek.year; Todos.update(); });
-							$t.find('.prevweek').on('click', function() { todo.week = todo.week+1; Todos.update(); });
-							$t.find('.nextweek').on('click', function() { todo.week = todo.week-1; Todos.update(); });
-							$t.find('.noweek').on('click', function() { delete todo.week; Todos.update(); });
+							$t.find('.todook').toggleClass('active', done).on('click', function() { todo.done = !done; update(); });
+							$t.find('.weekn').on('click', function() { todo.week = cweek.iso; todo.year = cweek.year; update(); });
+							$t.find('.prevweek').on('click', function() { todo.week = todo.week+1; update(); });
+							$t.find('.nextweek').on('click', function() { todo.week = todo.week-1; update(); });
+							$t.find('.noweek').on('click', function() { delete todo.week; update(); });
 
 							var $md = $t.find('.btn-group.md').addClass('md'+todo.workload);
 							if (todo.done) {
@@ -234,7 +239,7 @@
 								.on('click', '.btn', function(e) {
 									var md = $(this).data('md');
 									todo.workload = (todo.workload == md ? 0 : md);
-									Todos.update();
+									update();
 								});
 							}
 
@@ -242,7 +247,8 @@
 						},
 						weeks, windex, projects, pindex;
 
-					return function(todos) {
+					return function(data) {
+						todos = data;
 						weeks = [];
 						windex = {};
 						projects = [];
@@ -255,11 +261,11 @@
 								project: $('#projet').val(),
 								description: $('#description').val()
 							});
-							Todos.update();
+							update();
 						});
 						$('.container').off('click', '.delete').on('click', '.delete', function(e) {
 							todos.splice($(e.currentTarget).parent().parent().data('index'), 1);
-							Todos.update();
+							update();
 						});
 						todos.forEach(function(todo, i) {
 							var project = pindex[todo.project];

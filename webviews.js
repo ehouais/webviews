@@ -6,12 +6,27 @@ var Webviews = {
 			dataUri,
 			promise,
 			d = {
-				update: function() {
-					d.trigger();
-					$.ajax({url: dataUri, type: 'PUT', contentType: 'text/plain', data: JSON.stringify(local), xhrFields: {withCredentials: true}});
-				},
+				save: (function() {
+					var delay_ = $.Deferred().resolve(),
+						save_ = $.Deferred().resolve(),
+						pending = false;
+					return function(data) {
+						// Send update request to server when (eventual) previous one has succeeded and a 5 seconds delay has passed since last request
+						local = data;
+						if (!pending) {
+							pending = true;
+							$.when(delay_, save_).done(function() {
+								delay_ = $.Deferred();
+								setTimeout(function() {
+									delay_.resolve();
+								}, 5000);
+								save_ = $.ajax({url: dataUri, type: 'PUT', contentType: 'text/plain', data: JSON.stringify(data), xhrFields: {withCredentials: true}});
+								pending = false;
+							});
+						}
+					}
+				})(),
 				bind: function(handler) {
-					local && handler(local);
 					handlers.push(handler);
 					return d;
 				},
