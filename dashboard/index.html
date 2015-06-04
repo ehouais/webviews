@@ -1,0 +1,386 @@
+﻿<html>
+    <head>
+        <meta charset="utf-8">
+        <link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAMhSURBVFhHtZc/aBNxFMcPO4igoIO2uogQETGl+d+kiB0cHTrUotBJAg6im2uJm4PZFHQQiuBYHCTgIog4iODgpLZ1cNCllGJqKYIm8fM93oXL9Xq5wN0XHr+7997vfb+/9/vlLucEUSqVbmKfi8ViL8oKhUKoP8I61P2AzRvVIKampi4QfIt1y+VyLw2jtoT8ZXzB/YRRO04+nz9PYLNarfYqlYpW18bWsFUbQ405oX5ZIKY669ju9PR0TzzEv+ZyueOegPdySiFJS6buQKPRSMRUa2FhYYzFnYH4kbohPrieOTjqIraVN1xFKUPE6gRjWzffbG9+cQ6OWk6qgC+LdeDsqQPuAUHIqsUTA1vbZKUf4ZgzlwvtPXy/tfABAbZfiQDyebVZWyuD7Mns7OxhxfCPw7cdFLCWlACtkLobqqv6spmZmR6ibiieugBqrWj1HrmIGEV4TvFUBVBn0U8u0z1dqVtKegJo8SnqbflbL3L8LUtxkZoAarT8q7fWb0mYpbhIRQB16n5yme6pu2gpfSQugBWepo5bUPWo5ZGvWMoABgQoeYiAMRv3BXNf+1dvZ2Cj/7IJIHYH8N0neZUVXjPXHhC77SeX6R5/+HsfxBKA/4EK6SmmOAWvW6gPVniWvF2v9T7y55YSiqEC8NVrtVq/qBLDRDDnnQR6ecph/Dk5OXnMUkIRR8BVrcS/sqAI8u8qx4vL7JV+RfEoDBUgQHTHXiKK9UVw3SF2zyvgkUsMvqc2PRKxBAjE+iI8Ipm/7TJr/XdeOEdsaiRiCxCIh4rwm23NZZsyFCMJEPzbESS31j+01FgYWYBA3h4RthVr/ME8ZGmxsJ+Aof+I/J2QaR7zL1o4NviJn4CvHRSwbvFIkHeLiX/Ueh5ES+YeCXpEU2fHFcDFJ10gZCebzY5bTiT0BKQbJbsdGXBVWHQX7q6KzakLdpgeW06qgO+V8W16jpfeZxnXywSKOihJmTpLzZN07RJjSzz2ZdR0BdCOCbbhi5xMcA8Ywe0ETd+a7neA6hv5m4Ffjw4GCcvYBl3oKjlpo+4/xh+QNzOZzEHHcZz/Yu4UxPJ023QAAAAASUVORK5CYII=">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/require-jquery/0.25.0/require-jquery.js"></script>
+        <script src="../webviews.js"></script>
+        <style>
+            @font-face {
+                font-family: encode; src: url('http://static.ehouais.net/EncodeSansCondensed-Regular.ttf') format("truetype");
+            }
+            body {
+				font-family: encode;
+            }
+			* {
+				-moz-box-sizing: border-box;
+				-webkit-box-sizing: border-box;
+				box-sizing: border-box;
+				font-family: arial;
+			}
+			body {
+				margin: 0;
+				padding: 0;
+				overflow: hidden;
+			}
+			#dom  {
+				width: 100%;
+				height: 100%;
+				overflow: hidden;
+				background-color: #a0c0f0;
+			}
+			.frame {
+				position: absolute;
+				overflow: hidden;
+				background-color: rgba(255, 255, 255, 0.2);
+			}
+			.label {
+				font-family: encode;
+			}
+			.link {
+				font-family: encode;
+				display: block;
+				height: 16px;
+				background-color: #ddd;
+				border-radius: 4px;
+				text-align: center;
+				font-size: 12px;
+				text-decoration: none;
+				color: rgb(0, 0, 238);
+				line-height: 125%;
+			}
+			.link:hover {
+				background-color: #fff;
+				color: #f00;
+			}
+			#overlay {
+				position: absolute;
+				top: 0;
+				width: 100%;
+				height: 100%;
+			}
+			.mask {
+				position: absolute;
+				cursor: pointer;
+				background-color: #ffffff;
+				opacity: 0.3;
+			}
+			#dialog {
+				position: absolute;
+				top: 200px;
+				left: 600px;
+				width: 400px;
+				height: 200px;
+				padding: 4px;
+				background-color: #ffffff;
+			}
+			#dialog input[type=text] {
+				width: 100%;
+			}
+			#dialog input[type=button] {
+				height: 20px;
+				font-size: 11px;
+				width: 50px;
+				margin: 0px;
+			}
+			#cancel {
+				float: right;
+			}
+        </style>
+        <script>
+			require.config({paths: {
+				core      : 'http://ehouais.net/proxy?url=https://raw.githubusercontent.com/ehouais/jsutils/master/src/core.js',
+				observable: 'http://ehouais.net/proxy?url=https://raw.githubusercontent.com/ehouais/jsutils/master/src/observable.js',
+				factory   : 'http://ehouais.net/proxy?url=https://raw.githubusercontent.com/ehouais/jsutils/master/src/factory.js'
+			}});
+			require(['jquery', 'core', 'factory'], function($, core, factory) {
+				var editable = true,
+					HA = {left: 0, prop: 1, right: 2}, VA = {top: 0, prop: 1, bottom: 2},
+					Dashboard = Webviews.data();
+
+				$(function() {
+					var $db = $(document.body),
+					    $dom = $('<div/>').attr('id', 'dom').appendTo($db),
+						$overlay,
+					    step = 4,
+					    templates = {
+							iframe: function($f, f) {
+								$f.append($('<iframe/>').attr({src: f.data().get('uri'), frameborder: 0}).css({width: '100%', height: '100%'}));
+							},
+							link: function($f, f) {
+								$f.append($('<a/>').addClass('link').attr({href: f.data().get('uri'), target: '_blank'}).text(f.data().get('label')));
+								f.bottom().value(f.top().value()+16);
+							},
+							text: function($f, f) {
+								$f.addClass('label').css({textAlign: 'center'});
+								var update = function() {
+									$f.text(f.data().get('text'));
+									$f.css('font-size', (f.ab()-f.at())/1.3+'px');
+								};
+								f.bind('modified', update);
+								update();
+							},
+							image: function($f, f) {
+								$f.append($('<img/>').attr({src: f.data().get('uri')}).css({width: '100%'}));
+							}
+						},
+					    addFrame = function(frame) {
+							var ahc = function(hc) {
+								var gs = core.getset(function() {
+									switch(hc.type()) {
+										case HA.left: return hc.value();
+										case HA.prop: return $dom.width()*hc.value();
+										case HA.right: return $dom.width()-hc.value();
+									}
+								}, function(val) {
+									val -= val%step;
+									switch(hc.type()) {
+										case HA.left: hc.value(val); return frame;
+										case HA.prop: hc.value(val/$dom.width()); return frame;
+										case HA.right: hc.value($dom.width()-val); return frame;
+									}
+								});
+								return gs;
+							};
+							var avc = function(vc) {
+								var gs = core.getset(function() {
+									switch(vc.type()) {
+										case VA.top: return vc.value();
+										case VA.prop: return $dom.height()*vc.value();
+										case VA.bottom: return $dom.height()-vc.value();
+									}
+								}, function(val) {
+									val -= val%step;
+									switch(vc.type()) {
+										case VA.top: vc.value(val); return frame;
+										case VA.prop: vc.value(val/$dom.height()); return frame;
+										case VA.bottom: vc.value($dom.height()-val); return frame;
+									}
+								});
+								return gs;
+							};
+							frame.al = ahc(frame.left()),
+							frame.at = avc(frame.top()),
+							frame.ar = ahc(frame.right()),
+							frame.ab = avc(frame.bottom())
+							var update = function() {
+								var l = frame.al(), t = frame.at(), w = frame.ar()-l, h = frame.ab()-t;
+								$f.width(w).height(h).css({left: l, top: t});
+							};
+							frame.bind('modified', update);
+							frame.bind('removed', function() {
+								$f.remove();
+							});
+							var $f = $('<div/>').addClass('frame').appendTo($dom);
+							templates[frame.template_id()]($f, frame);
+							update();
+						},
+					    addMask = function(frame) {
+							var update = function() {
+								var l = frame.al(), t = frame.at(), w = frame.ar()-l, h = frame.ab()-t;
+								$em.width(w).height(h).css({left: l, top: t});
+							};
+							frame.bind('modified', update);
+							frame.bind('removed', function() {
+								$em.remove();
+							});
+							var $em = $('<div/>').addClass('mask').data('frame', frame).appendTo($overlay);
+							$em.dblclick(function() {
+								if (confirm('Are you sure ?')) {
+									view.frames().remove(frame);
+								}
+							});
+							update();
+						};
+
+					Dashboard.bind(function(data) {
+						// Initialization of data objects --------------------------------------
+						var view = (function(data) {
+							var hcf = factory.object({
+								type: {type: [HA.left, HA.prop, HA.right], defval: HA.prop},
+								value: {type: 'integer'}
+							});
+							var vcf = factory.object({
+								type: {type: [VA.top, VA.prop, VA.bottom], defval: VA.prop},
+								value: {type: 'integer'}
+							});
+							var ff = factory.object({
+								left: {type: hcf},
+								top: {type: vcf},
+								right: {type: hcf},
+								bottom: {type: vcf},
+								template_id: {type: 'string'},
+								data: {type: factory.map()}
+							});
+							var vf = factory.object({
+								title: {type: 'string'},
+								frames: {type: factory.set(ff)}
+							});
+							return vf(data);
+						})(data || {frames: []});
+
+						// Prevent some default behaviours
+						$dom.on('mousedown mousewheel', function(e) {
+							e.preventDefault();
+						});
+
+						// Display new frames when they're added to the view
+						view.frames().bind('elementAdded', function(e, f) {
+							addFrame(f);
+							if (editable) {
+								addMask(f);
+							}
+						});
+
+						view.frames().bind('elementRemoved', function(e, f) {
+							f.trigger('removed');
+						});
+
+						if (editable) {
+							(function() {
+								// modal dialog for frame creation
+								var $modal = $('<div/>').attr('id', 'dialog').hide().appendTo($db);
+								var $text = $('<input type="text"/>').appendTo($modal);
+								var $ib = $('<input type="button" value="iframe"/>').on('click', function() {
+									var val = $text.val();
+									if (val.substr(0, 5) == 'http:') {
+										frame(200, 200, 'iframe', {uri: val});
+									}
+									$modal.hide();
+								});
+								var $lb = $('<input type="button" value="label"/>').on('click', function() {
+									frame(200, 200, 'text', {text: $text.val()});
+									$modal.hide();
+								});
+								var $hb = $('<input type="button" value="link"/>').on('click', function() {
+									var match = $text.val().match(/(.*) \((.*)\)/);
+									frame(200, 200, 'link', {label: match[1], uri: match[2]});
+									$modal.hide();
+								});
+								var $mb = $('<input type="button" value="image"/>').on('click', function() {
+									var val = $text.val();
+									if (val.substr(0, 5) == 'http:' || val.substr(0, 6) == 'https:') {
+										frame(200, 200, 'image', {uri: val});
+									}
+									$modal.hide();
+								});
+								var $cb = $('<input type="button" value="cancel"/>').attr('id', 'cancel').on('click', function() { $modal.hide(); });
+								$([$ib, $lb, $hb, $mb, $cb]).appendTo($modal);
+								$dom.on('dblclick', function() {
+									$modal.show();
+								});
+
+								// frame creation
+								var frame = function(w, h, tpl, data) {
+									view.frames().add(function(f) {
+										var cx = $dom.width()/2, cy = $dom.height()/2;
+										f.left().type(HA.left).value(cx-w/2);
+										f.right().type(HA.left).value(cx+w/2);
+										f.top().type(VA.top).value(cy-h/2);
+										f.bottom().type(VA.top).value(cy+h/2);
+										f.template_id(tpl);
+										for (key in data) {
+											f.data().set(key, data[key]);
+										}
+										return f;
+									});
+								};
+
+								// edit mode toggle
+								$dom.on('mousedown', function() {
+									var tid;
+									var clear = function() {
+										clearTimeout(tid);
+										$dom.off('mouseup', clear);
+									};
+									$dom.on('mouseup', clear);
+									tid = setTimeout(function() {
+										$overlay.show();
+									}, 500);
+								});
+							})();
+					
+							// Overlay installment for frames manipulation
+							$overlay = $('<div/>').attr('id', 'overlay').hide().appendTo($db);
+							(function() {
+								var selected;
+								$overlay.on('click', function(e) {
+									if (selected) {
+										$(selected).css('background-color', '#ffffff');
+									}
+									if (e.target == $overlay.get(0)) {
+										selected = null;
+										$overlay.hide();
+									} else {
+										selected = e.target;
+										$(selected).css('background-color', '#ff0000');
+									}
+								});
+							})();
+							$overlay.on('mousedown', '.mask', function(e) {
+								var f = $(e.target), fm = f.data('frame');
+								var mx = e.pageX, my = e.pageY;
+								var dx1 = mx-fm.al(), dy1 = my-fm.at();
+								var dx2 = fm.ar()-mx, dy2 = fm.ab()-my;
+								var moving = (dx2 > 10 || dy2 > 10);
+								var mm = function(e) {
+									mx = e.pageX;
+									my = e.pageY;
+									if (moving) {
+										fm.al(mx-dx1).at(my-dy1);
+									}
+									fm.ar(mx+dx2).ab(my+dy2);
+								};
+								var mu = function() {
+									$overlay.off('mousemove', mm).off('mouseup', mu);
+								};
+								$overlay.on('mousemove', mm).on('mouseup', mu);
+								e.preventDefault();
+							});
+							$overlay.on('mousedown mousewheel', function(e) {
+								e.preventDefault();
+							});
+					
+							// DnD
+							var noop = function(e) {
+								e.stopPropagation();
+								e.preventDefault();
+							};
+							$dom.on({
+								'dragstart dragenter dragleave dragover dragend': noop,
+								'drop': function(e) {
+									noop(e);
+									var link = e.originalEvent.dataTransfer.getData('text/uri-list');
+									view.frames().add({
+										left: {type: HA.prop, value: 0.45},
+										top: {type: VA.prop, value: 0.45},
+										right: {type: HA.prop, value: 0.55},
+										bottom: {type: VA.prop, value: 0.55},
+										template_id: 'iframe',
+										data: {uri: 'http://crobs-server.philou.c9.io/g2697972'}
+									});
+								}
+							});    
+						}
+
+						// Initialization
+						view.frames().each(function(f) {
+							addFrame(f);
+							if (editable) {
+								addMask(f);
+							}
+						});
+
+						// Save when modified
+						if (editable) {
+							view.bind('modified', function() {
+								Dashboard.save(view.snapshot());
+							});
+						}
+					});
+				});
+			});
+        </script>
+    </head>
+    <body>
+    </body>
+</html>
