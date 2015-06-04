@@ -190,11 +190,12 @@
 								}
 							});
 							update();
-						};
+						},
+						view;
 
 					Dashboard.bind(function(data) {
 						// Initialization of data objects --------------------------------------
-						var view = (function(data) {
+						view = (function(data) {
 							var hcf = factory.object({
 								type: {type: [HA.left, HA.prop, HA.right], defval: HA.prop},
 								value: {type: 'integer'}
