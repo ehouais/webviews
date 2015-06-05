@@ -140,6 +140,7 @@
                 position: relative;
                 left: -12px;
                 top: -6px;
+				cursor: pointer;
             }
             .weekcol {
                 width: 60px;
@@ -273,7 +274,13 @@
 								var $dom = $ptpl.clone();
 								project = {title: todo.project, id: projects.length, dom: $dom};
 								$dom.appendTo($plst);
-								$dom.find('.header .mylabel').text(project.title).css('background-color', colorFromString(project.title));
+								$dom.find('.header .mylabel')
+								.text(project.title)
+								.css('background-color', colorFromString(project.title))
+								.on('click', function() {
+									$('#project').val(project.title);
+									$('#description').focus();
+								});
 								projects.push(project);
 								pindex[todo.project] = project;
 							}
