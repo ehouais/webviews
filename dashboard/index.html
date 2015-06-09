@@ -3,7 +3,6 @@
         <meta charset="utf-8">
         <link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAMhSURBVFhHtZc/aBNxFMcPO4igoIO2uogQETGl+d+kiB0cHTrUotBJAg6im2uJm4PZFHQQiuBYHCTgIog4iODgpLZ1cNCllGJqKYIm8fM93oXL9Xq5wN0XHr+7997vfb+/9/vlLucEUSqVbmKfi8ViL8oKhUKoP8I61P2AzRvVIKampi4QfIt1y+VyLw2jtoT8ZXzB/YRRO04+nz9PYLNarfYqlYpW18bWsFUbQ405oX5ZIKY669ju9PR0TzzEv+ZyueOegPdySiFJS6buQKPRSMRUa2FhYYzFnYH4kbohPrieOTjqIraVN1xFKUPE6gRjWzffbG9+cQ6OWk6qgC+LdeDsqQPuAUHIqsUTA1vbZKUf4ZgzlwvtPXy/tfABAbZfiQDyebVZWyuD7Mns7OxhxfCPw7cdFLCWlACtkLobqqv6spmZmR6ibiieugBqrWj1HrmIGEV4TvFUBVBn0U8u0z1dqVtKegJo8SnqbflbL3L8LUtxkZoAarT8q7fWb0mYpbhIRQB16n5yme6pu2gpfSQugBWepo5bUPWo5ZGvWMoABgQoeYiAMRv3BXNf+1dvZ2Cj/7IJIHYH8N0neZUVXjPXHhC77SeX6R5/+HsfxBKA/4EK6SmmOAWvW6gPVniWvF2v9T7y55YSiqEC8NVrtVq/qBLDRDDnnQR6ecph/Dk5OXnMUkIRR8BVrcS/sqAI8u8qx4vL7JV+RfEoDBUgQHTHXiKK9UVw3SF2zyvgkUsMvqc2PRKxBAjE+iI8Ipm/7TJr/XdeOEdsaiRiCxCIh4rwm23NZZsyFCMJEPzbESS31j+01FgYWYBA3h4RthVr/ME8ZGmxsJ+Aof+I/J2QaR7zL1o4NviJn4CvHRSwbvFIkHeLiX/Ueh5ES+YeCXpEU2fHFcDFJ10gZCebzY5bTiT0BKQbJbsdGXBVWHQX7q6KzakLdpgeW06qgO+V8W16jpfeZxnXywSKOihJmTpLzZN07RJjSzz2ZdR0BdCOCbbhi5xMcA8Ywe0ETd+a7neA6hv5m4Ffjw4GCcvYBl3oKjlpo+4/xh+QNzOZzEHHcZz/Yu4UxPJ023QAAAAASUVORK5CYII=">
         <script src="https://cdnjs.cloudflare.com/ajax/libs/require-jquery/0.25.0/require-jquery.js"></script>
-        <script src="../webviews.js"></script>
         <style>
             @font-face {
                 font-family: encode; src: url('http://static.ehouais.net/EncodeSansCondensed-Regular.ttf') format("truetype");
@@ -88,11 +87,12 @@
         </style>
         <script>
 			require.config({paths: {
-				core      : 'http://ehouais.net/proxy?url=https://raw.githubusercontent.com/ehouais/jsutils/master/src/core.js',
-				observable: 'http://ehouais.net/proxy?url=https://raw.githubusercontent.com/ehouais/jsutils/master/src/observable.js',
-				factory   : 'http://ehouais.net/proxy?url=https://raw.githubusercontent.com/ehouais/jsutils/master/src/factory.js'
+				webviews	: 'http://dev.ehouais.net/webviews/webviews',
+				core      	: 'http://ehouais.net/proxy?url=https://raw.githubusercontent.com/ehouais/jsutils/master/src/core.js',
+				observable	: 'http://ehouais.net/proxy?url=https://raw.githubusercontent.com/ehouais/jsutils/master/src/observable.js',
+				factory   	: 'http://ehouais.net/proxy?url=https://raw.githubusercontent.com/ehouais/jsutils/master/src/factory.js'
 			}});
-			require(['jquery', 'core', 'factory'], function($, core, factory) {
+			require(['jquery', 'webviews', 'core', 'factory'], function($, Webviews, core, factory) {
 				var editable = true,
 					HA = {left: 0, prop: 1, right: 2}, VA = {top: 0, prop: 1, bottom: 2},
 					Dashboard = Webviews.data();
