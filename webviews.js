@@ -18,7 +18,7 @@
 								} else {
 									delay_ = $.Deferred();
 									$.when(delay_, save_).done(function() {
-										save_ = $.ajax({url: dataUri, type: 'PUT', contentType: 'text/plain', data: JSON.stringify(cache), xhrFields: {withCredentials: true}});
+										save_ = $.ajax({url: dataUri, type: 'PUT', contentType: 'text/plain', data: cache, xhrFields: {withCredentials: true}});
 									});
 								}
 								tid = setTimeout(function() {
@@ -54,7 +54,7 @@
                         }, {});
                     })(window.location.href).datauri;
 
-				promise = $.ajax({url: dataUri, dataType: 'json', xhrFields: {withCredentials: true}}).done(function(data) {
+                promise = $.ajax({url: dataUri, dataType: 'text', xhrFields: {withCredentials: true}}).done(function(data) {
 					local = data;
 					d.trigger();
 				});

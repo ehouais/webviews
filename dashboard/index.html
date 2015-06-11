@@ -217,7 +217,7 @@
 								frames: {type: factory.set(ff)}
 							});
 							return vf(data);
-						})(data || {frames: []});
+						})(JSON.parse(data) || {frames: []});
 
 						// Prevent some default behaviours
 						$dom.on('mousedown mousewheel', function(e) {
@@ -374,7 +374,7 @@
 						// Save when modified
 						if (editable) {
 							view.bind('modified', function() {
-								Dashboard.save(view.snapshot());
+								Dashboard.save(JSON.stringify(view.snapshot()));
 							});
 						}
 					});

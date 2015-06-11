@@ -211,7 +211,7 @@
 						$plst = $('#projects'), $ptpl = $plst.find('.template').removeClass('template').remove(),
 						$ttpl = $ptpl.find('.todo').remove(),
 						update = function() {
-							Todos.save(todos);
+							Todos.save(JSON.stringify(todos));
 							Todos.trigger();
 						},
 						todos,
@@ -249,7 +249,7 @@
 						weeks, windex, projects, pindex;
 
 					return function(data) {
-						todos = data;
+						todos = JSON.parse(data);
 						weeks = [];
 						windex = {};
 						projects = [];
