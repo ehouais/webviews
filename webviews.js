@@ -3,8 +3,6 @@
 			data: function() {
 				var local,
 					handlers = [],
-					a = document.createElement('a'),
-					dataUri,
 					promise,
 					d = {
 						save: (function() {
@@ -45,14 +43,17 @@
 							});
 							return d;
 						}
-					};
+					},
+                    dataUri = (function(str) {
+                        var a = document.createElement('a');
+                        a.href = str;
+                        return a.search.replace(/^\?/, '').split('&').reduce(function(obj, pair) {
+                            var tokens = pair.split('=');
+                            obj[tokens[0]] = tokens[1];
+                            return obj;
+                        }, {});
+                    })(window.location.href).datauri;
 
-				a.href = window.location.href;
-				dataUri = a.search.replace(/^\?/,'').split('&').reduce(function(obj, pair) {
-					var tokens = pair.split('=');
-					obj[tokens[0]] = tokens[1];
-					return obj;
-				}, {}).datauri;
 				promise = $.ajax({url: dataUri, dataType: 'json', xhrFields: {withCredentials: true}}).done(function(data) {
 					local = data;
 					d.trigger();
