@@ -103,7 +103,7 @@
                             date: $('#date').val()
                         };
                         event ? $.extend(event, newevent) : events.unshift(newevent);
-                        Timeline.save(events);
+                        Timeline.save(JSON.stringify(events));
                     });
                 };
                 $('#resetevent').on('click', function() { setevent() });
@@ -168,7 +168,7 @@
                 };
 
                 Timeline.bind(function(data) {
-					events = data;
+					events = JSON.parse(data);
 					refresh();
 				});
 
