@@ -1,0 +1,73 @@
+﻿<html>
+    <head>
+        <meta charset="utf-8">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+        <script src="http://static-webtools.kermit.rd.francetelecom.fr/ext/markdown-it.min.js"></script>
+        <script src="http://webviews.local/webviews.js"></script>
+        <style>
+            @font-face {
+                font-family: encode; src: url('http://static.ehouais.net/EncodeSansCondensed-Regular.ttf') format("truetype");
+            }
+            body {
+                font-family: encode;
+            }
+            #source, #render {
+                font-size: 12px;
+                width: 100%;
+                height: 100%;
+            }
+            #source {
+                border: none;
+                resize: none;
+                background-color: #fff;
+                display: none;
+            }
+            #render {
+                -moz-user-select: none;
+                -webkit-user-select: none;
+                -ms-user-select: none;
+            }
+        </style>
+        <script>
+            var Notes = Webviews.data(),
+                md = window.markdownit(),
+                modified = false;
+
+            $(function() {
+                var $source = $('#source'),
+                    $render = $('#render'),
+                    update = function() {
+                        $render.html(md.render($source.val()));
+                    },
+                    toggle = function() {
+                        $source.toggle();
+                        $render.toggle();
+                    };
+
+                Notes.bind((function() {
+                    return function(data) {
+                        $source.text(data);
+                        update();
+                    };
+                })());
+                $render.on('dblclick', function() {
+                    toggle();
+                    $source.focus();
+                });
+                $source.on('keyup', function(e) {
+                    if (e.which == 27) {
+                        modified && update();
+                        toggle();
+                    } else {
+                        modified = true;
+                        Notes.save($source.val());
+                    }
+                });
+            });
+        </script>
+    </head>
+    <body>
+        <textarea id="source"></textarea>
+        <div id="render"></div>
+    </body>
+</html>
