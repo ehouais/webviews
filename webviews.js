@@ -54,7 +54,7 @@
                         }, {});
                     })(window.location.href).datauri;
 
-                promise = $.ajax({url: dataUri, dataType: 'text', xhrFields: {withCredentials: true}}).done(function(data) {
+                promise = $.ajax({url: dataUri, dataType: 'text', xhrFields: dataUri.substr(0, 5) == 'data:' ? {} : {withCredentials: true}}).done(function(data) {
 					local = data;
 					d.trigger();
 				});
