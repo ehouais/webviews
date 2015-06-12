@@ -8,17 +8,16 @@
 						save: (function() {
 							var delay_,
 								tid,
-								save_ = $.Deferred().resolve(),
-								cache;
+								save_ = $.Deferred().resolve();
 							return function(data) {
 								// Send update request to server when (eventual) previous one has succeeded and a 5 seconds delay has passed since function call
-								cache = data;
+								local = data;
 								if (tid) {
 									clearTimeout(tid);
 								} else {
 									delay_ = $.Deferred();
 									$.when(delay_, save_).done(function() {
-										save_ = $.ajax({url: dataUri, type: 'PUT', contentType: 'text/plain', data: cache, xhrFields: {withCredentials: true}});
+										save_ = $.ajax({url: dataUri, type: 'PUT', contentType: 'text/plain', data: local, xhrFields: {withCredentials: true}});
 									});
 								}
 								tid = setTimeout(function() {
