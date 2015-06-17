@@ -57,7 +57,7 @@
         rect,
         text,
         margin = {top: 20, right: 20, bottom: 20, left: 20},
-        dataUri = (function(str) {
+        params = (function(str) {
             var a = document.createElement('a');
             a.href = str;
             return a.search.replace(/^\?/, '').split('&').reduce(function(obj, pair) {
@@ -65,7 +65,8 @@
                 obj[tokens[0]] = tokens[1];
                 return obj;
             }, {});
-        })(window.location.href).datauri;
+        })(window.location.href);
+        dataUri = params.datauri;
 
     var resize = window.onresize = function() {
             var width = window.innerWidth,
