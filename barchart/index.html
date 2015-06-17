@@ -1,0 +1,141 @@
+﻿<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+    @font-face {
+        font-family: encode;
+        src: url('http://static.ehouais.net/EncodeSansCondensed-Regular.ttf') format("truetype");
+    }
+    body {
+        font-family: encode;
+        margin: 0;
+        border: 0;
+        overflow: hidden;
+    }
+    rect {
+        fill: steelblue;
+    }
+    text {
+        font: 10px;
+        text-anchor: middle;
+    }
+    .axis text {
+        font: 10px;
+    }
+    .axis path, .axis line {
+        fill: none;
+        stroke: #000;
+        shape-rendering: crispEdges;
+    }
+</style>
+<body>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
+<script>
+    var svg = d3.select('body').append('svg'),
+        chart = svg.append('g'),
+        xScale = d3.scale.ordinal(),
+        xAxis = d3.svg.axis()
+            .scale(xScale),
+        xx = chart.append('g')
+            .attr('class', 'x axis'),
+        yScale = d3.scale.linear(),
+        yAxis = d3.svg.axis()
+            .scale(yScale)
+            .orient('left'),
+        yy = chart.append('g')
+            .attr('class', 'y axis'),
+        data,
+        cols,
+        bars,
+        bar,
+        rect,
+        text,
+        margin = {top: 20, right: 20, bottom: 20, left: 20},
+        dataUri = (function(str) {
+            var a = document.createElement('a');
+            a.href = str;
+            return a.search.replace(/^\?/, '').split('&').reduce(function(obj, pair) {
+                var tokens = pair.split('=');
+                obj[tokens[0]] = tokens[1];
+                return obj;
+            }, {});
+        })(window.location.href).datauri;
+
+    var resize = window.onresize = function() {
+            var width = window.innerWidth,
+                height = window.innerHeight,
+                am = {
+                    top: height*margin.top/100,
+                    right: width*margin.right/100,
+                    bottom: height*margin.bottom/100,
+                    left: width*margin.left/100
+                },
+                cwidth = width-am.left-am.right,
+                cheight = height-am.top-am.bottom,
+                fs = Math.max(Math.min(height/20, 20), 8);
+
+            svg
+                .attr('width', width)
+                .attr('height', height);
+
+            chart
+                .attr('transform', 'translate('+am.left+','+am.top+')');
+
+            xScale
+                .rangeRoundBands([0, cwidth], 0.1);
+
+            xx
+                .attr('transform', 'translate(0,' + cheight + ')')
+                .call(xAxis)
+                .selectAll('text')
+                .text(function(d, i) { return cols ? cols[i] : i; })
+                .style('font-size', fs+'px');
+
+            yScale
+                .range([cheight, 0]);
+
+            yy
+                .call(yAxis)
+                .selectAll('text')
+                .style('font-size', fs+'px');
+
+            rect
+                .attr('x', function(d, i) { return xScale(i); })
+                .attr('y', function(d) { return yScale(d); })
+                .attr('width', xScale.rangeBand())
+                .attr('height', function(d) { return cheight - yScale(d); });
+
+            /*text
+                .attr('x', barWidth / 2)
+                .attr('y', function(d) { return yScale(d) + 3; })
+                .style('font-size', fs+'px');*/
+        };
+
+    d3.xhr(dataUri).get().on('load', function(xhr) {
+        data = xhr.response.split('|').map(function(value, i) {
+            var tokens = value.split(':');
+            if (tokens.length > 1) {
+                cols = cols || [];
+                cols[i] = tokens[0];
+                value = tokens[1];
+            }
+            return +value;
+        });
+
+        xScale.domain(d3.range(data.length)),
+        yScale.domain([0, d3.max(data)]);
+
+        bars = chart.append('g');
+
+        bar = bars.selectAll('g')
+          .data(data)
+          .enter().append('g');
+
+        rect = bar.append('rect');
+
+        /*text = bar.append('text')
+          .attr('dy', '.75em')
+          .text(function(d) { return d; });*/
+
+        resize();
+    });
+</script>
