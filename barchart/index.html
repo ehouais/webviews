@@ -21,10 +21,17 @@
     .axis text {
         font: 10px;
     }
-    .axis path, .axis line {
+    .axis path {
+        display: none;
+    }
+    .axis line {
         fill: none;
         stroke: #000;
         shape-rendering: crispEdges;
+    }
+    .axis .minor line {
+        stroke: #999;
+        stroke-dasharray: 2,2;
     }
 </style>
 <body>
@@ -93,10 +100,18 @@
             yScale
                 .range([cheight, 0]);
 
+            yAxis
+                .ticks(cheight/35)
+                .tickSize(-cwidth);
+
             yy
                 .call(yAxis)
                 .selectAll('text')
                 .style('font-size', fs+'px');
+            yy
+                .selectAll('g')
+                .filter(function(d) { return d; })
+                .classed('minor', true);
 
             rect
                 .attr('x', function(d, i) { return xScale(i); })
