@@ -53,8 +53,7 @@
         data,
         cols,
         bars,
-        bar,
-        rect,
+        rects,
         text,
         margin = {top: 20, right: 20, bottom: 20, left: 20},
         params = (function(str) {
@@ -114,7 +113,7 @@
                 .filter(function(d) { return d; })
                 .classed('minor', true);
 
-            rect
+            rects
                 .attr('x', function(d, i) { return xScale(i); })
                 .attr('y', function(d) { return yScale(d); })
                 .attr('width', xScale.rangeBand())
@@ -140,17 +139,17 @@
         xScale.domain(d3.range(data.length)),
         yScale.domain([0, d3.max(data)]);
 
-        bars = chart.append('g');
+        bars = chart.append('g')
+            .selectAll('g')
+            .data(data)
+            .enter()
+            .append('g');
 
-        bar = bars.selectAll('g')
-          .data(data)
-          .enter().append('g');
-
-        rect = bar.append('rect');
+        rects = bars.append('rect');
 
         /*text = bar.append('text')
-          .attr('dy', '.75em')
-          .text(function(d) { return d; });*/
+            .attr('dy', '.75em')
+            .text(function(d) { return d; });*/
 
         resize();
     });
