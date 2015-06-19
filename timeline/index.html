@@ -215,8 +215,9 @@
             return line;
         });
 
-        start = new Date(start-30*24*60*60*1000);
-        end = new Date(end+30*24*60*60*1000);
+        delta = (end-start)/10;
+        start = new Date(start-delta);
+        end = new Date(end+delta);
 
         xScale
             .domain([start, end]);
