@@ -26,6 +26,8 @@
                 padding: 1px 3px;
                 margin: 2px;
                 border-radius: 5px;
+                position: relative;
+                overflow: hidden;
             }
             .list-group-item-info .todo {
                 background-color: #fff;
@@ -41,6 +43,7 @@
                 line-height: 22px;
                 padding-left: 4px;
                 position: absolute;
+                white-space: nowrap;
             }
             .todo .buttons {
                 display: none;
@@ -139,7 +142,7 @@
             .project .header .mylabel {
                 position: relative;
                 left: -12px;
-                top: -6px;
+                top: -5px;
 				cursor: pointer;
             }
             .weekcol {
@@ -178,6 +181,7 @@
 			}
 			#new input {
 				display: inline;
+                margin-bottom: 2px;
 			}
 			#display label {
 				margin-left: 10px;
@@ -188,6 +192,9 @@
 			#description {
 				width: 60%;
 			}
+            #createtodo {
+                float: right;
+            }
         </style>
         <script>
             var cweek = {
