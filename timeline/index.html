@@ -99,7 +99,7 @@
                 cwidth = width-am.left-am.right,
                 cheight = height-am.top-am.bottom,
                 ratio = (end-start)/cwidth/1e7,
-                fs = Math.max(Math.min(height/20, 20), 12);
+                fs = Math.max(Math.min(height/20, 20), 11);
 
             svg
                 .attr('width', width)
@@ -147,7 +147,7 @@
                 .attr('y', 15);
 
             yScale
-                .rangeRoundBands([0, cheight], 0.5);
+                .rangeRoundBands([0, cheight], 0.7);
 
             lines
                 .attr('transform', function(d, i) { return 'translate(0,'+yScale(i)+')'; });
@@ -163,8 +163,8 @@
 
             texts
                 .style('font-size', fs)
-                .attr('x', function(d) { return xScale(d.period.end)+fs/3; })
-                .attr('y', function(d) { return yScale.rangeBand()/2+fs/3; });
+                .attr('x', function(d) { return xScale(d.period.start); })
+                .attr('y', function(d) { return -fs/4; });
         };
 
     d3.xhr(dataUri).get().on('load', function(xhr) {
