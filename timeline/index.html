@@ -163,18 +163,23 @@
         };
 
     d3.xhr(dataUri).get().on('load', function(xhr) {
-        var format = d3.time.format('%d/%m/%Y'),
+        var parse = function(str) {
+                var res;
+                if (res = str.match(/(\d{2})\/(\d{2})(\/(\d+))?/)) {
+                    return new Date(res[4] > 99 ? res[4] : (res[4] || 0) + new Date().getFullYear(), res[2], res[1]);
+                }
+            },
             strToPeriod = function(str) {
                 var tokens = str.split('-'),
                     date;
                 if (tokens.length > 1) {
                     return  {
-                        start: format.parse(tokens[0]),
-                        end: format.parse(tokens[1])
+                        start:parse(tokens[0]),
+                        end: new Date(+parse(tokens[1])+24*60*60*1000)
                     }
                 } else {
                     return {
-                        start: date = format.parse(str),
+                        start: date = parse(str),
                         end: new Date(+date+24*60*60*1000)
                     }
                 }
