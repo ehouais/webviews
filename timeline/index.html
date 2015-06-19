@@ -98,7 +98,11 @@
                 },
                 cwidth = width-am.left-am.right,
                 cheight = height-am.top-am.bottom,
-                ratio = (end-start)/cwidth/1e7,
+                mode = (function (val, bounds) {
+                    var index = 0;
+                    while (bounds[index] && val < bounds[index]) index++;
+                    return index;
+                })((end-start)/(24*60*60*1000)/cwidth, [14, 7, 2, 1.2, 0.6, 0.3]),
                 fs = Math.max(Math.min(height/20, 20), 11);
 
             svg
@@ -112,9 +116,9 @@
                 .range([0, cwidth]);
 
             mAxis
-                .ticks(d3.time.months)
+                .ticks(mode < 2 ? d3.time.years : mode == 2 ? d3.time.month : mode > 5 ? d3.time.weeks : d3.time.months, mode == 2 ? 3 : 1)
                 .outerTickSize(0)
-                .tickFormat(FR.timeFormat(ratio > 11 ? '%m' : ratio > 5.4 ? '%b' : '%B'));
+                .tickFormat(FR.timeFormat(mode < 4 ? '%m' : mode == 4 ? '%b' : mode == 5 ? '%B' : 'S%W'));
 
             xm
                 .attr('transform', 'translate(0,' + cheight + ')')
@@ -134,9 +138,9 @@
                 .call(lAxis);
 
             MAxis
-                .ticks(d3.time.years)
-                .outerTickSize(0)/*
-                .tickFormat(d3.time.format('%d/%m/%Y'))*/;
+                .ticks(mode < 6 ? d3.time.years : d3.time.months)
+                .outerTickSize(0)
+                .tickFormat(FR.timeFormat(mode < 6 ? '%Y' : '%B \'%y'));
 
             xM
                 .attr('transform', 'translate(0,' + cheight + ')')
