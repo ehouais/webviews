@@ -72,6 +72,7 @@
         yScale = d3.scale.ordinal(),
         cScale = d3.scale.category10(),
         lines,
+        titles,
         bars,
         rects,
         texts;
@@ -151,6 +152,10 @@
             lines
                 .attr('transform', function(d, i) { return 'translate(0,'+yScale(i)+')'; });
 
+            titles
+                .style('font-size', fs)
+                .attr('y', function(d) { return yScale.rangeBand()/2-fs/4; });
+
             rects
                 .attr('x', function(d) { return xScale(d.period.start); })
                 .attr('width', function(d) { return xScale(d.period.end)-xScale(d.period.start); })
@@ -189,18 +194,25 @@
         start = +Infinity,
         end = -Infinity;
 
-        data = xhr.response.split('|').map(function(line) {
-            var events = [],
+        data = xhr.response.split('|').map(function(str) {
+            var line = {label: 'noname', events: []},
+                res,
+                events = [],
                 event,
                 period;
-            while (res = line.match(/\[([^\]]+)]([^\[]+)(.*)/)) {
+            if (res = str.match(/^([^\[]+)(.*)/)) {
+                line.label = res[1];
+                margin.left = 18;
+                str = res[2];
+            }
+            while (res = str.match(/\[([^\]]+)]([^\[]+)(.*)/)) {
                 event = {label: res[2], str: res[1], period: strToPeriod(res[1])};
-                events.push(event);
+                line.events.push(event);
                 start = Math.min(start, event.period.start);
                 end = Math.max(end, event.period.end);
-                line = res[3];
+                str = res[3];
             }
-            return {label: 'toto', events: events};
+            return line;
         });
 
         start = new Date(start-30*24*60*60*1000);
@@ -218,6 +230,10 @@
             .enter()
             .append('g')
             .style('fill', function(d, i) { return cScale(i); });
+
+        titles = lines.append('text')
+            .text(function(d) { return d.label; })
+            .style('text-anchor', 'end');
 
         bars = lines.selectAll('g')      // line events
             .data(function(d) { return d.events; })
