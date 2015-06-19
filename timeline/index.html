@@ -73,7 +73,8 @@
         cScale = d3.scale.category10(),
         lines,
         bars,
-        rects;
+        rects,
+        texts;
 
     var dataUri = (function(str) {
             var a = document.createElement('a');
@@ -97,7 +98,7 @@
                 cwidth = width-am.left-am.right,
                 cheight = height-am.top-am.bottom,
                 ratio = (end-start)/cwidth/1e7,
-                fs = Math.max(Math.min(height/20, 20), 8);
+                fs = Math.max(Math.min(height/20, 20), 12);
 
             svg
                 .attr('width', width)
@@ -154,6 +155,11 @@
                 .attr('x', function(d) { return xScale(d.period.start); })
                 .attr('width', function(d) { return xScale(d.period.end)-xScale(d.period.start); })
                 .attr('height', yScale.rangeBand());
+
+            texts
+                .style('font-size', fs)
+                .attr('x', function(d) { return xScale(d.period.end)+fs/3; })
+                .attr('y', function(d) { return yScale.rangeBand()/2+fs/3; });
         };
 
     d3.xhr(dataUri).get().on('load', function(xhr) {
@@ -183,7 +189,7 @@
                 event,
                 period;
             while (res = line.match(/\[([^\]]+)]([^\[]+)(.*)/)) {
-                event = {label: res[2], period: strToPeriod(res[1])};
+                event = {label: res[2], str: res[1], period: strToPeriod(res[1])};
                 events.push(event);
                 start = Math.min(start, event.period.start);
                 end = Math.max(end, event.period.end);
@@ -216,8 +222,12 @@
         rects = bars.append('rect');
 
         rects.append('title')
-            .text(function(event) { return event.label; });
-        
+            .text(function(event) { return event.str; });
+
+        texts = bars.append('text')
+            .text(function(event) { return event.label; })
+            .style('fill', '#000');
+
         resize();
     });
 </script>
