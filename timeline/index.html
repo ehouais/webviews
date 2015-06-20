@@ -116,9 +116,9 @@
                 .range([0, cwidth]);
 
             mAxis
-                .ticks(mode < 2 ? d3.time.years : mode == 2 ? d3.time.month : mode > 5 ? d3.time.weeks : d3.time.months, mode == 2 ? 3 : 1)
+                .ticks(mode < 2 ? d3.time.years : mode == 2 ? d3.time.month : mode > 5 ? d3.time.monday : d3.time.months, mode == 2 ? 3 : 1)
                 .outerTickSize(0)
-                .tickFormat(FR.timeFormat(mode < 4 ? '%m' : mode == 4 ? '%b' : mode == 5 ? '%B' : 'S%W'));
+                .tickFormat(FR.timeFormat(mode < 4 ? '%m' : mode == 4 ? '%b' : mode == 5 ? '%B' : '%d'));
 
             xm
                 .attr('transform', 'translate(0,' + cheight + ')')
