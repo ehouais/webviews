@@ -27,9 +27,13 @@
     .axis.major path {
         display: none;
     }
-    .axis.line line {
+    .axis.major .line line {
         stroke: #999;
-        stroke-dasharray: 2,2;
+        stroke-dasharray: 2,2,1,0;
+    }
+    .axis.minor .line line {
+        stroke: #999;
+        stroke-dasharray: 1,4;
     }
 </style>
 <body>
@@ -55,20 +59,28 @@
         chart = svg.append('g'),
         margin = {top: 10, right: 10, bottom: 20, left: 10},
         xScale = d3.time.scale(),
-        mAxis = d3.svg.axis()
-            .scale(xScale),
-        xm = chart.append('g')
+        minor = chart.append('g')
             .attr('class', 'x axis minor'),
-        lAxis = d3.svg.axis()
+        mtAxis = d3.svg.axis()
+            .scale(xScale)
+            .outerTickSize(0),
+        mticks = minor.append('g'),
+        mlAxis = d3.svg.axis()
             .scale(xScale)
             .tickFormat(''),
-        xl = chart.append('g')
-            .attr('class', 'x axis line'),
-        MAxis = d3.svg.axis()
-            .scale(xScale)
-            .tickSize(15),
-        xM = chart.append('g')
+        mlines = minor.append('g')
+            .attr('class', 'line'),
+        major = chart.append('g')
             .attr('class', 'x axis major'),
+        MtAxis = d3.svg.axis()
+            .scale(xScale)
+            .tickSize(20),
+        Mticks = major.append('g'),
+        MlAxis = d3.svg.axis()
+            .scale(xScale)
+            .tickFormat(''),
+        Mlines = major.append('g')
+            .attr('class', 'line'),
         yScale = d3.scale.ordinal(),
         cScale = d3.scale.category10(),
         lines,
@@ -98,11 +110,21 @@
                 },
                 cwidth = width-am.left-am.right,
                 cheight = height-am.top-am.bottom,
-                mode = (function (val, bounds) {
+                findInterval = function (val, bounds) {
                     var index = 0;
                     while (bounds[index] && val < bounds[index]) index++;
                     return index;
-                })((end-start)/(24*60*60*1000)/cwidth, [14, 7, 2, 1.2, 0.6, 0.3]),
+                },
+                mode = findInterval((end-start)/(24*60*60*1000)/cwidth, [14, 7, 2, 1.2, 0.6, 0.3]),
+                ticks = [ // major interval, major format, minor interval, minor format
+                    [   null,    null,   'year', 1, '\'%y'],
+                    [   null,    null,   'year', 1,   '%Y'],
+                    [ 'year',    '%Y',  'month', 3,   '%m'],
+                    [ 'year',    '%Y',  'month', 1,   '%m'],
+                    [ 'year',    '%Y',  'month', 1,   '%b'],
+                    [ 'year',    '%Y',  'month', 1,   '%B'],
+                    ['month', '%B %Y', 'monday', 1,   '%d']
+                ][mode],
                 fs = Math.max(Math.min(height/20, 20), 11);
 
             svg
@@ -115,40 +137,49 @@
             xScale
                 .range([0, cwidth]);
 
-            mAxis
-                .ticks(mode < 2 ? d3.time.years : mode == 2 ? d3.time.month : mode > 5 ? d3.time.monday : d3.time.months, mode == 2 ? 3 : 1)
-                .outerTickSize(0)
-                .tickFormat(FR.timeFormat(mode < 4 ? '%m' : mode == 4 ? '%b' : mode == 5 ? '%B' : '%d'));
+            major.style('display', ticks[0] ? 'block' : 'none');
+            if (ticks[0]) {
+                MtAxis
+                    .ticks(d3.time[ticks[0]])
+                    .tickFormat(FR.timeFormat(ticks[1]));
 
-            xm
+                Mticks
+                    .attr('transform', 'translate(0,' + cheight + ')')
+                    .call(MtAxis)
+                    .selectAll('.tick text')
+                    .style('text-anchor', 'start')
+                    .attr('x', 2)
+                    .attr('y', 15);
+
+                MlAxis
+                    .ticks(d3.time[ticks[0]])
+                    .tickSize(-cheight, 0);
+
+                Mlines
+                    .attr('transform', 'translate(0,' + cheight + ')')
+                    .call(MlAxis);
+            }
+
+            mtAxis
+                .ticks(d3.time[ticks[2]], ticks[3])
+                .tickFormat(FR.timeFormat(ticks[4]));
+
+            mticks
                 .attr('transform', 'translate(0,' + cheight + ')')
-                .call(mAxis)
+                .call(mtAxis)
                 .selectAll(".tick text")
                 .style("text-anchor", "start")
                 .attr("x", 2)
                 .attr("y", 4)/*
                 .classed('hidden', cwidth < 350)*/;
 
-            lAxis
-                .ticks(d3.time.months)
+            mlAxis
+                .ticks(d3.time[ticks[2]], ticks[3])
                 .tickSize(-cheight, 0);
 
-            xl
+            mlines
                 .attr('transform', 'translate(0,' + cheight + ')')
-                .call(lAxis);
-
-            MAxis
-                .ticks(mode < 6 ? d3.time.years : d3.time.months)
-                .outerTickSize(0)
-                .tickFormat(FR.timeFormat(mode < 6 ? '%Y' : '%B \'%y'));
-
-            xM
-                .attr('transform', 'translate(0,' + cheight + ')')
-                .call(MAxis)
-                .selectAll('.tick text')
-                .style('text-anchor', 'start')
-                .attr('x', 2)
-                .attr('y', 15);
+                .call(mlAxis);
 
             yScale
                 .rangeRoundBands([0, cheight], 0.7);
