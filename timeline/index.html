@@ -242,7 +242,7 @@
                 margin.left = 15;
                 str = res[2];
             }
-            while (res = str.match(/\[([^\]]+)]([^\[]+)(.*)/)) {
+            while (res = str.match(/\[([^\]]+)]([^\[]*)(.*)/)) {
                 event = {label: res[2], str: res[1], period: strToPeriod(res[1])};
                 line.events.push(event);
                 start = Math.min(start, event.period.start);
