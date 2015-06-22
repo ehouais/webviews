@@ -192,14 +192,22 @@
                 .attr('y', function(d) { return yScale.rangeBand()/2+fs/4; });
 
             rects
-                .attr('x', function(d) { return xScale(d.period.start); })
-                .attr('width', function(d) { return xScale(d.period.end)-xScale(d.period.start); })
-                .attr('height', yScale.rangeBand());
+                .attr('d', function(d) {
+                    var x1 = xScale(d.period.start),
+                        x2 = xScale(d.period.end),
+                        h = yScale.rangeBand();
+                    if (x2) {
+                        return 'M'+x1+' 0L'+x2+' 0L'+x2+' '+h+'L'+x1+' '+h+'Z';
+                    } else {
+                        return 'M'+x1+' 0l'+(h/3)+' 0l'+(-h/3)+' '+h+'l'+(-h/3)+' '+(-h)+'Z';
+                    }
+                })
 
             texts
                 .style('font-size', fs)
                 .attr('x', function(d) { return xScale(d.period.start); })
-                .attr('y', function(d) { return -fs/4; });
+                .attr('y', function(d) { return -fs/4; })
+                .style('text-anchor', function(d) { return d.period.end ? 'start' : 'middle'; });
         };
 
     d3.xhr(dataUri).get().on('load', function(xhr) {
@@ -215,12 +223,11 @@
                 if (tokens.length > 1) {
                     return  {
                         start:parse(tokens[0]),
-                        end: new Date(+parse(tokens[1])+24*60*60*1000)
+                        end: new Date(+parse(tokens[1])+24*60*60*1000-1000)
                     }
                 } else {
                     return {
-                        start: date = parse(str),
-                        end: new Date(+date+24*60*60*1000)
+                        start: date = parse(str)
                     }
                 }
             },
@@ -246,7 +253,7 @@
                 event = {label: res[2], str: res[1], period: strToPeriod(res[1])};
                 line.events.push(event);
                 start = Math.min(start, event.period.start);
-                end = Math.max(end, event.period.end);
+                end = event.period.end ? Math.max(end, event.period.end) : end;
                 str = res[3];
             }
             return line;
@@ -278,7 +285,7 @@
             .enter()
             .append('g');
 
-        rects = bars.append('rect');
+        rects = bars.append('path');
 
         rects.append('title')
             .text(function(event) { return event.str; });
