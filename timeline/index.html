@@ -115,15 +115,18 @@
                     while (bounds[index] && val < bounds[index]) index++;
                     return index;
                 },
-                mode = findInterval((end-start)/(24*60*60*1000)/cwidth, [14, 7, 2, 1.2, 0.6, 0.3]),
-                ticks = [ // major interval, major format, minor interval, minor format
-                    [   null,    null,   'year', 1, '\'%y'],
-                    [   null,    null,   'year', 1,   '%Y'],
-                    [ 'year',    '%Y',  'month', 3,   '%m'],
-                    [ 'year',    '%Y',  'month', 1,   '%m'],
-                    [ 'year',    '%Y',  'month', 1,   '%b'],
-                    [ 'year',    '%Y',  'month', 1,   '%B'],
-                    ['month', '%B %Y', 'monday', 1,   '%d']
+                mode = findInterval((end-start)/(24*60*60*1000)/cwidth, [14, 7, 2, 1.2, 0.6, 0.3, 0.06, 0.04, 0.02]),
+                ticks = [ // major interval, major format, minor interval, nb. intervals, minor format
+                    [    null,       null,   'year', 1,     '\'%y'],
+                    [    null,       null,   'year', 1,       '%Y'],
+                    [  'year',       '%Y',  'month', 3,       '%m'],
+                    [  'year',       '%Y',  'month', 1,       '%m'],
+                    [  'year',       '%Y',  'month', 1,       '%b'],
+                    [  'year',       '%Y',  'month', 1,       '%B'],
+                    [ 'month',    '%B %Y', 'monday', 1,       '%d'],
+                    ['monday', '%d/%m/%Y',    'day', 1,         ''],
+                    ['monday', '%d/%m/%Y',    'day', 1,       '%a'],
+                    ['monday',         '',    'day', 1, '%a %d/%m']
                 ][mode],
                 fs = Math.max(Math.min(height/20, 20), 11);
 
