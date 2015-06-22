@@ -253,7 +253,7 @@
                 event = {label: res[2], str: res[1], period: strToPeriod(res[1])};
                 line.events.push(event);
                 start = Math.min(start, event.period.start);
-                end = event.period.end ? Math.max(end, event.period.end) : end;
+                end = Math.max(end, event.period.end || event.period.start);
                 str = res[3];
             }
             return line;
