@@ -11,9 +11,6 @@
         border: 0;
         overflow: hidden;
     }
-    rect {
-        fill: steelblue;
-    }
     text {
         font: 10px;
         text-anchor: middle;
@@ -31,11 +28,12 @@
     }
     .axis .minor line {
         stroke: #999;
-        stroke-dasharray: 2,2;
+        stroke-dasharray: 1,2;
     }
 </style>
 <body>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
+<script src="http://webviews.local/webviews.js"></script>
 <script>
     var svg = d3.select('body').append('svg'),
         chart = svg.append('g'),
@@ -50,106 +48,142 @@
             .orient('left'),
         yy = chart.append('g')
             .attr('class', 'y axis'),
+        cScale = d3.scale.category10(),
+        nb,
         data,
-        cols,
+        labels,
+        legend,
+        groups,
         bars,
         rects,
         text,
-        margin = {top: 20, right: 20, bottom: 20, left: 20},
-        params = (function(str) {
-            var a = document.createElement('a');
-            a.href = str;
-            return a.search.replace(/^\?/, '').split('&').reduce(function(obj, pair) {
-                var tokens = pair.split('=');
-                obj[tokens[0]] = tokens[1];
-                return obj;
-            }, {});
-        })(window.location.href);
-        dataUri = params.datauri;
+        lrects,
+        ltexts,
+        dataUri = Webviews.uriParams(window.location.href).datauri;
 
     var resize = window.onresize = function() {
             var width = window.innerWidth,
-                height = window.innerHeight,
-                am = {
-                    top: height*margin.top/100,
-                    right: width*margin.right/100,
-                    bottom: height*margin.bottom/100,
-                    left: width*margin.left/100
-                },
-                cwidth = width-am.left-am.right,
-                cheight = height-am.top-am.bottom,
-                fs = Math.max(Math.min(height/20, 20), 8);
+                height = window.innerHeight;
 
             svg
                 .attr('width', width)
                 .attr('height', height);
 
-            chart
-                .attr('transform', 'translate('+am.left+','+am.top+')');
+            Webviews.margins(width, height, {top: [20, 50], right: [20, 50], bottom: [30, 50], left: [30, 50]}, function(m) {
+                var cwidth = width-m.left-m.right,
+                    cheight = height-m.top-m.bottom,
+                    fs = Math.max(Math.min(Math.min(cwidth, cheight)/20, 20), 10);
 
-            xScale
-                .rangeRoundBands([0, cwidth], 0.1);
 
-            xx
-                .attr('transform', 'translate(0,' + cheight + ')')
-                .call(xAxis)
-                .selectAll('text')
-                .text(function(d, i) { return cols ? cols[i] : i; })
-                .style('font-size', fs+'px');
+                chart
+                    .attr('transform', 'translate('+m.left+','+m.top+')');
 
-            yScale
-                .range([cheight, 0]);
+                xScale
+                    .rangeRoundBands([0, cwidth], 0.3);
 
-            yAxis
-                .ticks(cheight/35)
-                .tickSize(-cwidth);
+                xx
+                    .attr('transform', 'translate(0,' + cheight + ')')
+                    .call(xAxis)
+                    .selectAll('text')
+                    .text(function(d, i) { return data[i].label || ''; })
+                    .style('font-size', fs+'px');
 
-            yy
-                .call(yAxis)
-                .selectAll('text')
-                .style('font-size', fs+'px');
-            yy
-                .selectAll('g')
-                .filter(function(d) { return d; })
-                .classed('minor', true);
+                yScale
+                    .range([cheight, 0]);
 
-            rects
-                .attr('x', function(d, i) { return xScale(i); })
-                .attr('y', function(d) { return yScale(d); })
-                .attr('width', xScale.rangeBand())
-                .attr('height', function(d) { return cheight - yScale(d); });
+                yAxis
+                    .ticks(cheight/35)
+                    .tickSize(-cwidth);
 
-            /*text
-                .attr('x', barWidth / 2)
-                .attr('y', function(d) { return yScale(d) + 3; })
-                .style('font-size', fs+'px');*/
+                yy
+                    .call(yAxis)
+                    .selectAll('text')
+                    .style('font-size', fs+'px');
+
+                yy
+                    .selectAll('g')
+                    .filter(function(d) { return d; })
+                    .classed('minor', true);
+
+                groups
+                    .attr('transform', function(d, i) { return 'translate('+xScale(i)+',0)'; });
+
+                rects
+                    .attr('x', function(d, i) { return i*Math.ceil(xScale.rangeBand()/nb); })
+                    .attr('y', function(d) {
+                        return yScale(d);
+                    })
+                    .attr('width', Math.ceil(xScale.rangeBand()/nb))
+                    .attr('height', function(d) { return cheight-yScale(d); });
+
+                legend
+                    .attr('transform', function(d, i) { return 'translate(0,'+(m.top+i*20)+')'; });
+
+                lrects
+                    .attr('x', width-m.right-18);
+
+                ltexts
+                    .attr('x', width-m.right-24)
+                    .style('font-size', fs+'px');
+            });
         };
 
+    // text/plain: [val11,val12,val13|label2:val21,val22, val23
     d3.xhr(dataUri).get().on('load', function(xhr) {
-        data = xhr.response.split('|').map(function(value, i) {
+        data = [];
+        var str = xhr.response,
+            res;
+        if (res = str.match(/^\{([^\}]+)\}(.*)/)) {
+            labels = res[1].split(',');
+            str = res[2];
+        }
+        str.split('|').forEach(function(value, i) {
             var tokens = value.split(':');
-            if (tokens.length > 1) {
-                cols = cols || [];
-                cols[i] = tokens[0];
-                value = tokens[1];
+            if (tokens.length == 1) {
+                tokens.unshift('');
             }
-            return +value;
+            data[i] = {
+                label: tokens[0],
+                values: tokens[1].split(',').map(function(val) { return +val; })
+            };
         });
+        nb = data[0].values.length;
+        labels = labels || d3.range(nb).map(function(i) { return 'series #'+i; })
 
         xScale.domain(d3.range(data.length)),
-        yScale.domain([0, d3.max(data)]);
+        yScale.domain([0, d3.max(data, function(d) { return d3.max(d.values); })]);
 
-        bars = chart.append('g')
-            .selectAll('g')
+        groups = chart.append('g')
+            .selectAll('.group')
             .data(data)
+            .enter()
+            .append('g')
+            .attr('class', 'group');
+
+        bars = groups.selectAll('g')
+            .data(function(d) { return d.values })
             .enter()
             .append('g');
 
-        rects = bars.append('rect');
+        rects = bars.append('rect')
+            .attr('fill', function(d, i) { return cScale(i); });
 
-        /*text = bar.append('text')
-            .attr('dy', '.75em')
-            .text(function(d) { return d; });*/
+        legend = svg.selectAll('.legend')
+            .data(labels)
+            .enter()
+            .append('g')
+            .attr('class', 'legend');
+
+        lrects = legend.append('rect')
+            .attr('width', 18)
+            .attr('height', 18)
+            .style('fill', function(d, i) { return cScale(i); });
+
+        ltexts = legend.append('text')
+            .attr('y', 9)
+            .attr('dy', '.35em')
+            .style('text-anchor', 'end')
+            .text(function(d) { return d; });
 
         resize();
     });
