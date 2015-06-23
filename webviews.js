@@ -59,7 +59,16 @@
 				});
 
 				return d;
-			}
+			},
+			uriParams: function(uri) {
+	            var a = document.createElement('a');
+	            a.href = uri;
+	            return a.search.replace(/^\?/, '').split('&').reduce(function(obj, pair) {
+	                var tokens = pair.split('=');
+	                obj[tokens[0]] = tokens[1];
+	                return obj;
+	            }, {});
+	        }
 		};
 
 	if (window.define) {
