@@ -38,6 +38,7 @@
 </style>
 <body>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
+<script src="http://webviews.local/webviews.js"></script>
 <script>
     var FR = d3.locale({
             decimal: ",",
@@ -87,17 +88,8 @@
         titles,
         bars,
         rects,
-        texts;
-
-    var dataUri = (function(str) {
-            var a = document.createElement('a');
-            a.href = str;
-            return a.search.replace(/^\?/, '').split('&').reduce(function(obj, pair) {
-                var tokens = pair.split('=');
-                obj[tokens[0]] = tokens[1];
-                return obj;
-            }, {});
-        })(window.location.href).datauri;
+        texts,
+        dataUri = Webviews.uriParams(window.location.href).datauri;
 
     var resize = window.onresize = function() {
             var width = window.innerWidth,
