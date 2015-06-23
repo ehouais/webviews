@@ -1,3 +1,4 @@
+$.getScript('//cdnjs.cloudflare.com/ajax/libs/sjcl/1.0.0/sjcl.min.js');
 (function() {
 	var uriParams = function(uri) {
 			var a = document.createElement('a');
@@ -13,6 +14,13 @@
 				var local,
 					handlers = [],
 					promise,
+					ciphered = false,
+					password = (function() {
+						var password;
+						return function() {
+							return (password = password || prompt('Enter password for data \''+dataUri+'\''));
+						}
+					})(),
 					d = {
 						save: (function() {
 							var delay_,
@@ -26,6 +34,9 @@
 								} else {
 									delay_ = $.Deferred();
 									$.when(delay_, save_).done(function() {
+										if (ciphered) {
+											local = sjcl.encrypt(password(), local);
+										}
 										save_ = $.ajax({url: dataUri, type: 'PUT', contentType: 'text/plain', data: local, xhrFields: {withCredentials: true}});
 									});
 								}
@@ -55,6 +66,17 @@
                     dataUri = uriParams(window.location.href).datauri;
 
                 promise = $.ajax({url: dataUri, dataType: 'text', xhrFields: dataUri.substr(0, 5) == 'data:' ? {} : {withCredentials: true}}).done(function(data) {
+					var obj;
+					try {
+						obj = JSON.parse(data);
+						if (obj.iv && obj.v && obj.iter && obj.ks && obj.ts && obj.mode && obj.cipher && obj.salt && obj.ct) {
+							ciphered = true;
+							data = sjcl.decrypt(password(), data);
+						}
+					} catch(e) {
+						alert(e.message);
+						return;
+					}
 					local = data;
 					d.trigger();
 				});
