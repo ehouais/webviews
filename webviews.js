@@ -71,14 +71,17 @@ $.getScript('//cdnjs.cloudflare.com/ajax/libs/sjcl/1.0.0/sjcl.min.js');
 						obj = JSON.parse(data);
 						if (obj.iv && obj.v && obj.iter && obj.ks && obj.ts && obj.mode && obj.cipher && obj.salt && obj.ct) {
 							ciphered = true;
-							data = sjcl.decrypt(password(), data);
+							try {
+								data = sjcl.decrypt(password(), data);
+							} catch(e) {
+								alert(e.message);
+								return;
+							}
 						}
-					} catch(e) {
-						alert(e.message);
-						return;
+					} finally {
+						local = data;
+						d.trigger();
 					}
-					local = data;
-					d.trigger();
 				});
 
 				return d;
