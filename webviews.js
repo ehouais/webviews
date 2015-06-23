@@ -1,5 +1,14 @@
 (function() {
-	var Webviews = {
+	var uriParams = function(uri) {
+			var a = document.createElement('a');
+			a.href = uri;
+			return a.search.replace(/^\?/, '').split('&').reduce(function(obj, pair) {
+				var tokens = pair.split('=');
+				obj[tokens[0]] = tokens[1];
+				return obj;
+			}, {});
+		},
+		Webviews = {
 			data: function() {
 				var local,
 					handlers = [],
@@ -43,15 +52,7 @@
 							return d;
 						}
 					},
-                    dataUri = (function(str) {
-                        var a = document.createElement('a');
-                        a.href = str;
-                        return a.search.replace(/^\?/, '').split('&').reduce(function(obj, pair) {
-                            var tokens = pair.split('=');
-                            obj[tokens[0]] = tokens[1];
-                            return obj;
-                        }, {});
-                    })(window.location.href).datauri;
+                    dataUri = uriParams(window.location.href).datauri;
 
                 promise = $.ajax({url: dataUri, dataType: 'text', xhrFields: dataUri.substr(0, 5) == 'data:' ? {} : {withCredentials: true}}).done(function(data) {
 					local = data;
@@ -69,15 +70,7 @@
                     left    : Math.max(  params.left[0], Math.min(  params.left[1],  width/factor))
                 });
             },
-			uriParams: function(uri) {
-	            var a = document.createElement('a');
-	            a.href = uri;
-	            return a.search.replace(/^\?/, '').split('&').reduce(function(obj, pair) {
-	                var tokens = pair.split('=');
-	                obj[tokens[0]] = tokens[1];
-	                return obj;
-	            }, {});
-	        }
+			uriParams: uriParams
 		};
 
 	if (window.define) {
