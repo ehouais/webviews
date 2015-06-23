@@ -1,4 +1,3 @@
-$.getScript('//cdnjs.cloudflare.com/ajax/libs/sjcl/1.0.0/sjcl.min.js');
 (function() {
 	var uriParams = function(uri) {
 			var a = document.createElement('a');
