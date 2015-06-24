@@ -15,9 +15,11 @@
 					promise,
 					ciphered = false,
 					password = (function() {
-						var password;
-						return function() {
-							return (password = password || prompt('Enter password for data \''+dataUri+'\''));
+						var password,
+							hint;
+						return function(str) {
+							hint = hint || str;
+							return (password = password || prompt('Enter password for data \''+dataUri+'\''+(hint ? ' ("'+hint+'")' : '')));
 						}
 					})(),
 					d = {
@@ -71,7 +73,7 @@
 						if (obj.iv && obj.v && obj.iter && obj.ks && obj.ts && obj.mode && obj.cipher && obj.salt && obj.ct) {
 							ciphered = true;
 							try {
-								data = sjcl.decrypt(password(), data);
+								data = sjcl.decrypt(password(obj.label), data);
 							} catch(e) {
 								alert(e.message);
 								return;
