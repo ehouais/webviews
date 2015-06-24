@@ -35,6 +35,8 @@
         stroke: #999;
         stroke-dasharray: 1,4;
     }
+    .label-bg {
+    }
 </style>
 <body>
 <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
@@ -90,7 +92,9 @@
         titles,
         bars,
         rects,
+        labels,
         texts,
+        backs
         dataUri = Webviews.uriParams(window.location.href).datauri;
 
     var resize = window.onresize = function() {
@@ -200,10 +204,18 @@
                     })
                     .style('fill', function(d, i) { return d.period.end ? '' : cScale(0); });
 
-                texts
+                labels
                     .style('font-size', fs)
-                    .attr('x', function(d) { return xScale(d.period.start); })
-                    .attr('y', function(d) { return -fs/4; })
+                    .attr('transform', function(d) { return 'translate('+xScale(d.period.start)+','+(-fs/4)+')'; });
+
+                backs
+                    .style('width', function(d) { return this.parentNode.lastChild.getBBox().width+fs/2; })
+                    .style('height', function(d) { return this.parentNode.lastChild.getBBox().height; })
+                    .attr('transform', function(d) {
+                        return 'translate('+((d.period.end ? 0 : -this.parentNode.lastChild.getBBox().width/2)-fs/4)+','+(-fs)+')';
+                    });
+
+                texts
                     .style('text-anchor', function(d) { return d.period.end ? 'start' : 'middle'; });
             });
         };
@@ -288,7 +300,12 @@
         rects.append('title')
             .text(function(event) { return event.str; });
 
-        texts = bars.append('text')
+        labels = bars.append('g');
+
+        backs = labels.append('rect')
+            .attr('class', 'label-bg');
+
+        texts = labels.append('text')
             .text(function(event) { return event.label; })
             .style('fill', '#000');
 
