@@ -54,7 +54,11 @@
         </style>
         <script>
             var Notes = Webviews.data(),
-                md = window.markdownit(),
+                md = window.markdownit({
+                    highlight: true,
+                    linkify: true,
+                    typographer: true
+                }),
                 modified = false;
 
             $(function() {
