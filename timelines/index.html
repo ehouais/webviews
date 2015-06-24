@@ -1,0 +1,339 @@
+﻿<html>
+    <head>
+        <meta charset="utf-8">
+        <link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB8AAAAgCAYAAADqgqNBAAAACXBIWXMAAAsSAAALEgHS3X78AAACmUlEQVRYR7WXu2sUURTGZ2d3E7VQFJKIWGjAQgTBwogoNoJlMJWF/4CNYCVWgqWtrRgfsTMQsDEPFAQLCw2IoItoFI0gPtAmGiMh/r6Zs+vsujO5d2b2gx9z7znnnm9ezCPoVBiGZ+ABvIGFkngNs3DKbNpVq9WOkXxarVbXegkeM9gNx64I46MkVqzgOwV32V6HcdsWIepBz2m2f0Aei9jukncfk5cKUjDLfIeCvVC9Xt+PzyvzmtY1PqcJfCW/NS4LQubHYSwvGB2wXm0ivo/8T1iV+RMG2pMpy29kPKdYUXRg1rNNxO8pr8E7K76pBNsTNi+DT7SsqW9SxG8oL/MFK5xQQqfL5oWh9zwtQ/VNityE8v+ZS8TOMm/A+7zQ41HadSefbm7SHvcnqFvMlVS5mHeTrp8rfbDBaJOXuR5C1D2mZjEPrH3GdszaeZn3k2vWFGGZXkNqyNjZfDM5PRQ6m3lDrz1qyNj9tFcqlUtWU4RraqV+jP1uOK77IWpO5kFvTGsTiZifeZlyMd9J7iLxKylc1tmwWi+xNtN8C/Po1bcOK2lPsSyxLt3cPi46jbrC+gu2zFmsyzzyQeafLZ4JO3rE1jiLddnXnNOpr46r5O90g9xtGLVyL8kLMm+4nqmI+RCnekR3ugvU//tSNeUyp2YUvlm9K8t4nLcWkYi1zN9a0brm1L6wWl9WWT4Yd4nMbymeNI++4bJEbd6fiiWWb4u7tJvf14DtnOVSxTU8TK2+8Zc80Pv8tLWIxPwh8TXthR7+2rtfxPfG6UxVYbsHm6AlDuAgXvo7+h0FmkcPDZIjUbAHor9+RD7IC89JCwfDBD4qaIl50J9qadD3ebM/NPDUWWlpN0WTJH4kisrmC4zjNRAEQfAXR3PzGytfhYUAAAAASUVORK5CYII=">
+        <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+        <link href="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.4/css/bootstrap.css" rel="stylesheet">
+
+        <link href="//cdnjs.cloudflare.com/ajax/libs/jqueryui/1.10.4/css/jquery-ui.css" type="text/css" rel="stylesheet">
+        <script src="//cdnjs.cloudflare.com/ajax/libs/jqueryui/1.10.4/jquery-ui.min.js"></script>
+
+        <link href="//cdnjs.cloudflare.com/ajax/libs/bootstrap-tokenfield/0.12.0/css/bootstrap-tokenfield.min.css" type="text/css" rel="stylesheet">
+        <script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-tokenfield/0.12.0/bootstrap-tokenfield.min.js"></script>
+
+        <script src="//cdnjs.cloudflare.com/ajax/libs/raphael/2.1.2/raphael-min.js"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.6.0/moment.min.js"></script>
+        <script src="../webviews.js"></script>
+        <style>
+            @font-face {
+                font-family: encode; src: url('http://static.ehouais.net/EncodeSansCondensed-Regular.ttf') format("truetype");
+            }
+            body {
+                font-family: encode;
+            }
+			.container {
+				margin-top: 20px;
+			}
+            #canvas {
+                background-color: #f0f0f0;
+                height: 500px;
+            }
+            #form {
+                padding: 10px;
+            }
+            #form input, #events input {
+                margin-top: 8px;
+            }
+            #form .tokenfield {
+                min-height: 53px;
+            }
+            #form #description, #events input {
+                margin-top: 0;
+            }
+            #description {
+                height: 91px;
+            }
+            .tokenfield {
+                padding-left: 4px;
+            }
+            #events .panel-heading {
+                padding: 10px;
+            }
+            #events ul {
+                height: 136px;
+                overflow: auto;
+            }
+            .event {
+                padding: 2px 10px;
+                cursor: default;
+            }
+            .event button {
+                margin-top: 2px;
+                height: 16px;
+                display: none;
+            }
+            .event:hover button {
+                display: block;
+            }
+            .btn-xs .glyphicon {
+                top: 0;
+            }
+            #nbevents {
+                text-align: center;
+                padding-top: 5px;
+            }
+			#nbevents .badge {
+				font-weight: normal;
+			}
+            .timeline {
+                background-color: #ddd;
+                display: inline-block;
+                height: 40px;
+                width: 850px;
+                margin-right: 15px;
+                position: relative;
+                top: -10px;
+            }
+        </style>
+        <script>
+			var Timeline = Webviews.data();
+
+            var events, tags = [], timelines = [];
+
+            $(function() {
+
+                // event form management ---------------------------------------
+                var setevent = function(event) {
+                    $('#description').val(event ? event.info : '');
+                    $('#date').val(event ? event.date : '');
+                    $('#saveevent').val(event ? 'Save' : 'Add');
+                    $('#saveevent').off('click').on('click', function(e) {
+                        var newevent = {
+                            info: $('#description').val(),
+                            date: $('#date').val()
+                        };
+                        event ? $.extend(event, newevent) : events.unshift(newevent);
+                        Timeline.save(events);
+                    });
+                };
+                $('#resetevent').on('click', function() { setevent() });
+                var fevents = function(tags) {
+                    return events.filter(function(event) {
+                        if (tags.length == 0) return true;
+                        return (tags.every(function(tag) {
+                            return (event.info.match(new RegExp(tag.value, 'i')));
+                        }));
+                    });
+                };
+
+                // events list management --------------------------------------
+                var $elst = $('#events ul'),
+                    $etpl = $elst.find('.template').removeClass('template').remove(),
+                    $filter = $('#filter');
+                var refreshlist = function() {
+                    var list = fevents($filter.tokenfield('getTokens'));
+                    $elst.empty();
+                    $('#nbevents .badge').text(list.length+' event'+(list.length > 1 ? 's' : ''));
+                    list.forEach(function(event) {
+                        var $e = $etpl.clone().appendTo($elst);
+                        $e.prepend(event.info+' ('+event.date+')');
+                        $e.on('click', function() { setevent(event) });
+                    });
+                };
+                $filter.tokenfield({
+                    autocomplete: {
+                        source: tags,
+                        delay: 100
+                    },
+                    //showAutocompleteOnFocus: true
+                });
+                $filter.on('tokenfield:createdtoken tokenfield:removedtoken', refreshlist);
+                $('#savetimeline').on('click', function() {
+                    timelines.push({tags: $filter.tokenfield('getTokens')});
+                    refreshTimelines();
+                });
+
+                // timelines management ----------------------------------------
+                var $tlst = $('#timelines ul'),
+                    $ttpl = $tlst.find('.template').removeClass('template').remove();
+                var refreshTimelines = function() {
+                    $tlst.empty();
+                    timelines.forEach(function(timeline) {
+                        $ttpl.clone().prepend(timeline.tags.join(', ')).appendTo($tlst);
+                    });
+                };
+
+                // initialization ----------------------------------------------
+                var refresh = function() {
+                    events.forEach(function(event) {
+                        event.tags && event.tags.split(',').forEach(function(tag) {
+                            tag = tag.trim();
+                            if (tags.indexOf(tag) == -1) {
+                                tags.push(tag);
+                            }
+                        });
+                    });
+                    refreshlist();
+                    setevent();
+                };
+
+                Timeline.bind(function(data) {
+					events = data;
+					refresh();
+				});
+
+                /*var $canvas = $('#canvas'), w = $canvas.width(), h = $canvas.height(), lw = 200;
+                var R = Raphael($canvas[0], w, h);
+                R.rect(lw, 0, w-lw+1, h).attr({fill: '#fff', stroke: 'none'});
+                var sdate = new Date(2011,6,14), edate = new Date(2015,0,1);
+                var f = (w-lw)/(edate-sdate);
+                var dateToX = function(date) { return lw+f*(date-sdate) };
+
+                var cdate = new Date(sdate), mth, wt, x1, x2;
+                cdate.setDate(1);
+                while (cdate <= edate) {
+                    x2 = dateToX(cdate);
+                    if (x1) {
+                        mth%2 && R.rect(x1, 10, x2-x1, h-10).attr({fill: '#f0f0f0', stroke: 'none'});
+                        R.text((x1+x2)/2, 16, 'JFMAMJJASOND'[mth]).attr({'font-size': '9px'});
+                    }
+                    mth = cdate.getMonth();
+                    !mth && R.path('M'+(x2-.7)+','+h+'L'+(x2-.7)+', '+0).attr({'stroke-width': 1.4, stroke: '#555'});
+                    if (mth == 6) {
+                        R.text(x2, 5, cdate.getFullYear()).attr({'font-size': '9px'});
+                    }
+                    x1 = x2;
+                    cdate.setMonth(mth+1);
+                }
+
+                data.forEach(function(event) {
+                    var dates = event.date.split('-');
+                    var start = new Date(dates[0].substr(6, 4), dates[0].substr(3, 2)-1, dates[0].substr(0, 2));
+                    dates[1] = dates[1] || dates[0];
+                    var end = new Date(dates[1].substr(6, 4), dates[1].substr(3, 2)-1, dates[1].substr(0, 2));
+                    R.path('M'+dateToX(start)+','+100+'L'+dateToX(end)+', '+100).attr({'stroke-width': 10, stroke: '#e00', 'stroke-linecap': 'butt', title: event.info});
+                });
+                return;
+
+                var $wlst = $('#weeks'), $wtpl = $wlst.find('.template').removeClass('template').remove(),
+                    $plst = $('#projects'), $ptpl = $plst.find('.template').removeClass('template').remove(),
+                    $ttpl = $ptpl.find('.todo').remove();
+
+                var $todo = function(todo, index, project) {
+                    var done = todo.done !== undefined && todo.done;
+                    $t = $ttpl.clone();
+                    $t.toggleClass('done', done);
+                    $t.attr('title', todo.description);
+                    $t.find('.titre').text(todo.description.substr(0, 58)+(todo.description.length > 58 ? '...' : ''));
+                    $t.find('.label').text(project.title).addClass('color'+project.id);
+                    $t.find('.todook').toggle(todo.week == cweek).toggleClass('active', done).on('click', function() { todo.done = !done; save(); });
+                    $t.find('.weekn').on('click', function() { todo.week = cweek; save(); });
+                    $t.find('.prevweek').on('click', function() { todo.week = todo.week-1; save(); });
+                    $t.find('.nextweek').on('click', function() { todo.week = todo.week+1; save(); });
+                    $t.find('.noweek').on('click', function() { delete todo.week; save(); });
+                    $t.find('.delete').on('click', function() { todos.splice(index, 1); save(); });
+
+                    var $md = $t.find('.btn-group.md').addClass('md'+todo.workload);
+                    if (todo.done) {
+                        $md.find('button').prop('disabled', true);
+                    } else {
+                        $md.on('mouseenter mouseleave', '.btn', function(e) {
+                            var md = $(this).data('md');
+                            $(this).parent().toggleClass('md'+md, e.type == 'mouseenter' || todo.workload == md);
+                        })
+                        .on('click', '.btn', function(e) {
+                            var md = $(this).data('md');
+                            todo.workload = (todo.workload == md ? 0 : md);
+                            save();
+                        });
+                    }
+
+                    return $t;
+                };
+                var refresh = function() {
+                    var weeks = [], windex = {}, projects = [], pindex = {};
+                    $wlst.empty();
+                    $plst.empty();
+                    todos.forEach(function(todo, i) {
+                        var project = pindex[todo.project];
+                        if (!project) {
+                            var $dom = $ptpl.clone();
+                            project = {title: todo.project, id: projects.length, dom: $dom};
+                            $dom.appendTo($plst);
+                            $dom.find('.header .label').text(project.title).addClass('color'+project.id);
+                            projects.push(project);
+                            pindex[todo.project] = project;
+                        }
+                        if (todo.week) {
+                            var key = todo.year+'-'+todo.week,
+                                week = windex[key];
+                            if (!week) {
+                                var date = moment().year(todo.year).isoWeek(todo.week),
+                                    $dom = $wtpl.clone();
+                                week = {year: todo.year, nb: todo.week, dom: $dom};
+                                $dom.toggleClass('list-group-item-info', todo.year < cyear || (todo.year == cyear && todo.week <= cweek));
+                                $dom.find('.weeknb').text(todo.week);
+                                $dom.find('.weekrng').html(date.day("Monday").format('DD/MM')+'<br/>'+date.day("Friday").format('DD/MM'));
+                                weeks.push(week);
+                                windex[key] = week;
+                            }
+                            $todo(todo, i, project).appendTo(week.dom.find('ul'));
+                        } else {
+                            $todo(todo, i, project).appendTo(project.dom.find('ul'));
+                        }
+                    });
+                    weeks.sort(function(w1, w2) {
+                        return w1.year < w2.year || w1.nb < w2.nb ? -1 : 1;
+                    });
+                    weeks.forEach(function(week) {
+                        week.dom.appendTo($wlst);
+                    });
+                    $('#projet, #description').val('');
+                };*/
+            });
+        </script>
+    </head>
+    <body>
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-4">
+                    <div id="form" class="well">
+                        <textarea class="form-control input-sm" id="description" placeholder="Description"></textarea>
+                        <input type="text" class="form-control input-sm" id="date" placeholder="Date"/>
+                        <div class="row">
+                            <div class="col-lg-6">
+                                <input type="button" id="resetevent" class="btn btn-default btn-sm pull-left" value="Reset"/>
+                            </div>
+                            <div class="col-lg-6">
+                                <input type="button" id="saveevent" class="btn btn-default btn-sm pull-right" value="Add"/>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-8">
+                    <div id="events" class="panel panel-default">
+                        <div class="panel-heading">
+                            <div class="row">
+                                <div class="col-lg-8">
+                                    <input type="text" class="form-control input-sm" id="filter" placeholder="Filter tags"/>
+                                </div>
+                                <div class="col-lg-2" id="nbevents">
+                                    <span class="badge">0 events</span>
+                                </div>
+                                <div class="col-lg-2">
+                                    <input type="button" id="savetimeline" class="btn btn-default btn-sm pull-right" value="Add to timelines"/>
+                                </div>
+                            </div>
+                        </div>
+                        <ul class="list-group">
+                            <a class="list-group-item event template">
+                                <button type="button" class="btn btn-danger btn-xs pull-right"><span class="glyphicon glyphicon-remove"></span></button>
+                            </a>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div id="timelines" class="panel panel-default">
+                <div class="panel-heading">Timelines</div>
+                <div class="panel-body">Header</div>
+                <ul class="list-group">
+                    <li class="list-group-item week template">
+                        Test
+                        <button type="button" class="btn btn-danger btn-xs pull-right"><span class="glyphicon glyphicon-remove"></span></button>
+                        <div class="timeline pull-right"></div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </body>
+</html>
