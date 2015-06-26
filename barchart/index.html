@@ -163,12 +163,15 @@
             .attr('class', 'group');
 
         bars = groups.selectAll('g')
-            .data(function(d) { return d.values })
+            .data(function(d) { return d.values; })
             .enter()
             .append('g');
 
         rects = bars.append('rect')
             .attr('fill', function(d, i) { return cScale(i); });
+
+        rects.append('title')
+            .text(function(d) { return d; });
 
         legend = svg.selectAll('.legend')
             .data(labels)
