@@ -81,7 +81,7 @@
                     .attr('transform', 'translate('+m.left+','+m.top+')');
 
                 xScale
-                    .rangeRoundBands([0, cwidth], 0.3);
+                    .rangeRoundBands([0, cwidth], nb > 1 ? 0.2 : 0.1);
 
                 xx
                     .attr('transform', 'translate(0,' + cheight + ')')
