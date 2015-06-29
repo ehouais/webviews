@@ -79,6 +79,8 @@
 								return;
 							}
 						}
+					} catch(e) {
+						// hide non significant error
 					} finally {
 						local = data;
 						d.trigger();
