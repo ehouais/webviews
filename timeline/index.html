@@ -92,121 +92,111 @@
         rects,
         texts,
         dataUri = Webviews.uriParams(window.location.href).datauri;
-
-    var resize = window.onresize = function() {
-            var width = window.innerWidth,
-                height = window.innerHeight;
+        resize = Webviews.resize({top: [20, 50], right: [30, 50], bottom: [35, 50], left: [70, 100]}, function(width, height, margins) {
+            var cwidth = width-margins.left-margins.right,
+                cheight = height-margins.top-margins.bottom,
+                findInterval = function (val, bounds) {
+                    var index = 0;
+                    while (bounds[index] && val < bounds[index]) index++;
+                    return index;
+                },
+                mode = findInterval((end-start)/(24*60*60*1000)/cwidth, [14, 7, 2, 1.2, 0.6, 0.3, 0.06, 0.04, 0.02]),
+                ticks = [ // major interval, major format, minor interval, nb. intervals, minor format
+                    [    null,       null,   'year', 1,     '\'%y'],
+                    [    null,       null,   'year', 1,       '%Y'],
+                    [  'year',       '%Y',  'month', 3,       '%m'],
+                    [  'year',       '%Y',  'month', 1,       '%m'],
+                    [  'year',       '%Y',  'month', 1,       '%b'],
+                    [  'year',       '%Y',  'month', 1,       '%B'],
+                    [ 'month',    '%B %Y', 'monday', 1,       '%d'],
+                    ['monday', '%d/%m/%Y',    'day', 1,         ''],
+                    ['monday', '%d/%m/%Y',    'day', 1,       '%a'],
+                    ['monday',         '',    'day', 1, '%a %d/%m']
+                ][mode],
+                fs = Math.max(Math.min(Math.min(cwidth, cheight)/20, 20), 10);
 
             svg
                 .attr('width', width)
                 .attr('height', height);
 
-            Webviews.margins(width, height, {top: [20, 50], right: [30, 50], bottom: [35, 50], left: [70, 100]}, function(m) {
-                var cwidth = width-m.left-m.right,
-                    cheight = height-m.top-m.bottom,
-                    findInterval = function (val, bounds) {
-                        var index = 0;
-                        while (bounds[index] && val < bounds[index]) index++;
-                        return index;
-                    },
-                    mode = findInterval((end-start)/(24*60*60*1000)/cwidth, [14, 7, 2, 1.2, 0.6, 0.3, 0.06, 0.04, 0.02]),
-                    ticks = [ // major interval, major format, minor interval, nb. intervals, minor format
-                        [    null,       null,   'year', 1,     '\'%y'],
-                        [    null,       null,   'year', 1,       '%Y'],
-                        [  'year',       '%Y',  'month', 3,       '%m'],
-                        [  'year',       '%Y',  'month', 1,       '%m'],
-                        [  'year',       '%Y',  'month', 1,       '%b'],
-                        [  'year',       '%Y',  'month', 1,       '%B'],
-                        [ 'month',    '%B %Y', 'monday', 1,       '%d'],
-                        ['monday', '%d/%m/%Y',    'day', 1,         ''],
-                        ['monday', '%d/%m/%Y',    'day', 1,       '%a'],
-                        ['monday',         '',    'day', 1, '%a %d/%m']
-                    ][mode],
-                    fs = Math.max(Math.min(Math.min(cwidth, cheight)/20, 20), 10);
+            chart
+                .attr('transform', 'translate('+margins.left+','+margins.top+')');
 
-                svg
-                    .attr('width', width)
-                    .attr('height', height);
+            xScale
+                .range([0, cwidth]);
 
-                chart
-                    .attr('transform', 'translate('+m.left+','+m.top+')');
+            major.style('display', ticks[0] ? 'block' : 'none');
+            if (ticks[0]) {
+                MtAxis
+                    .ticks(d3.time[ticks[0]])
+                    .tickFormat(FR.timeFormat(ticks[1]));
 
-                xScale
-                    .range([0, cwidth]);
-
-                major.style('display', ticks[0] ? 'block' : 'none');
-                if (ticks[0]) {
-                    MtAxis
-                        .ticks(d3.time[ticks[0]])
-                        .tickFormat(FR.timeFormat(ticks[1]));
-
-                    Mticks
-                        .attr('transform', 'translate(0,' + cheight + ')')
-                        .call(MtAxis)
-                        .selectAll('.tick text')
-                        .style('text-anchor', 'start')
-                        .attr('x', 2)
-                        .attr('y', 15);
-
-                    MlAxis
-                        .ticks(d3.time[ticks[0]])
-                        .tickSize(-cheight, 0);
-
-                    Mlines
-                        .attr('transform', 'translate(0,' + cheight + ')')
-                        .call(MlAxis);
-                }
-
-                mtAxis
-                    .ticks(d3.time[ticks[2]], ticks[3])
-                    .tickFormat(FR.timeFormat(ticks[4]));
-
-                mticks
+                Mticks
                     .attr('transform', 'translate(0,' + cheight + ')')
-                    .call(mtAxis)
-                    .selectAll(".tick text")
-                    .style("text-anchor", "start")
-                    .attr("x", 2)
-                    .attr("y", 4);
+                    .call(MtAxis)
+                    .selectAll('.tick text')
+                    .style('text-anchor', 'start')
+                    .attr('x', 2)
+                    .attr('y', 15);
 
-                mlAxis
-                    .ticks(d3.time[ticks[2]], ticks[3])
+                MlAxis
+                    .ticks(d3.time[ticks[0]])
                     .tickSize(-cheight, 0);
 
-                mlines
+                Mlines
                     .attr('transform', 'translate(0,' + cheight + ')')
-                    .call(mlAxis);
+                    .call(MlAxis);
+            }
 
-                yScale
-                    .rangeRoundBands([0, cheight], 0.7);
+            mtAxis
+                .ticks(d3.time[ticks[2]], ticks[3])
+                .tickFormat(FR.timeFormat(ticks[4]));
 
-                lines
-                    .attr('transform', function(d, i) { return 'translate(0,'+yScale(i)+')'; });
+            mticks
+                .attr('transform', 'translate(0,' + cheight + ')')
+                .call(mtAxis)
+                .selectAll(".tick text")
+                .style("text-anchor", "start")
+                .attr("x", 2)
+                .attr("y", 4);
 
-                titles
-                    .style('font-size', fs)
-                    .attr('y', function(d) { return yScale.rangeBand()/2+fs/4; });
+            mlAxis
+                .ticks(d3.time[ticks[2]], ticks[3])
+                .tickSize(-cheight, 0);
 
-                rects
-                    .attr('d', function(d) {
-                        var x1 = xScale(d.period.start),
-                            x2 = xScale(d.period.end),
-                            h = yScale.rangeBand();
-                        if (x2) {
-                            return 'M'+x1+' '+(h/4)+'L'+x2+' '+(h/4)+'L'+x2+' '+h+'L'+x1+' '+h+'Z';
-                        } else {
-                            return 'M'+x1+' 0l'+(h/2)+' 0l'+(-h/2)+' '+h+'l'+(-h/2)+' '+(-h)+'Z';
-                        }
-                    })
-                    .style('fill', function(d, i) { return d.period.end ? '' : cScale(0); });
+            mlines
+                .attr('transform', 'translate(0,' + cheight + ')')
+                .call(mlAxis);
 
-                texts
-                    .style('font-size', fs)
-                    .attr('x', function(d) { return xScale(d.period.start); })
-                    .attr('y', function(d) { return -fs/4; })
-                    .style('text-anchor', function(d) { return d.period.end ? 'start' : 'middle'; });
-            });
-        };
+            yScale
+                .rangeRoundBands([0, cheight], 0.7);
+
+            lines
+                .attr('transform', function(d, i) { return 'translate(0,'+yScale(i)+')'; });
+
+            titles
+                .style('font-size', fs)
+                .attr('y', function(d) { return yScale.rangeBand()/2+fs/4; });
+
+            rects
+                .attr('d', function(d) {
+                    var x1 = xScale(d.period.start),
+                        x2 = xScale(d.period.end),
+                        h = yScale.rangeBand();
+                    if (x2) {
+                        return 'M'+x1+' '+(h/4)+'L'+x2+' '+(h/4)+'L'+x2+' '+h+'L'+x1+' '+h+'Z';
+                    } else {
+                        return 'M'+x1+' 0l'+(h/2)+' 0l'+(-h/2)+' '+h+'l'+(-h/2)+' '+(-h)+'Z';
+                    }
+                })
+                .style('fill', function(d, i) { return d.period.end ? '' : cScale(0); });
+
+            texts
+                .style('font-size', fs)
+                .attr('x', function(d) { return xScale(d.period.start); })
+                .attr('y', function(d) { return -fs/4; })
+                .style('text-anchor', function(d) { return d.period.end ? 'start' : 'middle'; });
+        });
 
     d3.xhr(dataUri).get().on('load', function(xhr) {
         var parse = function(str) {

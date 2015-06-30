@@ -61,74 +61,67 @@
         text,
         lrects,
         ltexts,
-        dataUri = Webviews.uriParams(window.location.href).datauri;
-
-    var resize = window.onresize = function() {
-            var width = window.innerWidth,
-                height = window.innerHeight;
+        dataUri = Webviews.uriParams(window.location.href).datauri,
+        resize = Webviews.resize({top: [20, 50], right: [20, 50], bottom: [30, 50], left: [30, 50]}, function(width, height, margins) {
+            var cwidth = width-margins.left-margins.right,
+                cheight = height-margins.top-margins.bottom,
+                fs = Math.max(Math.min(Math.min(cwidth, cheight)/20, 20), 10);
 
             svg
                 .attr('width', width)
                 .attr('height', height);
 
-            Webviews.margins(width, height, {top: [20, 50], right: [20, 50], bottom: [30, 50], left: [30, 50]}, function(m) {
-                var cwidth = width-m.left-m.right,
-                    cheight = height-m.top-m.bottom,
-                    fs = Math.max(Math.min(Math.min(cwidth, cheight)/20, 20), 10);
+            chart
+                .attr('transform', 'translate('+margins.left+','+margins.top+')');
 
+            xScale
+                .rangeRoundBands([0, cwidth], nb > 1 ? 0.2 : 0.1);
 
-                chart
-                    .attr('transform', 'translate('+m.left+','+m.top+')');
+            xx
+                .attr('transform', 'translate(0,' + cheight + ')')
+                .call(xAxis)
+                .selectAll('text')
+                .text(function(d, i) { return data[i].label || ''; })
+                .style('font-size', fs+'px');
 
-                xScale
-                    .rangeRoundBands([0, cwidth], nb > 1 ? 0.2 : 0.1);
+            yScale
+                .range([cheight, 0]);
 
-                xx
-                    .attr('transform', 'translate(0,' + cheight + ')')
-                    .call(xAxis)
-                    .selectAll('text')
-                    .text(function(d, i) { return data[i].label || ''; })
-                    .style('font-size', fs+'px');
+            yAxis
+                .ticks(cheight/20)
+                .tickSize(-cwidth);
 
-                yScale
-                    .range([cheight, 0]);
+            yy
+                .call(yAxis)
+                .selectAll('text')
+                .style('font-size', fs+'px');
 
-                yAxis
-                    .ticks(cheight/20)
-                    .tickSize(-cwidth);
+            yy
+                .selectAll('g')
+                .filter(function(d) { return d; })
+                .classed('minor', true);
 
-                yy
-                    .call(yAxis)
-                    .selectAll('text')
-                    .style('font-size', fs+'px');
+            groups
+                .attr('transform', function(d, i) { return 'translate('+xScale(i)+',0)'; });
 
-                yy
-                    .selectAll('g')
-                    .filter(function(d) { return d; })
-                    .classed('minor', true);
+            rects
+                .attr('x', function(d, i) { return i*Math.ceil(xScale.rangeBand()/nb); })
+                .attr('y', function(d) {
+                    return yScale(d);
+                })
+                .attr('width', Math.ceil(xScale.rangeBand()/nb))
+                .attr('height', function(d) { return cheight-yScale(d); });
 
-                groups
-                    .attr('transform', function(d, i) { return 'translate('+xScale(i)+',0)'; });
+            legend
+                .attr('transform', function(d, i) { return 'translate(0,'+(margins.top+i*20)+')'; });
 
-                rects
-                    .attr('x', function(d, i) { return i*Math.ceil(xScale.rangeBand()/nb); })
-                    .attr('y', function(d) {
-                        return yScale(d);
-                    })
-                    .attr('width', Math.ceil(xScale.rangeBand()/nb))
-                    .attr('height', function(d) { return cheight-yScale(d); });
+            lrects
+                .attr('x', width-margins.right-18);
 
-                legend
-                    .attr('transform', function(d, i) { return 'translate(0,'+(m.top+i*20)+')'; });
-
-                lrects
-                    .attr('x', width-m.right-18);
-
-                ltexts
-                    .attr('x', width-m.right-24)
-                    .style('font-size', fs+'px');
-            });
-        };
+            ltexts
+                .attr('x', width-margins.right-24)
+                .style('font-size', fs+'px');
+        });
 
     // text/plain: [val11,val12,val13|label2:val21,val22, val23
     d3.xhr(dataUri).get().on('load', function(xhr) {

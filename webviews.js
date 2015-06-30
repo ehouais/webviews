@@ -89,15 +89,20 @@
 
 				return d;
 			},
-			margins: function(width, height, params, cb) {
-                var factor = 20;
-                cb({
-                    top     : Math.max(   params.top[0], Math.min(   params.top[1], height/factor)),
-                    right   : Math.max( params.right[0], Math.min( params.right[1],  width/factor)),
-                    bottom  : Math.max(params.bottom[0], Math.min(params.bottom[1], height/factor)),
-                    left    : Math.max(  params.left[0], Math.min(  params.left[1],  width/factor))
-                });
-            },
+			resize: function(params, cb) {
+				return window.onresize = function() {
+					var width = window.innerWidth,
+		                height = window.innerHeight;
+					    factor = 20
+
+		            width && height && cb(width, height, {
+	                    top     : Math.max(   params.top[0], Math.min(   params.top[1], height/factor)),
+	                    right   : Math.max( params.right[0], Math.min( params.right[1],  width/factor)),
+	                    bottom  : Math.max(params.bottom[0], Math.min(params.bottom[1], height/factor)),
+	                    left    : Math.max(  params.left[0], Math.min(  params.left[1],  width/factor))
+	                });
+				}
+			},
 			uriParams: uriParams
 		};
 
