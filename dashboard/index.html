@@ -32,6 +32,11 @@
 				overflow: hidden;
 				background-color: rgba(255, 255, 255, 0.2);
 			}
+            .image {
+                background-repeat: no-repeat;
+                background-position: center;
+                background-size: cover;
+            }
 			.label {
 				font-family: encode;
 			}
@@ -120,7 +125,7 @@
 								update();
 							},
 							image: function($f, f) {
-								$f.append($('<img/>').attr({src: f.data().get('uri')}).css({width: '100%'}));
+								$f.addClass('image').css('background-image', 'url('+f.data().get('uri')+')');
 							}
 						},
 					    addFrame = function(frame) {
@@ -299,7 +304,7 @@
 									}, 500);
 								});
 							})();
-					
+
 							// Overlay installment for frames manipulation
 							$overlay = $('<div/>').attr('id', 'overlay').hide().appendTo($db);
 							(function() {
@@ -340,7 +345,7 @@
 							$overlay.on('mousedown mousewheel', function(e) {
 								e.preventDefault();
 							});
-					
+
 							// DnD
 							var noop = function(e) {
 								e.stopPropagation();
@@ -360,7 +365,7 @@
 										data: {uri: 'http://crobs-server.philou.c9.io/g2697972'}
 									});
 								}
-							});    
+							});
 						}
 
 						// Initialization
