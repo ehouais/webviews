@@ -266,7 +266,7 @@
                     window.addEventListener('message', function receiveMessage(event) {
                         if (event.origin !== 'http://webviews.local') return;
                         if (event.data.type == 'submit') {
-                            todos.unshift(event.data);
+                            todos.unshift(event.data.data);
                             update();
                         } else if (event.data.type == 'resize') {
                             $form.height(event.data.data);
@@ -282,7 +282,7 @@
 						$wlst.empty();
 						$plst.empty();
 
-						$('.container').off('click', '.delete').on('click', '.delete', function(e) {
+						$('#projects, #weeks').off('click', '.delete').on('click', '.delete', function(e) {
 							todos.splice($(e.currentTarget).parent().parent().data('index'), 1);
 							update();
 						});
