@@ -185,21 +185,12 @@
 			.week .todos {
 				margin-left: 55px;
 			}
-			#new input {
-				display: inline;
-                margin-bottom: 2px;
-			}
 			#display label {
 				margin-left: 10px;
 			}
-			#project {
-				width: 150px;
-			}
-			#description {
-				width: 60%;
-			}
-            #createtodo {
-                float: right;
+            #form {
+                width: 100%;
+                border: none;
             }
         </style>
         <script>
@@ -219,6 +210,7 @@
             $(function() {
 				$('#display input[value="project"]').on('click', function() { $('#projects').show(); $('#weeks').hide(); });
 				$('#display input[value="week"]').on('click', function() { $('#projects').hide(); $('#weeks').show(); });
+
                 Todos.bind((function() {
 					var $wlst = $('#weeks'), $wtpl = $wlst.find('.template').removeClass('template').remove(),
 						$plst = $('#projects'), $ptpl = $plst.find('.template').removeClass('template').remove(),
@@ -259,7 +251,18 @@
 
 							return $t;
 						},
-						weeks, windex, projects, pindex;
+						weeks, windex, projects, pindex,
+                        $form = $('#form');
+
+                    window.addEventListener('message', function receiveMessage(event) {
+                        if (event.origin !== 'http://webviews.local') return;
+                        if (event.data.type == 'submit') {
+                            todos.unshift(event.data);
+                            update();
+                        } else if (event.data.type == 'resize') {
+                            $form.height(event.data.data);
+                        }
+                    }, false);
 
 					return function(data) {
 						todos = JSON.parse(data);
@@ -270,13 +273,6 @@
 						$wlst.empty();
 						$plst.empty();
 
-						$('#createtodo').off('click').on('click', function(e) {
-							todos.unshift({
-								project: $('#project').val(),
-								description: $('#description').val()
-							});
-							update();
-						});
 						$('.container').off('click', '.delete').on('click', '.delete', function(e) {
 							todos.splice($(e.currentTarget).parent().parent().data('index'), 1);
 							update();
@@ -291,8 +287,7 @@
 								.text(project.title)
 								.css('background-color', colorFromString(project.title))
 								.on('click', function() {
-									$('#project').val(project.title);
-									$('#description').focus();
+                                    $form[0].contentWindow.postMessage({project: project.title}, 'http://webviews.local');
 								});
 								projects.push(project);
 								pindex[todo.project] = project;
@@ -327,11 +322,7 @@
     </head>
     <body>
         <div class="container">
-			<form id="new">
-				<input type="text" class="form-control input-sm" id="project" placeholder="Project"/>
-				<input type="text" class="form-control input-sm" id="description" placeholder="Description"/>
-				<input type="button" id="createtodo" class="btn btn-default btn-sm" value="Create"/>
-			</form>
+            <iframe src="http://webviews.local/forms?datauri=data:text/plain,project:Project,description:Description" id="form"></iframe>
 			<form id="display">
 				<label class="radio-inline">
 					<input type="radio" name="groupby" value="project" checked> Group by project
