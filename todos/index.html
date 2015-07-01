@@ -15,13 +15,13 @@
             body {
 				font-family: encode;
                 background-color: transparent;
+                display: flex;
+                flex-direction: column;
+                height: 100%;
             }
             .template {
                 display: none;
             }
-			.container {
-				margin-top: 20px;
-			}
             .todo {
                 background-color: #f3f3f3;
                 height: 24px;
@@ -185,12 +185,21 @@
 			.week .todos {
 				margin-left: 55px;
 			}
+            #display {
+                margin: 5px;
+            }
 			#display label {
 				margin-left: 10px;
 			}
             #form {
                 width: 100%;
                 border: none;
+            }
+            #projects, #weeks {
+                flex: 1;
+                overflow: auto;
+                margin-bottom: 0;
+                border-top: 1px solid #e2e2e2;
             }
         </style>
         <script>
@@ -321,76 +330,74 @@
         </script>
     </head>
     <body>
-        <div class="container">
-            <iframe src="http://webviews.local/forms?datauri=data:text/plain,project:Project,description:Description" id="form"></iframe>
-			<form id="display">
-				<label class="radio-inline">
-					<input type="radio" name="groupby" value="project" checked> Group by project
-				</label>
-				<label class="radio-inline">
-					<input type="radio" name="groupby" value="week"> Group by week
-				</label>
-				<label class="checkbox-inline">
-					<input type="checkbox" name="showall" value="showall"> Show all
-				</label>
-			</form>
-			<ul id="projects" class="list-group">
-				<li class="list-group-item project template">
-					<div class="header">
+        <iframe src="http://webviews.local/forms?datauri=data:text/plain,project:Project,description:Description" id="form"></iframe>
+		<form id="display">
+			<label class="radio-inline">
+				<input type="radio" name="groupby" value="project" checked> Group by project
+			</label>
+			<label class="radio-inline">
+				<input type="radio" name="groupby" value="week"> Group by week
+			</label>
+			<label class="checkbox-inline">
+				<input type="checkbox" name="showall" value="showall"> Show all
+			</label>
+		</form>
+		<ul id="projects" class="list-group">
+			<li class="list-group-item project template">
+				<div class="header">
+					<span class="mylabel"></span>
+				</div>
+				<ul>
+					<li class="todo">
 						<span class="mylabel"></span>
-					</div>
+						<span class="titre"></span>
+						<div class="md btn-group btn-group-xs pull-right">
+							<button type="button" class="btn btn-default md5" data-md="5" title="0,5 hj">&nbsp;</button>
+							<button type="button" class="btn btn-default md10" data-md="10" title="1 hj">&nbsp;</button>
+							<button type="button" class="btn btn-default md15" data-md="15" title="1,5 hj">&nbsp;</button>
+							<button type="button" class="btn btn-default md20" data-md="20" title="2 hj">&nbsp;</button>
+							<button type="button" class="btn btn-default md25" data-md="25" title="2,5 hj">&nbsp;</button>
+							<button type="button" class="btn btn-default md30" data-md="30" title="3 hj">&nbsp;</button>
+							<button type="button" class="btn btn-default md35" data-md="35" title="3,5 hj">&nbsp;</button>
+							<button type="button" class="btn btn-default md40" data-md="40" title="4 hj">&nbsp;</button>
+							<button type="button" class="btn btn-default md45" data-md="45" title="4,5 hj">&nbsp;</button>
+							<button type="button" class="btn btn-default md50" data-md="50" title="5 hj">&nbsp;</button>
+						</div>
+						<span class="buttons pull-right">
+							<button type="button" class="btn btn-default btn-xs todook" title="Toggle todo as done/to do">
+								<span class="glyphicon glyphicon-ok"></span>
+							</button>
+							<button type="button" class="btn btn-default btn-xs weekn" title="Add todo to current week">
+								<span class="glyphicon glyphicon-chevron-right"></span>
+							</button>
+							<button type="button" class="btn btn-default btn-xs prevweek" title="Move todo to previous week">
+								<span class="glyphicon glyphicon-chevron-up"></span>
+							</button>
+							<button type="button" class="btn btn-default btn-xs nextweek" title="Move todo to next week">
+								<span class="glyphicon glyphicon-chevron-down"></span>
+							</button>
+							<button type="button" class="btn btn-default btn-xs noweek" title="Remove todo from planning">
+								<span class="glyphicon glyphicon-chevron-left"></span>
+							</button>
+							<button type="button" class="btn btn-default btn-xs delete" title="Delete todo">
+								<span class="glyphicon glyphicon-remove"></span>
+							</button>
+						</span>
+					</li>
+				</ul>
+			</li>
+		</ul>
+		<ul id="weeks" class="list-group">
+			<li class="list-group-item week template">
+				<div class="text-center weekcol">
+					<div class="weeknb"></div>
+					<div class="weekrng"></div>
+				</div>
+				<div class="todos">
 					<ul>
-						<li class="todo">
-							<span class="mylabel"></span>
-							<span class="titre"></span>
-							<div class="md btn-group btn-group-xs pull-right">
-								<button type="button" class="btn btn-default md5" data-md="5" title="0,5 hj">&nbsp;</button>
-								<button type="button" class="btn btn-default md10" data-md="10" title="1 hj">&nbsp;</button>
-								<button type="button" class="btn btn-default md15" data-md="15" title="1,5 hj">&nbsp;</button>
-								<button type="button" class="btn btn-default md20" data-md="20" title="2 hj">&nbsp;</button>
-								<button type="button" class="btn btn-default md25" data-md="25" title="2,5 hj">&nbsp;</button>
-								<button type="button" class="btn btn-default md30" data-md="30" title="3 hj">&nbsp;</button>
-								<button type="button" class="btn btn-default md35" data-md="35" title="3,5 hj">&nbsp;</button>
-								<button type="button" class="btn btn-default md40" data-md="40" title="4 hj">&nbsp;</button>
-								<button type="button" class="btn btn-default md45" data-md="45" title="4,5 hj">&nbsp;</button>
-								<button type="button" class="btn btn-default md50" data-md="50" title="5 hj">&nbsp;</button>
-							</div>
-							<span class="buttons pull-right">
-								<button type="button" class="btn btn-default btn-xs todook" title="Toggle todo as done/to do">
-									<span class="glyphicon glyphicon-ok"></span>
-								</button>
-								<button type="button" class="btn btn-default btn-xs weekn" title="Add todo to current week">
-									<span class="glyphicon glyphicon-chevron-right"></span>
-								</button>
-								<button type="button" class="btn btn-default btn-xs prevweek" title="Move todo to previous week">
-									<span class="glyphicon glyphicon-chevron-up"></span>
-								</button>
-								<button type="button" class="btn btn-default btn-xs nextweek" title="Move todo to next week">
-									<span class="glyphicon glyphicon-chevron-down"></span>
-								</button>
-								<button type="button" class="btn btn-default btn-xs noweek" title="Remove todo from planning">
-									<span class="glyphicon glyphicon-chevron-left"></span>
-								</button>
-								<button type="button" class="btn btn-default btn-xs delete" title="Delete todo">
-									<span class="glyphicon glyphicon-remove"></span>
-								</button>
-							</span>
-						</li>
 					</ul>
-				</li>
-			</ul>
-			<ul id="weeks" class="list-group">
-				<li class="list-group-item week template">
-					<div class="text-center weekcol">
-						<div class="weeknb"></div>
-						<div class="weekrng"></div>
-					</div>
-					<div class="todos">
-						<ul>
-						</ul>
-					</div>
-				</li>
-			</ul>
-        </div>
+				</div>
+			</li>
+		</ul>
     </body>
 </html>
