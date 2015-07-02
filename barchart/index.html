@@ -52,6 +52,7 @@
             .attr('class', 'y axis'),
         cScale = d3.scale.category10(),
         nb,
+        indexes,
         data,
         labels,
         legend,
@@ -65,7 +66,8 @@
         resize = Webviews.resize({top: [20, 50], right: [20, 50], bottom: [30, 50], left: [30, 50]}, function(width, height, margins) {
             var cwidth = width-margins.left-margins.right,
                 cheight = height-margins.top-margins.bottom,
-                fs = Math.max(Math.min(Math.min(cwidth, cheight)/20, 20), 10);
+                fs = Math.max(Math.min(Math.min(cwidth, cheight)/20, 20), 10),
+                heights = [];
 
             svg
                 .attr('width', width)
@@ -105,9 +107,13 @@
                 .attr('transform', function(d, i) { return 'translate('+xScale(i)+',0)'; });
 
             rects
-                .attr('x', function(d, i) { return i*Math.ceil(xScale.rangeBand()/nb); })
-                .attr('y', function(d) {
-                    return yScale(d);
+                .attr('x', function(d, i) { return indexes[i]*Math.ceil(xScale.rangeBand()/nb); })
+                .attr('y', function(d, i) {
+                    var index = d3.select(this.parentNode.parentNode).datum().index;
+
+                    heights[index] = heights[index] || [];
+                    heights[index][indexes[i]] = (heights[index][indexes[i]] || 0) + d;
+                    return yScale(heights[index][indexes[i]]);
                 })
                 .attr('width', Math.ceil(xScale.rangeBand()/nb))
                 .attr('height', function(d) { return cheight-yScale(d); });
@@ -123,30 +129,59 @@
                 .style('font-size', fs+'px');
         });
 
-    // text/plain: [val11,val12,val13|label2:val21,val22, val23
+    // text/plain: {label1,label2,label3}label:val11,val12,val13|label:val21,val22, val23
     d3.xhr(dataUri).get().on('load', function(xhr) {
-        data = [];
         var str = xhr.response,
-            res;
+            res,
+            tokens,
+            index = 0,
+            max = [];
+
+        data = [];
+        labels = [];
+        indexes = [];
+
+        // get serie labels
         if (res = str.match(/^\{([^\}]+)\}(.*)/)) {
-            labels = res[1].split(',');
+            tokens = res[1].split(',');
+            nb = tokens.length;
+            tokens.forEach(function(token, i) {
+                token.split('+').forEach(function(label) {
+                    labels.push(label);
+                    indexes[index++] = i;
+                });
+            });
             str = res[2];
+        } else {
+            indexes = d3.range(nb);
         }
+
+        // get serie values
         str.split('|').forEach(function(value, i) {
             var tokens = value.split(':');
             if (tokens.length == 1) {
                 tokens.unshift('');
             }
             data[i] = {
-                label: tokens[0],
+                index: i,
+                label: tokens[0], // group label
                 values: tokens[1].split(',').map(function(val) { return +val; })
             };
         });
-        nb = data[0].values.length;
-        labels = labels || d3.range(nb).map(function(i) { return 'series #'+i; })
+
+        if (!nb) {
+            nb = data[0].values.length;
+            labels = indexes.map(function(i) { return 'series #'+(i+1); })
+        }
 
         xScale.domain(d3.range(data.length)),
-        yScale.domain([0, d3.max(data, function(d) { return d3.max(d.values); })]);
+        yScale.domain([0, d3.max(data, function(d) {
+            return d3.max(d.values.reduce(function(stacks, value, i) {
+                var index = indexes[i];
+                stacks[index] = (stacks[index] || 0) + value;
+                return stacks;
+            }, []));
+        })]);
 
         groups = chart.append('g')
             .selectAll('.group')
