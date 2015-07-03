@@ -4,7 +4,7 @@
 			a.href = uri;
 			return a.search.replace(/^\?/, '').split('&').reduce(function(obj, pair) {
 				var tokens = pair.split('=');
-				obj[tokens[0]] = tokens[1];
+				obj[tokens[0]] = decodeURIComponent(tokens[1]);
 				return obj;
 			}, {});
 		},
