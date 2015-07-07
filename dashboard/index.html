@@ -109,8 +109,8 @@
                 dataSource.bind(function(data) {
                     var $frames = $('.frame', $dom);
 
-                    (dashboard = JSON.parse(data) || {frames: []}).frames.forEach(function(frame) {
-                        var $frame = $getFrame(frame.id),
+                    (dashboard = JSON.parse(data) || {frames: []}).frames.forEach(function(frame, index) {
+                        var $frame = $getFrame(frame.id = frame.id || index),
                             setup = function() {
                                 // apply template according to resource type
                                 if (frame.uri.match(/\.(jpg|png)$/)) {
