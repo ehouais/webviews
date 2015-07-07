@@ -87,7 +87,7 @@
         </style>
         <script>
 			var dataSource = Webviews.data(),
-                index = 0,
+                maxId = 0,
                 dashboard,
                 refresh = function() {
                     dataSource.save(JSON.stringify(dashboard));
@@ -120,8 +120,8 @@
                                 }
                             };
 
-                        // keep track of highest index
-                        index = Math.max(index, frame.id);
+                        // keep track of highest id
+                        maxId = Math.max(maxId, frame.id);
 
                         if ($frame.length) {
                             // get current frame URI
@@ -196,7 +196,7 @@
                             cy = $dom.height()/2;
 
                         dashboard.frames.push({
-                            id: ++index,
+                            id: ++maxId,
                             left: cx-width/2,
                             right: cx+width/2,
                             top: cy-height/2,
