@@ -190,6 +190,22 @@
                         }, 500);
                     });
 
+                    // frame creation
+                    var frame = function(width, height, uri) {
+                        var cx = $dom.width()/2,
+                            cy = $dom.height()/2;
+
+                        dashboard.frames.push({
+                            id: ++index,
+                            left: cx-width/2,
+                            right: cx+width/2,
+                            top: cy-height/2,
+                            bottom: cy+height/2,
+                            uri: uri
+                        });
+                        refresh();
+                    };
+
 					(function() {
 						// modal dialog for frame creation
 						var $modal = $('<div/>').attr('id', 'dialog').hide().appendTo($db),
@@ -204,23 +220,6 @@
 						$dom.on('dblclick', function() {
 							$modal.show();
 						});
-
-						// frame creation
-						var frame = function(width, height, uri) {
-                            var cx = $dom.width()/2,
-                                cy = $dom.height()/2;
-
-							dashboard.frames.push({
-                                id: ++index,
-								left: cx-width/2,
-								right: cx+width/2,
-								top: cy-height/2,
-								bottom: cy+height/2,
-                                uri: uri
-							});
-                            refresh();
-						};
-
 					})();
 
 					// Overlay installment for frames manipulation
@@ -276,7 +275,6 @@
 						e.preventDefault();
 					});
 
-					/*
                     // DnD
                     var noop = function(e) {
 						e.stopPropagation();
@@ -287,16 +285,9 @@
 						'drop': function(e) {
 							noop(e);
 							var link = e.originalEvent.dataTransfer.getData('text/uri-list');
-							view.frames.push({
-                                id: ++index,
-								left: {type: HA.prop, value: 0.45},
-								top: {type: VA.prop, value: 0.45},
-								right: {type: HA.prop, value: 0.55},
-								bottom: {type: VA.prop, value: 0.55},
-								uri: 'http://crobs-server.philou.c9.io/g2697972'
-							});
+							frame(200, 200, link);
 						}
-					});*/
+					});
 				})();
 			});
         </script>
