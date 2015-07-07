@@ -2,14 +2,9 @@
     <head>
         <meta charset="utf-8">
         <link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAMhSURBVFhHtZc/aBNxFMcPO4igoIO2uogQETGl+d+kiB0cHTrUotBJAg6im2uJm4PZFHQQiuBYHCTgIog4iODgpLZ1cNCllGJqKYIm8fM93oXL9Xq5wN0XHr+7997vfb+/9/vlLucEUSqVbmKfi8ViL8oKhUKoP8I61P2AzRvVIKampi4QfIt1y+VyLw2jtoT8ZXzB/YRRO04+nz9PYLNarfYqlYpW18bWsFUbQ405oX5ZIKY669ju9PR0TzzEv+ZyueOegPdySiFJS6buQKPRSMRUa2FhYYzFnYH4kbohPrieOTjqIraVN1xFKUPE6gRjWzffbG9+cQ6OWk6qgC+LdeDsqQPuAUHIqsUTA1vbZKUf4ZgzlwvtPXy/tfABAbZfiQDyebVZWyuD7Mns7OxhxfCPw7cdFLCWlACtkLobqqv6spmZmR6ibiieugBqrWj1HrmIGEV4TvFUBVBn0U8u0z1dqVtKegJo8SnqbflbL3L8LUtxkZoAarT8q7fWb0mYpbhIRQB16n5yme6pu2gpfSQugBWepo5bUPWo5ZGvWMoABgQoeYiAMRv3BXNf+1dvZ2Cj/7IJIHYH8N0neZUVXjPXHhC77SeX6R5/+HsfxBKA/4EK6SmmOAWvW6gPVniWvF2v9T7y55YSiqEC8NVrtVq/qBLDRDDnnQR6ecph/Dk5OXnMUkIRR8BVrcS/sqAI8u8qx4vL7JV+RfEoDBUgQHTHXiKK9UVw3SF2zyvgkUsMvqc2PRKxBAjE+iI8Ipm/7TJr/XdeOEdsaiRiCxCIh4rwm23NZZsyFCMJEPzbESS31j+01FgYWYBA3h4RthVr/ME8ZGmxsJ+Aof+I/J2QaR7zL1o4NviJn4CvHRSwbvFIkHeLiX/Ueh5ES+YeCXpEU2fHFcDFJ10gZCebzY5bTiT0BKQbJbsdGXBVWHQX7q6KzakLdpgeW06qgO+V8W16jpfeZxnXywSKOihJmTpLzZN07RJjSzz2ZdR0BdCOCbbhi5xMcA8Ywe0ETd+a7neA6hv5m4Ffjw4GCcvYBl3oKjlpo+4/xh+QNzOZzEHHcZz/Yu4UxPJ023QAAAAASUVORK5CYII=">
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/require-jquery/0.25.0/require-jquery.js"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+        <script src="http://dev.ehouais.net/webviews/webviews.js"></script>
         <style>
-            @font-face {
-                font-family: encode; src: url('http://static.ehouais.net/EncodeSansCondensed-Regular.ttf') format("truetype");
-            }
-            body {
-				font-family: encode;
-            }
 			* {
 				-moz-box-sizing: border-box;
 				-webkit-box-sizing: border-box;
@@ -91,233 +86,228 @@
 			}
         </style>
         <script>
-			require.config({paths: {
-				webviews	: 'http://dev.ehouais.net/webviews/webviews'
-			}});
-			require(['jquery', 'webviews'], function($, Webviews) {
-				var dataSource = Webviews.data(),
-                    index = 0,
-                    dashboard,
-                    refresh = function() {
-                        dataSource.save(JSON.stringify(dashboard));
-                        dataSource.trigger();
+			var dataSource = Webviews.data(),
+                index = 0,
+                dashboard,
+                refresh = function() {
+                    dataSource.save(JSON.stringify(dashboard));
+                    dataSource.trigger();
+                };
+
+			$(function() {
+				var $db = $(document.body),
+				    $dom = $('<div/>').attr('id', 'dom').appendTo($db),
+                    $getFrame = function(id) {
+                        return $('#frame_'+id, $dom);
+                    },
+                    setFrame = function($dom, frame) {
+                        var left, top;
+
+                        $dom.css({left: left = frame.left, top: top = frame.top}).width(frame.right-left).height(frame.bottom-top);
                     };
 
-				$(function() {
-					var $db = $(document.body),
-					    $dom = $('<div/>').attr('id', 'dom').appendTo($db),
-                        $getFrame = function(id) {
-                            return $('#frame_'+id, $dom);
-                        },
-                        setFrame = function($dom, frame) {
-                            var left, top;
+                dataSource.bind(function(data) {
+                    var $frames = $('.frame', $dom);
 
-                            $dom.css({left: left = frame.left, top: top = frame.top}).width(frame.right-left).height(frame.bottom-top);
-                        };
-
-                    dataSource.bind(function(data) {
-                        var $frames = $('.frame', $dom);
-
-                        (dashboard = JSON.parse(data) || {frames: []}).frames.forEach(function(frame) {
-                            var $frame = $getFrame(frame.id),
-                                setup = function() {
-                                    // apply template according to resource type
-                                    if (false) {
-                                        $frame.addClass('image').css('background-image', 'url('+frame.uri+')');
-                                    } else {
-                                        $frame.append($('<iframe/>').attr({src: frame.uri, frameborder: 0}).css({width: '100%', height: '100%'}));
-                                    }
-                                };
-
-                            // keep track of highest index
-                            index = Math.max(index, frame.id);
-
-                            if ($frame.length) {
-                                // get current frame URI
-                                uri = $frame.data('frame').uri;
-                                // reset frame if URI has changed
-                                if (frame.uri != uri) {
-                                    $frame.empty().removeClass('image').css('background-image', 'none');
-                                    setup();
+                    (dashboard = JSON.parse(data) || {frames: []}).frames.forEach(function(frame) {
+                        var $frame = $getFrame(frame.id),
+                            setup = function() {
+                                // apply template according to resource type
+                                if (false) {
+                                    $frame.addClass('image').css('background-image', 'url('+frame.uri+')');
+                                } else {
+                                    $frame.append($('<iframe/>').attr({src: frame.uri, frameborder: 0}).css({width: '100%', height: '100%'}));
                                 }
-                                // remove node from list of missing nodes
-                                $frames = $frames.not($frame[0]);
-                            } else {
-                                // create and setup frame
-                                $frame = $('<div/>').attr('id', 'frame_'+frame.id).addClass('frame').appendTo($dom);
-                                setup();
-                            }
-                            // update link to data
-                            $frame.data('frame', frame);
-                            // set frame position and size
-                            setFrame($frame, frame);
-                        });
-
-                        // remove orphan DOM nodes
-                        $frames.remove();
-                    });
-
-                    // Setup controllers
-					(function() {
-                        var $overlay,
-					        step = 4,
-                            updateMask = function($mask) {
-                                setFrame($mask, $getFrame($mask.data('frame_id')).data('frame'));
                             };
 
-                        // Prevent some default behaviours
-    					$dom.on('mousedown mousewheel', function(e) {
-    						e.preventDefault();
-    					});
+                        // keep track of highest index
+                        index = Math.max(index, frame.id);
 
-                        // edit mode toggle ans masks creation
-                        $dom.on('mousedown', function() {
-                            var tid,
-                                clear = function() {
-                                    clearTimeout(tid);
-                                    $dom.off('mouseup', clear);
-                                };
+                        if ($frame.length) {
+                            // get current frame URI
+                            uri = $frame.data('frame').uri;
+                            // reset frame if URI has changed
+                            if (frame.uri != uri) {
+                                $frame.empty().removeClass('image').css('background-image', 'none');
+                                setup();
+                            }
+                            // remove node from list of missing nodes
+                            $frames = $frames.not($frame[0]);
+                        } else {
+                            // create and setup frame
+                            $frame = $('<div/>').attr('id', 'frame_'+frame.id).addClass('frame').appendTo($dom);
+                            setup();
+                        }
+                        // update link to data
+                        $frame.data('frame', frame);
+                        // set frame position and size
+                        setFrame($frame, frame);
+                    });
 
-                            $dom.on('mouseup', clear);
-                            tid = setTimeout(function() {
-                                $overlay.show();
-                                // create masks
-                                dashboard.frames.forEach(function(frame) {
-                                    var $mask = $('<div/>').addClass('mask').data('frame_id', frame.id).appendTo($overlay);
+                    // remove orphan DOM nodes
+                    $frames.remove();
+                });
 
-                                    $mask.dblclick(function() {
-                                        if (confirm('Are you sure ?')) {
-                                            $mask.remove();
-                                            dashboard.frames = dashboard.frames.filter(function(item) {
-                                                return item !== frame;
-                                            });
-                                            refresh();
-                                        }
-                                    });
-                                    updateMask($mask);
+                // Setup controllers
+				(function() {
+                    var $overlay,
+				        step = 4,
+                        updateMask = function($mask) {
+                            setFrame($mask, $getFrame($mask.data('frame_id')).data('frame'));
+                        };
+
+                    // Prevent some default behaviours
+					$dom.on('mousedown mousewheel', function(e) {
+						e.preventDefault();
+					});
+
+                    // edit mode toggle ans masks creation
+                    $dom.on('mousedown', function() {
+                        var tid,
+                            clear = function() {
+                                clearTimeout(tid);
+                                $dom.off('mouseup', clear);
+                            };
+
+                        $dom.on('mouseup', clear);
+                        tid = setTimeout(function() {
+                            $overlay.show();
+                            // create masks
+                            dashboard.frames.forEach(function(frame) {
+                                var $mask = $('<div/>').addClass('mask').data('frame_id', frame.id).appendTo($overlay);
+
+                                $mask.dblclick(function() {
+                                    if (confirm('Are you sure ?')) {
+                                        $mask.remove();
+                                        dashboard.frames = dashboard.frames.filter(function(item) {
+                                            return item !== frame;
+                                        });
+                                        refresh();
+                                    }
                                 });
-                            }, 500);
-                        });
+                                updateMask($mask);
+                            });
+                        }, 500);
+                    });
 
-						(function() {
-							// modal dialog for frame creation
-							var $modal = $('<div/>').attr('id', 'dialog').hide().appendTo($db),
-							    $text = $('<input type="text"/>').appendTo($modal),
-    							$ib = $('<input type="button" value="iframe"/>').on('click', function() {
-    								var val = $text.val();
-    								if (val.substr(0, 5) == 'http:') {
-    									frame(200, 200, val);
-    								}
-    								$modal.hide();
-    							}),
-							    $mb = $('<input type="button" value="image"/>').on('click', function() {
-    								var val = $text.val();
-    								if (val.substr(0, 5) == 'http:' || val.substr(0, 6) == 'https:') {
-    									frame(200, 200, val);
-    								}
-    								$modal.hide();
-    							}),
-							    $cb = $('<input type="button" value="cancel"/>').attr('id', 'cancel').on('click', function() { $modal.hide(); });
+					(function() {
+						// modal dialog for frame creation
+						var $modal = $('<div/>').attr('id', 'dialog').hide().appendTo($db),
+						    $text = $('<input type="text"/>').appendTo($modal),
+							$ib = $('<input type="button" value="iframe"/>').on('click', function() {
+								var val = $text.val();
+								if (val.substr(0, 5) == 'http:') {
+									frame(200, 200, val);
+								}
+								$modal.hide();
+							}),
+						    $mb = $('<input type="button" value="image"/>').on('click', function() {
+								var val = $text.val();
+								if (val.substr(0, 5) == 'http:' || val.substr(0, 6) == 'https:') {
+									frame(200, 200, val);
+								}
+								$modal.hide();
+							}),
+						    $cb = $('<input type="button" value="cancel"/>').attr('id', 'cancel').on('click', function() { $modal.hide(); });
 
-							$([$ib, $mb, $cb]).appendTo($modal);
-							$dom.on('dblclick', function() {
-								$modal.show();
+						$([$ib, $mb, $cb]).appendTo($modal);
+						$dom.on('dblclick', function() {
+							$modal.show();
+						});
+
+						// frame creation
+						var frame = function(width, height, uri) {
+                            var cx = $dom.width()/2,
+                                cy = $dom.height()/2;
+
+							dashboard.frames.push({
+                                id: ++index,
+								left: cx-width/2,
+								right: cx+width/2,
+								top: cy-height/2,
+								bottom: cy+height/2,
+                                uri: uri
 							});
+                            refresh();
+						};
 
-							// frame creation
-							var frame = function(width, height, uri) {
-                                var cx = $dom.width()/2,
-                                    cy = $dom.height()/2;
+					})();
 
-								dashboard.frames.push({
-                                    id: ++index,
-									left: cx-width/2,
-									right: cx+width/2,
-									top: cy-height/2,
-									bottom: cy+height/2,
-                                    uri: uri
-								});
+					// Overlay installment for frames manipulation
+					$overlay = $('<div/>').attr('id', 'overlay').hide().appendTo($db);
+					(function() {
+						var selected;
+						$overlay.on('click', function(e) {
+							if (selected) {
+								$(selected).css('background-color', '#ffffff');
+							}
+							if (e.target == $overlay.get(0)) {
+								selected = null;
+                                $('.mask', $overlay).remove();
+								$overlay.hide();
+							} else {
+								selected = e.target;
+								$(selected).css('background-color', '#ff0000');
+							}
+						});
+					})();
+					$overlay.on('mousedown', '.mask', function(e) {
+						var $mask = $(e.target),
+                            $frame = $getFrame($mask.data('frame_id')),
+                            frame = $frame.data('frame'),
+						    mx = e.pageX, my = e.pageY,
+						    dx1 = mx-frame.left, dy1 = my-frame.top,
+						    dx2 = frame.right-mx, dy2 = frame.bottom-my,
+						    moving = (dx2 > 10 || dy2 > 10),
+                            snap = function(val) {
+                                return val-val%step;
+                            },
+							mm = function(e) {
+                                frame = $frame.data('frame'),
+								mx = e.pageX;
+								my = e.pageY;
+								if (moving) {
+									frame.left = snap(mx-dx1);
+                                    frame.top = snap(my-dy1);
+								}
+								frame.right = snap(mx+dx2);
+                                frame.bottom = snap(my+dy2);
+                                updateMask($mask);
                                 refresh();
+							},
+							mu = function() {
+								$overlay.off('mousemove', mm).off('mouseup', mu);
 							};
 
-						})();
+						$overlay.on('mousemove', mm).on('mouseup', mu);
+						e.preventDefault();
+					});
+					$overlay.on('mousedown mousewheel', function(e) {
+						e.preventDefault();
+					});
 
-						// Overlay installment for frames manipulation
-						$overlay = $('<div/>').attr('id', 'overlay').hide().appendTo($db);
-						(function() {
-							var selected;
-							$overlay.on('click', function(e) {
-								if (selected) {
-									$(selected).css('background-color', '#ffffff');
-								}
-								if (e.target == $overlay.get(0)) {
-									selected = null;
-                                    $('.mask', $overlay).remove();
-									$overlay.hide();
-								} else {
-									selected = e.target;
-									$(selected).css('background-color', '#ff0000');
-								}
+					/*
+                    // DnD
+                    var noop = function(e) {
+						e.stopPropagation();
+						e.preventDefault();
+					};
+					$dom.on({
+						'dragstart dragenter dragleave dragover dragend': noop,
+						'drop': function(e) {
+							noop(e);
+							var link = e.originalEvent.dataTransfer.getData('text/uri-list');
+							view.frames.push({
+                                id: ++index,
+								left: {type: HA.prop, value: 0.45},
+								top: {type: VA.prop, value: 0.45},
+								right: {type: HA.prop, value: 0.55},
+								bottom: {type: VA.prop, value: 0.55},
+								uri: 'http://crobs-server.philou.c9.io/g2697972'
 							});
-						})();
-						$overlay.on('mousedown', '.mask', function(e) {
-							var $mask = $(e.target),
-                                $frame = $getFrame($mask.data('frame_id')),
-                                frame = $frame.data('frame'),
-							    mx = e.pageX, my = e.pageY,
-							    dx1 = mx-frame.left, dy1 = my-frame.top,
-							    dx2 = frame.right-mx, dy2 = frame.bottom-my,
-							    moving = (dx2 > 10 || dy2 > 10),
-                                snap = function(val) {
-                                    return val-val%step;
-                                },
-    							mm = function(e) {
-                                    frame = $frame.data('frame'),
-    								mx = e.pageX;
-    								my = e.pageY;
-    								if (moving) {
-    									frame.left = snap(mx-dx1);
-                                        frame.top = snap(my-dy1);
-    								}
-    								frame.right = snap(mx+dx2);
-                                    frame.bottom = snap(my+dy2);
-                                    updateMask($mask);
-                                    refresh();
-    							},
-    							mu = function() {
-    								$overlay.off('mousemove', mm).off('mouseup', mu);
-    							};
-
-							$overlay.on('mousemove', mm).on('mouseup', mu);
-							e.preventDefault();
-						});
-						$overlay.on('mousedown mousewheel', function(e) {
-							e.preventDefault();
-						});
-
-						/*
-                        // DnD
-                        var noop = function(e) {
-							e.stopPropagation();
-							e.preventDefault();
-						};
-						$dom.on({
-							'dragstart dragenter dragleave dragover dragend': noop,
-							'drop': function(e) {
-								noop(e);
-								var link = e.originalEvent.dataTransfer.getData('text/uri-list');
-								view.frames.push({
-                                    id: ++index,
-									left: {type: HA.prop, value: 0.45},
-									top: {type: VA.prop, value: 0.45},
-									right: {type: HA.prop, value: 0.55},
-									bottom: {type: VA.prop, value: 0.55},
-									uri: 'http://crobs-server.philou.c9.io/g2697972'
-								});
-							}
-						});*/
-					})();
-				});
+						}
+					});*/
+				})();
 			});
         </script>
     </head>
