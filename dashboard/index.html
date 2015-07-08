@@ -196,7 +196,8 @@
 
                     // edition popup
                     $overlay.on('dblclick', '.mask', function(e) {
-                        var frame = $getFrame($(e.target).data('frame_id')).data('frame');
+                        var $mask = $(e.target),
+                            frame = $getFrame($mask.data('frame_id')).data('frame');
                             onMessage = function(e) {
                                 var event = e.originalEvent,
                                     msg = event.data;
