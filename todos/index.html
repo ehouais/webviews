@@ -264,15 +264,19 @@
 						weeks, windex, projects, pindex,
                         $form = $('#form');
 
-                    window.addEventListener('message', function receiveMessage(event) {
-                        if (event.origin !== 'http://webviews.local') return;
-                        if (event.data.type == 'submit') {
-                            todos.unshift(event.data.data);
-                            update();
-                        } else if (event.data.type == 'resize') {
-                            $form.height(event.data.data);
+                    $(window).on('message', function(event) {
+                        var event = e.originalEvent,
+                            msg = event.data;
+
+                        if (event.origin == 'http://webviews.local') {
+                            if (msg.type == 'submit') {
+                                todos.unshift(msg.data);
+                                update();
+                            } else if (msg.type == 'resize') {
+                                $form.height(msg.data.height);
+                            }
                         }
-                    }, false);
+                    });
 
 					return function(data) {
 						todos = JSON.parse(data);
@@ -297,7 +301,7 @@
 								.text(project.title)
 								.css('background-color', colorFromString(project.title))
 								.on('click', function() {
-                                    $form[0].contentWindow.postMessage({project: project.title}, 'http://webviews.local');
+                                    $form[0].contentWindow.postMessage({type: 'set', values: {project: project.title}}, 'http://webviews.local');
 								});
 								projects.push(project);
 								pindex[todo.project] = project;

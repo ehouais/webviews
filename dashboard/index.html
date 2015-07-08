@@ -64,39 +64,25 @@
 				background-color: #fff;
 				color: #f00;
 			}
-			#overlay, #popup {
+			#overlay, #creation_popup, #edition_popup, #popup_overlay {
 				position: absolute;
 				top: 0;
 				width: 100%;
 				height: 100%;
                 display: none;
 			}
+            #popup_overlay {
+                background-color: #fff;
+                opacity: 0.7;
+            }
+            #creation_popup, #edition_popup {
+                border: none;
+            }
 			.mask {
 				position: absolute;
 				cursor: pointer;
 				background-color: #ffffff;
 				opacity: 0.3;
-			}
-			#dialog {
-				position: absolute;
-				top: 200px;
-				left: 600px;
-				width: 400px;
-				height: 200px;
-				padding: 4px;
-				background-color: #ffffff;
-			}
-			#dialog input[type=text] {
-				width: 100%;
-			}
-			#dialog input[type=button] {
-				height: 20px;
-				font-size: 11px;
-				width: 50px;
-				margin: 0px;
-			}
-			#cancel {
-				float: right;
 			}
         </style>
         <script>
@@ -132,16 +118,15 @@
                                 } else {
                                     $frame.append($('<iframe/>').attr({src: frame.uri, frameborder: 0}).css({width: '100%', height: '100%'}));
                                 }
+                                $frame.data('uri', frame.uri);
                             };
 
                         // keep track of highest id
                         maxId = Math.max(maxId, frame.id);
 
                         if ($frame.length) {
-                            // get current frame URI
-                            uri = $frame.data('frame').uri;
                             // reset frame if URI has changed
-                            if (frame.uri != uri) {
+                            if (frame.uri != $frame.data('uri')) {
                                 $frame.empty().removeClass('image').css('background-image', 'none');
                                 setup();
                             }
@@ -165,10 +150,26 @@
                 // Setup controllers
 				(function() {
                     var $overlay = $('#overlay'),
-                        $popup = $('#popup'),
+                        $creation_popup = $('#creation_popup'),
+                        $edition_popup = $('#edition_popup'),
 				        step = 4,
+                        selected,
                         updateMask = function($mask) {
                             setFrame($mask, $getFrame($mask.data('frame_id')).data('frame'));
+                        },
+                        frame = function(width, height, uri) {
+                            var cx = $dom.width()/2,
+                                cy = $dom.height()/2;
+
+                            dashboard.frames.push({
+                                id: ++maxId,
+                                left: 0|cx-width/2,
+                                right: 0|cx+width/2,
+                                top: 0|cy-height/2,
+                                bottom: 0|cy+height/2,
+                                uri: uri
+                            });
+                            refresh();
                         };
 
                     // Prevent some default behaviours
@@ -186,75 +187,80 @@
 
                         $dom.on('mouseup', clear);
                         tid = setTimeout(function() {
-                            $overlay.show();
-                            // create masks
                             dashboard.frames.forEach(function(frame) {
-                                var $mask = $('<div/>').addClass('mask').data('frame_id', frame.id).appendTo($overlay);
+                                updateMask($('<div/>').addClass('mask').data('frame_id', frame.id).appendTo($overlay));
+                            });
+                            $overlay.show();
+                        }, 500);
+                    });
 
-                                $mask.dblclick(function() {
-                                    if (confirm('Are you sure ?')) {
+                    // edition popup
+                    $overlay.on('dblclick', '.mask', function(e) {
+                        var frame = $getFrame($(e.target).data('frame_id')).data('frame');
+                            onMessage = function(e) {
+                                var event = e.originalEvent,
+                                    msg = event.data;
+
+                                if (event.origin == 'http://webviews.local' && msg.type != 'resize') {
+                                    if (msg.type == 'submit' && msg.data.uri != '') {
+                                        frame.uri = msg.data.uri;
+                                        refresh();
+                                    } else if (msg.type == 'delete' && confirm('Are you sure ?')) {
                                         $mask.remove();
                                         dashboard.frames = dashboard.frames.filter(function(item) {
                                             return item !== frame;
                                         });
                                         refresh();
                                     }
-                                });
-                                updateMask($mask);
-                            });
-                        }, 500);
+                                    $edition_popup.hide();
+                                    $('#popup_overlay').hide();
+                                    $(window).off('message', onMessage);
+                                }
+                            };
+
+                        $edition_popup[0].contentWindow.postMessage({type: 'set', values: {uri: decodeURI(frame.uri)}}, 'http://webviews.local');
+                        $edition_popup.show();
+                        $('#popup_overlay').show();
+                        $(window).on('message', onMessage);
                     });
 
-                    // frame creation
-                    var frame = function(width, height, uri) {
-                        var cx = $dom.width()/2,
-                            cy = $dom.height()/2;
+                    // Creation popup using "Forms" webview
+					$dom.on('dblclick', function() {
+						var onMessage = function(e) {
+                            var event = e.originalEvent,
+                                msg = event.data;
 
-                        dashboard.frames.push({
-                            id: ++maxId,
-                            left: cx-width/2,
-                            right: cx+width/2,
-                            top: cy-height/2,
-                            bottom: cy+height/2,
-                            uri: uri
-                        });
-                        refresh();
-                    };
+                                if (event.origin == 'http://webviews.local' && msg.type != 'resize') {
+                                    if (msg.type == 'submit' && msg.data.uri != '') {
+                                        frame(200, 200, msg.data.uri);
+                                    }
+                                    $creation_popup.hide();
+                                    $('#popup_overlay').hide();
+                                    $(window).off('message', onMessage);
+                                }
+                            };
 
-					(function() {
-						// modal dialog for frame creation
-						/*var $modal = $('<div/>').attr('id', 'dialog').hide().appendTo($db),
-						    $text = $('<input type="text"/>').appendTo($modal),
-                            $sb = $('<input type="button" value="submit"/>').attr('id', 'submit').on('click', function() {
-                                frame(200, 200, $text.val());
-                                $modal.hide();
-                            });
-						    $cb = $('<input type="button" value="cancel"/>').attr('id', 'cancel').on('click', function() { $modal.hide(); });
-
-                        $modal.append($sb).append($cb);*/
-						$dom.on('dblclick', function() {
-							$('iframe', $popup).attr('src', 'http://webviews.local/forms?datauri=data:text/plain,uri:URI');
-                            $popup.show();
-						});
-					})();
+                        $creation_popup.show();
+                        $('#popup_overlay').show();
+                        $(window).on('message', onMessage);
+					});
 
 					// Overlay installment for frames manipulation
-					(function() {
-						var selected;
-						$overlay.on('click', function(e) {
-							if (selected) {
-								$(selected).css('background-color', '#ffffff');
-							}
-							if (e.target == $overlay.get(0)) {
-								selected = null;
-                                $('.mask', $overlay).remove();
-								$overlay.hide();
-							} else {
-								selected = e.target;
-								$(selected).css('background-color', '#ff0000');
-							}
-						});
-					})();
+					$overlay.on('click', function(e) {
+						if (selected) {
+							$(selected).css('background-color', '#ffffff');
+						}
+						if (e.target == $overlay.get(0)) {
+							selected = null;
+                            $('.mask', $overlay).remove();
+							$overlay.hide();
+						} else {
+							selected = e.target;
+							$(selected).css('background-color', '#ff0000');
+						}
+					});
+
+                    // Frame handling through masks
 					$overlay.on('mousedown', '.mask', function(e) {
 						var $mask = $(e.target),
                             $frame = $getFrame($mask.data('frame_id')),
@@ -291,12 +297,11 @@
 					});
 
                     // DnD
-                    var noop = function(e) {
-						e.stopPropagation();
-						e.preventDefault();
-					};
 					$dom.on({
-						'dragstart dragenter dragleave dragover dragend': noop,
+						'dragstart dragenter dragleave dragover dragend': function noop(e) {
+    						e.stopPropagation();
+    						e.preventDefault();
+    					},
 						'drop': function(e) {
 							noop(e);
 							var link = e.originalEvent.dataTransfer.getData('text/uri-list');
@@ -310,6 +315,8 @@
     <body>
         <div id="dom"></div>
         <div id="overlay"></div>
-        <div id="popup"><div id="container"><div id="form"><iframe></iframe></div></div></div>
+        <div id="popup_overlay"></div>
+        <iframe id="creation_popup" src="http://webviews.local/forms?datauri=data:text/plain,uri:URI"></iframe>
+        <iframe id="edition_popup" src="http://webviews.local/forms?datauri=data:text/plain,uri:URI,cancel,delete"></iframe>
     </body>
 </html>
