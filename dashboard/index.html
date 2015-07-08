@@ -202,7 +202,7 @@
                                 var event = e.originalEvent,
                                     msg = event.data;
 
-                                if (event.origin == 'http://webviews.local' && msg.type != 'resize') {
+                                if (event.origin == 'http://dev.ehouais.net' && msg.type != 'resize') {
                                     if (msg.type == 'submit' && msg.data.uri != '') {
                                         frame.uri = msg.data.uri;
                                         refresh();
@@ -219,7 +219,7 @@
                                 }
                             };
 
-                        $edition_popup[0].contentWindow.postMessage({type: 'set', values: {uri: decodeURI(frame.uri)}}, 'http://webviews.local');
+                        $edition_popup[0].contentWindow.postMessage({type: 'set', values: {uri: decodeURI(frame.uri)}}, 'http://dev.ehouais.net');
                         $edition_popup.show();
                         $('#popup_overlay').show();
                         $(window).on('message', onMessage);
@@ -231,7 +231,7 @@
                             var event = e.originalEvent,
                                 msg = event.data;
 
-                                if (event.origin == 'http://webviews.local' && msg.type != 'resize') {
+                                if (event.origin == 'http://dev.ehouais.net' && msg.type != 'resize') {
                                     if (msg.type == 'submit' && msg.data.uri != '') {
                                         frame(200, 200, msg.data.uri);
                                     }
