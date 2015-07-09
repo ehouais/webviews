@@ -271,6 +271,7 @@
                         if (event.origin == 'http://dev.ehouais.net') {
                             if (msg.type == 'submit') {
                                 todos.unshift(msg.data);
+                                $form[0].contentWindow.postMessage({type: 'set', values: {project: '', description: ''}}, 'http://dev.ehouais.net');
                                 update();
                             } else if (msg.type == 'resize') {
                                 $form.height(msg.data.height);
