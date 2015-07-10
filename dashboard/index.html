@@ -89,7 +89,7 @@
 			var dataSource = Webviews.data(),
                 maxId = 0,
                 dashboard,
-                formDomain = 'http://webviews.local',
+                formDomain = 'http://dev.ehouais.net',
                 refresh = function() {
                     dataSource.save(JSON.stringify(dashboard));
                     dataSource.trigger();
@@ -324,7 +324,7 @@
         <div id="dom"></div>
         <div id="overlay"></div>
         <div id="popup_overlay"></div>
-        <iframe id="creation_popup" src="http://webviews.local/forms?datauri=data:text/plain,uri:URI,[cancel]:Cancel"></iframe>
-        <iframe id="edition_popup" src="http://webviews.local/forms?datauri=data:text/plain,uri:URI,[cancel]:Cancel,[refresh]:Refresh,[newpage]:New page,[delete]:Delete"></iframe>
+        <iframe id="creation_popup" src="http://dev.ehouais.net/webviews/forms?datauri=data:text/plain,uri:URI,[cancel]:Cancel"></iframe>
+        <iframe id="edition_popup" src="http://dev.ehouais.net/webviews/forms?datauri=data:text/plain,uri:URI,[cancel]:Cancel,[refresh]:Refresh,[newpage]:New page,[delete]:Delete"></iframe>
     </body>
 </html>
