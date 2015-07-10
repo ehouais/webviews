@@ -89,6 +89,7 @@
 			var dataSource = Webviews.data(),
                 maxId = 0,
                 dashboard,
+                formDomain = 'http://webviews.local',
                 refresh = function() {
                     dataSource.save(JSON.stringify(dashboard));
                     dataSource.trigger();
@@ -197,12 +198,13 @@
                     // edition popup
                     $overlay.on('dblclick', '.mask', function(e) {
                         var $mask = $(e.target),
-                            frame = $getFrame($mask.data('frame_id')).data('frame');
+                            $frame = $getFrame($mask.data('frame_id')),
+                            frame = $frame.data('frame');
                             onMessage = function(e) {
                                 var event = e.originalEvent,
                                     msg = event.data;
 
-                                if (event.origin == 'http://dev.ehouais.net' && msg.type != 'resize') {
+                                if (event.origin == formDomain && msg.type != 'resize') {
                                     if (msg.type == 'submit' && msg.data.uri != '') {
                                         frame.uri = msg.data.uri;
                                         refresh();
@@ -219,7 +221,7 @@
                                 }
                             };
 
-                        $edition_popup[0].contentWindow.postMessage({type: 'set', values: {uri: decodeURI(frame.uri)}}, 'http://dev.ehouais.net');
+                        $edition_popup[0].contentWindow.postMessage({type: 'set', values: {uri: decodeURI(frame.uri)}}, formDomain);
                         $edition_popup.show();
                         $('#popup_overlay').show();
                         $(window).on('message', onMessage);
@@ -231,7 +233,7 @@
                             var event = e.originalEvent,
                                 msg = event.data;
 
-                                if (event.origin == 'http://dev.ehouais.net' && msg.type != 'resize') {
+                                if (event.origin == formDomain && msg.type != 'resize') {
                                     if (msg.type == 'submit' && msg.data.uri != '') {
                                         frame(200, 200, msg.data.uri);
                                     }
