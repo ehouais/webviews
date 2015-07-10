@@ -208,6 +208,11 @@
                                     if (msg.type == 'submit' && msg.data.uri != '') {
                                         frame.uri = msg.data.uri;
                                         refresh();
+                                    } else if (msg.type == 'refresh') {
+                                        // TODO check if img background
+                                        $('iframe', $frame)[0].src = $('iframe', $frame)[0].src;
+                                    } else if (msg.type == 'newpage') {
+                                        window.open(frame.uri);
                                     } else if (msg.type == 'delete' && confirm('Are you sure ?')) {
                                         $mask.remove();
                                         dashboard.frames = dashboard.frames.filter(function(item) {
@@ -319,7 +324,7 @@
         <div id="dom"></div>
         <div id="overlay"></div>
         <div id="popup_overlay"></div>
-        <iframe id="creation_popup" src="http://dev.ehouais.net/webviews/forms?datauri=data:text/plain,uri:URI"></iframe>
-        <iframe id="edition_popup" src="http://dev.ehouais.net/webviews/forms?datauri=data:text/plain,uri:URI,cancel,delete"></iframe>
+        <iframe id="creation_popup" src="http://webviews.local/forms?datauri=data:text/plain,uri:URI,[cancel]:Cancel"></iframe>
+        <iframe id="edition_popup" src="http://webviews.local/forms?datauri=data:text/plain,uri:URI,[cancel]:Cancel,[refresh]:Refresh,[newpage]:New page,[delete]:Delete"></iframe>
     </body>
 </html>
