@@ -34,7 +34,7 @@
             input {
                 margin-bottom: 2px;
             }
-            input.btn {
+            .template {
                 display: none;
             }
             input[type=text] {
@@ -51,24 +51,26 @@
                 background-color: #eee;
                 border-radius: 5px;
             }
+            .buttons input {
+                margin-right: 2px;
+            }
         </style>
         <script>
-			var Form = Webviews.data();
+			var Form = Webviews.data(),
+                msg = function(type, data) {
+                    parent.postMessage({type: type, data: data}, '*');
+                };
 
             $(function() {
                 var form = {},
                     $form = $('form'),
-                    $btns = $('.buttons'),
-                    $tpl = $('input[type=text]', $form).detach(),
-                    $cancel_btn = $('input.cancel', $form),
-                    $submit_btn = $('input[type=submit]', $form),
-                    $delete_btn = $('input.delete', $form);
+                    $btns = $('.buttons', $form),
+                    $tpl = $('input[type=text]', $form).removeClass('template').detach(),
+                    $gen_btn = $('input.template', $btns).removeClass('template').detach(),
+                    $submit_btn = $('input[type=submit]', $btns);
 
-                $cancel_btn.on('click', function(e) {
-                    parent.postMessage({type: 'cancel'}, '*');
-                });
-                $delete_btn.on('click', function(e) {
-                    parent.postMessage({type: 'delete'}, '*');
+                $btns.on('click', 'input[type=button]', function(e) {
+                    msg($(e.target).data('id'));
                 });
                 // Bind submit event to parent handler
                 $submit_btn.on('click', function(e) {
@@ -78,12 +80,12 @@
                     for (id in form) {
                         data[id] = form[id].dom.val()
                     }
-                    parent.postMessage({type: 'submit', data: data}, '*');
+                    msg('submit', data);
                     e.preventDefault();
                 })
                 $(document).on('keyup', function(e) {
                     if (e.which == 27) {
-                        parent.postMessage({type: 'cancel'}, '*');
+                        msg('cancel');
                     }
                 });
 
@@ -104,16 +106,12 @@
                     data.split(',').forEach(function(field) {
                         var tokens = field.split(':'),
                             id = tokens[0],
-                            label = tokens[1],
-                            $dom = $tpl.clone();
+                            label = tokens[1];
 
-                        if (id == 'cancel') {
-                            $cancel_btn.show();
-                        } else if (id == 'delete') {
-                            $delete_btn.show();
+                        if (id.match(/^\[[^\]]+\]$/)) {
+                            $gen_btn.clone().data('id', id.substr(1, id.length-2)).val(label).appendTo($btns);
                         } else {
-                            form[id] = {label: label, dom: $dom};
-                            $dom.attr({id: id, placeholder: label}).insertBefore($btns);
+                            form[id] = {label: label, dom: $tpl.clone().attr({id: id, placeholder: label}).insertBefore($btns)};
                         }
                     })
 
@@ -121,7 +119,7 @@
                     $submit_btn.show();
 
                     // Send resize event to parent now that content is stable
-                    parent.postMessage({type: 'resize', data: {height: $('.inner', $form).outerHeight()}}, '*');
+                    msg('resize', {height: $('.inner', $form).outerHeight()});
 				});
             });
         </script>
@@ -130,12 +128,10 @@
         <div id="container">
     		<form>
                 <div class="inner">
-        			<input type="text" class="form-control input-sm template"/>
+                    <input type="text" class="form-control input-sm template"/>
                     <div class="buttons">
-            			<input type="button" class="btn cancel btn-default btn-sm" value="Cancel"/>
-                        <input type="submit" class="btn btn-default btn-sm" value="Submit"/>
-                        <input type="button" class="btn delete btn-danger btn-sm" value="Delete"/>
-                    </div>
+                        <input type="button" class="btn btn-default btn-sm template"/>
+                        <input type="submit" class="btn btn-default btn-sm" value="Submit"/></div>
                 </div>
     		</form>
         </div>
