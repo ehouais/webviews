@@ -165,7 +165,11 @@
             data[i] = {
                 index: i,
                 label: tokens[0], // group label
-                values: tokens[1].split(',').map(function(val) { return +val; })
+                values: tokens[1].split(',').map(function(val) {
+                    return val.split('+').reduce(function(sum, item) {
+                        return +item+sum;
+                    }, 0);
+                })
             };
         });
 
