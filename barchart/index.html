@@ -119,14 +119,16 @@
                 .attr('height', function(d) { return cheight-yScale(d); });
 
             legend
-                .attr('transform', function(d, i) { return 'translate(0,'+(margins.top+i*20)+')'; });
+                .attr('transform', function(d, i) { return 'translate(0,'+(i*20)+')'; });
 
             lrects
-                .attr('x', width-margins.right-18);
+                .attr('x', cwidth-18);
 
             ltexts
-                .attr('x', width-margins.right-24)
+                .attr('x', cwidth-24)
                 .style('font-size', fs+'px');
+
+            return svg[0][0].getBBox();
         });
 
     // text/plain: {label1,label2,label3}label:val11,val12,val13|label:val21,val22, val23
@@ -205,7 +207,7 @@
         rects.append('title')
             .text(function(d) { return d; });
 
-        legend = svg.selectAll('.legend')
+        legend = chart.append('g').selectAll('.legend')
             .data(labels)
             .enter()
             .append('g')
