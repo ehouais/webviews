@@ -196,6 +196,8 @@
                 .attr('x', function(d) { return xScale(d.period.start); })
                 .attr('y', function(d) { return -fs/8; })
                 .style('text-anchor', function(d) { return d.period.end ? 'start' : 'middle'; });
+
+            return svg[0][0].getBBox();
         });
 
     d3.xhr(dataUri).get().on('load', function(xhr) {
