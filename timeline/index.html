@@ -92,7 +92,7 @@
         rects,
         texts,
         dataUri = Webviews.uriParams(window.location.href).datauri;
-        resize = Webviews.resize({top: [20, 50], right: [30, 50], bottom: [35, 50], left: [70, 100]}, function(width, height, margins) {
+        resize = Webviews.resize(function(width, height, margins) {
             var cwidth = width-margins.left-margins.right,
                 cheight = height-margins.top-margins.bottom,
                 findInterval = function (val, bounds) {

@@ -89,27 +89,25 @@
 
 				return d;
 			},
-			resize: function(params, cb) {
+			resize: function(cb) {
 				return window.onresize = function() {
 					var width = window.innerWidth,
 		                height = window.innerHeight,
-					    factor = 20,
-						margins = {
-		                    top     : Math.max(   params.top[0], Math.min(   params.top[1], height/factor)),
-		                    right   : Math.max( params.right[0], Math.min( params.right[1],  width/factor)),
-		                    bottom  : Math.max(params.bottom[0], Math.min(params.bottom[1], height/factor)),
-		                    left    : Math.max(  params.left[0], Math.min(  params.left[1],  width/factor))
-		                },
-						bbox = {width: 0, height: 0, x: 0, y: 0},
+						margin = Math.min(width, height)/20,
+						bbox = {width: 0, height: 0, x: margin, y: margin},
 						dw = 0, dh = 0;
 
 		            if (width && height) {
 						while (true) {
-							bbox = cb(width, height, {left: -bbox.x, top: -bbox.y, right: dw+bbox.x, bottom: dh+bbox.y});
-							dw = bbox.width-width;
-							dh = bbox.height-height;
-							console.log(dw, dh);
-							if (Math.abs(dw) < 1 || Math.abs(dh) < 1) break;
+							bbox = cb(width, height, {
+								left: -bbox.x,
+								top: -bbox.y,
+								right: dw+bbox.x,
+								bottom: dh+bbox.y
+							});
+							dw = bbox.width-(width-2*margin);
+							dh = bbox.height-(height-2*margin);
+							if (dw < 1 || dh < 1) break;
 						}
 					}
 				}

@@ -35,7 +35,7 @@
 <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
 <script src="//cdnjs.cloudflare.com/ajax/libs/sjcl/1.0.0/sjcl.min.js"></script>
 <script src="//cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
-<script src="http://dev.ehouais.net/webviews/webviews.js"></script>
+<script src="http://webviews.local/webviews.js"></script>
 <script>
     var svg = d3.select('body').append('svg'),
         chart = svg.append('g'),
@@ -63,7 +63,7 @@
         lrects,
         ltexts,
         dataUri = Webviews.uriParams(window.location.href).datauri,
-        resize = Webviews.resize({top: [20, 50], right: [20, 50], bottom: [30, 50], left: [30, 50]}, function(width, height, margins) {
+        resize = Webviews.resize(function(width, height, margins) {
             var cwidth = width-margins.left-margins.right,
                 cheight = height-margins.top-margins.bottom,
                 fs = Math.max(Math.min(Math.min(cwidth, cheight)/20, 20), 11),
@@ -90,7 +90,7 @@
                 .range([cheight, 0]);
 
             yAxis
-                .ticks(cheight/20)
+                .ticks(cheight/25)
                 .tickSize(-cwidth);
 
             yy
