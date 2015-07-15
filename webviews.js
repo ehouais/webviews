@@ -93,22 +93,16 @@
 				return window.onresize = function() {
 					var width = window.innerWidth,
 		                height = window.innerHeight,
-						margin = Math.min(width, height)/20,
-						bbox = {width: 0, height: 0, x: margin, y: margin},
-						dw = 0, dh = 0;
+						dl = dt = dr = db = margin = Math.min(width, height)/20,
+						bbox,
+						ml = mt = mr = mb = 0;
 
-		            if (width && height) {
-						while (true) {
-							bbox = cb(width, height, {
-								left: -bbox.x,
-								top: -bbox.y,
-								right: dw+bbox.x,
-								bottom: dh+bbox.y
-							});
-							dw = bbox.width-(width-2*margin);
-							dh = bbox.height-(height-2*margin);
-							if (dw < 1 || dh < 1) break;
-						}
+					while (dl || dt || dr || db) {
+						bbox = cb(width, height, {left: ml += dl, top: mt += dt, right: mr += dr, bottom: mb += db});
+						dl = Math.max(0, margin-ml+margin-bbox.x);
+						dt = Math.max(0, margin-mt+margin-bbox.y);
+						dr = Math.max(0, margin-mr+bbox.x+bbox.width-(width-margin));
+						db = Math.max(0, margin-mb+bbox.y+bbox.height-(height-margin));
 					}
 				}
 			},
