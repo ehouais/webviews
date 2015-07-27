@@ -110,13 +110,15 @@
                 .attr('height', function(d) { return cheight-yScale(d); });
 
             legend
-                .attr('transform', function(d, i) { return 'translate(0,'+(i*20)+')'; });
+                .attr('transform', function(d, i) { return 'translate(0,'+(-(i+1)*fs)+')'; });
 
             lrects
-                .attr('x', cwidth-18);
+                .attr('x', cwidth-18)
+                .attr('height', fs*0.9);
 
             ltexts
                 .attr('x', cwidth-24)
+                .attr('y', fs/2)
                 .style('font-size', fs+'px');
 
             return svg[0][0].getBBox();
@@ -206,11 +208,9 @@
 
         lrects = legend.append('rect')
             .attr('width', 18)
-            .attr('height', 18)
             .style('fill', function(d, i) { return cScale(i); });
 
         ltexts = legend.append('text')
-            .attr('y', 9)
             .attr('dy', '.35em')
             .style('text-anchor', 'end')
             .text(function(d) { return d; });
