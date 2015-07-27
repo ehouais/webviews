@@ -164,21 +164,26 @@
                 .rangeRoundBands([0, cheight], 0.7);
 
             lines
-                .attr('transform', function(d, i) { return 'translate(0,'+yScale(i)+')'; });
+                .attr('transform', function(d, i) { return 'translate(0,'+(yScale(i)+yScale.rangeBand()/2)+')'; });
 
             titles
                 .style('font-size', fs)
-                .attr('y', function(d) { return yScale.rangeBand()/2+fs/4; });
+                .attr('y', function(d) { return fs/4; });
 
             rects
                 .attr('d', function(d) {
                     var x1 = xScale(d.period.start),
                         x2 = xScale(d.period.end),
-                        h = yScale.rangeBand();
-                    if (x2) {
-                        return 'M'+x1+' '+(h/4)+'L'+x2+' '+(h/4)+'L'+x2+' '+h+'L'+x1+' '+h+'Z';
+                        h = yScale.rangeBand(),
+                        th = Math.min(h, 60),
+                        vh = -2*h*d.value;
+
+                    if (d.value) {
+                        return 'M'+x1+' 0L'+x1+' '+vh+'L'+x2+' '+vh+'L'+x2+' 0Z';
+                    } else if (x2) {
+                        return 'M'+x1+' '+(-h/2)+'L'+x2+' '+(-h/2)+'L'+x2+' '+(h/2)+'L'+x1+' '+(h/2)+'Z';
                     } else {
-                        return 'M'+x1+' 0l'+(h/2)+' 0l'+(-h/2)+' '+h+'l'+(-h/2)+' '+(-h)+'Z';
+                        return 'M'+(x1-th/2)+' '+(-th)+'l'+(th)+' 0l'+(-th/2)+' '+th+'l'+(-th/2)+' '+(-th)+'Z';
                     }
                 })
                 .style('fill', function(d, i) { return d.period.end ? '' : cScale(0); });
@@ -186,7 +191,10 @@
             texts
                 .style('font-size', fs)
                 .attr('x', function(d) { return xScale(d.period.start); })
-                .attr('y', function(d) { return -fs/8; })
+                .attr('y', function(d) {
+                    var h = yScale.rangeBand();
+                    return (d.value ? -2*h*d.value : d.period.end ? -h/2 : -Math.min(h, 60))-fs/8;
+                })
                 .style('text-anchor', function(d) { return d.period.end ? 'start' : 'middle'; });
 
             return svg[0][0].getBBox();
@@ -225,18 +233,35 @@
                 res,
                 events = [],
                 event,
-                period;
+                period,
+                max = 0;
+
             if (res = str.match(/^([^\[]+)(.*)/)) {
                 line.label = res[1];
                 str = res[2];
             }
+
             while (res = str.match(/\[([^\]]+)]([^\[]*)(.*)/)) {
-                event = {label: res[2], str: res[1], period: strToPeriod(res[1])};
+                event = {str: res[1], period: strToPeriod(res[1])};
+                value = res[2];
+                if (value.substr(0, 1) == '+') {
+                    event.value = value = +value.substr(1);
+                    max = Math.max(max, value);
+                }
+                event.label = value;
+
                 line.events.push(event);
                 start = Math.min(start, event.period.start);
                 end = Math.max(end, event.period.end || event.period.start);
                 str = res[3];
             }
+
+            if (max > 0) {
+                line.events.forEach(function(event) {
+                    event.value /= max;
+                });
+            }
+
             return line;
         });
 
