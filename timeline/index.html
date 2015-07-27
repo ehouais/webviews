@@ -53,7 +53,6 @@
         end,
         svg = d3.select('body').append('svg'),
         chart = svg.append('g'),
-        margin = {top: 10, right: 10, bottom: 20, left: 10},
         xScale = d3.time.scale(),
         minor = chart.append('g')
             .attr('class', 'x axis minor'),
@@ -229,7 +228,6 @@
                 period;
             if (res = str.match(/^([^\[]+)(.*)/)) {
                 line.label = res[1];
-                margin.left = 15;
                 str = res[2];
             }
             while (res = str.match(/\[([^\]]+)]([^\[]*)(.*)/)) {
