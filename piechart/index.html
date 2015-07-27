@@ -70,7 +70,7 @@
                         cos = Math.cos(angle),
                         sin = Math.sin(angle);
 
-                    return 'translate('+((radius+fs/2)*cos+radius*0.21*(cos > 0 ? 1 : -1))+','+(radius+fs/2)*sin+')';
+                    return 'translate('+((radius+2+fs/2)*cos+radius*0.21*(cos > 0 ? 1 : -1))+','+(radius+2+fs/2)*sin+')';
                 });
 
             return svg[0][0].getBBox();
