@@ -11,6 +11,10 @@
         border: 0;
         overflow: hidden;
     }
+    path.tick {
+        fill: none;
+        stroke: grey;
+    }
 </style>
 <body>
 <script src="//cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
@@ -46,24 +50,27 @@
                 .attr('d', arc);
 
             ticks
-                .attr('x1', 0)
-                .attr('x2', 0)
-                .attr('y1', -radius-2)
-                .attr('y2', -radius-0.5*fs)
-                .attr('stroke', 'gray')
-                .attr('transform', function(d) {
-                    return 'rotate('+(d.startAngle+d.endAngle)/2 * (180/Math.PI)+')';
+                .attr('d', function(d) {
+                    var angle = (d.startAngle+d.endAngle)/2-Math.PI/2,
+                        cos = Math.cos(angle),
+                        sin = Math.sin(angle);
+                    return 'M'+(radius+2)*cos+' '+(radius+2)*sin+'l'+(fs/2)*cos+' '+(fs/2)*sin+'l'+radius*0.2*(cos > 0 ? 1 : -1)+' 0';
                 });
 
             labels
                 .style('font-size', fs+'px')
-                .attr('transform', function(d) {
-                    var dist = radius + 1.5*fs,
-                        angle = (d.startAngle + d.endAngle) / 2, // Middle of wedge
-                        x = dist * Math.sin(angle),
-                        y = -dist * Math.cos(angle);
+                .attr('text-anchor', function(d) {
+                    var angle = (d.startAngle+d.endAngle)/2-Math.PI/2,
+                        cos = Math.cos(angle);
 
-                    return 'translate('+x+','+y+')';
+                    return cos > 0 ? 'start' : 'end';
+                })
+                .attr('transform', function(d) {
+                    var angle = (d.startAngle+d.endAngle)/2-Math.PI/2,
+                        cos = Math.cos(angle),
+                        sin = Math.sin(angle);
+
+                    return 'translate('+((radius+fs/2)*cos+radius*0.21*(cos > 0 ? 1 : -1))+','+(radius+fs/2)*sin+')';
                 });
 
             return svg[0][0].getBBox();
@@ -84,10 +91,11 @@
             //.attr('stroke', '#fff')
             .attr('fill', function(d, i) { return color(i); });
 
-        ticks = chart.selectAll('line')
+        ticks = chart.selectAll('.tick')
             .data(data)
             .enter()
-            .append('line');
+            .append('path')
+            .attr('class', 'tick');
 
         labels = chart.selectAll('text')
             .data(data)
