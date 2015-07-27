@@ -32,7 +32,7 @@
     }
     .hline {
         stroke: #999;
-        stroke-dasharray: 1,4;
+        stroke-dasharray: 1,2;
         shape-rendering: crispEdges;
     }
 </style>
@@ -197,8 +197,7 @@
                     } else {
                         return 'M'+(x1-th/2)+' '+(-th)+'l'+(th)+' 0l'+(-th/2)+' '+th+'l'+(-th/2)+' '+(-th)+'Z';
                     }
-                })
-                .style('fill', function(d, i) { return d.period.end ? '' : cScale(0); });
+                });
 
             texts
                 .style('font-size', fs)
@@ -299,12 +298,14 @@
             .style('text-anchor', 'end');
 
         hticks = lines.append('line')
-            .attr('class', 'hline');
+            .attr('class', 'hline')
+            .style('stroke', function(d, i) { return cScale(i+1); });
 
         bars = lines.selectAll('g')      // line events
             .data(function(d) { return d.events; })
             .enter()
-            .append('g');
+            .append('g')
+            .style('fill', function(d, i) { return d.period.end ? '' : cScale(0); });
 
         rects = bars.append('path');
 
