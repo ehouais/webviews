@@ -11,74 +11,195 @@
         border: 0;
         overflow: hidden;
     }
-    .node {
-        stroke: #000;
-        fill: #fff;
-        stroke-width: 1.5px;
-    }
-    .link {
-        stroke: #999;
-        stroke-width: 3px;
-        stroke-opacity: 1;
-    }
-    .label {
-        fill: #000;
-        font-size: 25px;
-        text-anchor: middle;
-    }
 </style>
 <body>
 <script src="//cdnjs.cloudflare.com/ajax/libs/snap.svg/0.4.1/snap.svg-min.js"></script>
 <script src="http://webviews.local/webviews.js"></script>
 <script>
-    var composite = function() {
-        return {
-            add: function(node) {
-
-            }
-        }
-    };
-    var VNode = function() {
+    var VNode = function(params) {
         var nodes = [];
+
         return {
             add: function(node) {
                 nodes.push(node);
+                return this;
             },
-            render: function() {
+            render: function(parent) {
                 var g = paper.group(),
                     y = 0,
-                    bbox;
+                    bbox,
+                    margin = params.margin || 0;
 
+                parent.add(g);
                 nodes.forEach(function(node) {
-                    ne = node.render();
+                    ne = node.render(g);
                     bbox = ne.getBBox();
-                    g.add(ne);
-                    ne.transform('t'+(-bbox.width/2)+','+(y+bbox.height/2));
-                    y += bbox.height;
+                    switch (params.align || 'center') {
+                    case 'left':
+                        ne.transform('t'+(-bbox.x)+','+(y-bbox.y));
+                        break;
+                    case 'center':
+                        ne.transform('t'+(-bbox.width/2-bbox.x)+','+(y-bbox.y));
+                        break;
+                    case 'right':
+                        ne.transform('t'+(-bbox.width-bbox.x)+','+(y-bbox.y));
+                        break;
+                    }
+                    y += bbox.height+margin;
                 });
+                if (params.type == 'box') {
+                    bbox = g.getBBox();
+                    g.prepend(paper.rect(bbox.x-margin, bbox.y-margin, bbox.width+2*margin, bbox.height+2*margin).attr({'stroke-width': '0.05em', stroke: '#000', fill: '#fff'}));
+                } else if (params.type == 'zone') {
+                    bbox = g.getBBox();
+                    g.prepend(paper.rect(bbox.x-margin, bbox.y-margin, bbox.width+2*margin, bbox.height+2*margin).attr({rx: '0.4em', ry: '0.4em', stroke: 'none', fill: '#0bf'}));
+                }
+
+                if (params.id) {
+                    namedNodes[params.id] = g;
+                }
 
                 return g;
             }
         };
     };
-    var TextNode = function(text) {
+    var HNode = function(params) {
+        var nodes = [];
+
         return {
-            render: function() {
-                return paper.text(0, 0, text);
+            add: function(node) {
+                nodes.push(node);
+                return this;
+            },
+            render: function(parent) {
+                var g = paper.group(),
+                    x = 0,
+                    bbox,
+                    margin = params.margin || 0;
+
+                parent.add(g);
+                nodes.forEach(function(node) {
+                    ne = node.render(g);
+                    bbox = ne.getBBox();
+                    switch (params.align || 'middle') {
+                    case 'top':
+                        ne.transform('t'+(x-bbox.x)+','+(-bbox.y));
+                        break;
+                    case 'middle':
+                        ne.transform('t'+(x-bbox.x)+','+(-bbox.height/2-bbox.y));
+                        break;
+                    case 'bottom':
+                        ne.transform('t'+(x-bbox.x)+','+(-bbox.height-bbox.y));
+                        break;
+                    }
+                    x += bbox.width+margin;
+                });
+                if (params.type == 'box') {
+                    bbox = g.getBBox();
+                    g.prepend(paper.rect(bbox.x-margin, bbox.y-margin, bbox.width+2*margin, bbox.height+2*margin).attr({'stroke-width': '0.05em', stroke: '#000', fill: '#fff'}));
+                }
+                if (params.id) {
+                    namedNodes[params.id] = g;
+                }
+
+                return g;
             }
         };
-    }
+    };
+    var TextNode = function(params) {
+        params = params || ' ';
+        if (typeof params === 'string') {
+            params = {text: params};
+        }
+        return {
+            render: function(parent) {
+                var g = paper.group(),
+                    node = paper.text(0, 0, params.text),
+                    margin = params.margin || 0;
 
-    root = VNode();
-    root.add(TextNode('toto'));
-    root.add(TextNode('titi'));
-    root.add(TextNode('tata'));
+                node.node.setAttributeNS("http://www.w3.org/XML/1998/namespace", "xml:space","preserve");
+                g.add(node);
+                parent.add(g);
+                if (params.type == 'box') {
+                    bbox = node.getBBox();
+                    g.prepend(paper.rect(bbox.x-margin, bbox.y-margin, bbox.width+2*margin, bbox.height+2*margin).attr({'stroke-width': '0.05em', stroke: '#000', fill: 'none'}));
+                }
+                if (params.id) {
+                    namedNodes[params.id] = g;
+                }
+
+                return g;
+            }
+        };
+    };
+    var namedNodes = {};
+    var link = function(id1, type, id2) {
+        var bbox1 = namedNodes[id1].node.getBoundingClientRect(),
+            bbox2 = namedNodes[id2].node.getBoundingClientRect(),
+            hw1 = bbox1.width/2, hh1 = bbox1.height/2,
+            xc1 = bbox1.left+hw1, yc1 = bbox1.top+hh1,
+            hw2 = bbox2.width/2, hh2 = bbox2.height/2,
+            xc2 = bbox2.left+hw2, yc2 = bbox2.top+hh2,
+            d,
+            line;
+
+        if (xc1 == xc2) {
+            yc1 += yc1 < yc2 ? hh1 : -hh1;
+            yc2 += yc2 < yc2 ? -hh2 : hh2;
+        } else if (yc1 == yc2) {
+            xc1 += xc1 < xc2 ? hw1 : -hw1;
+            xc2 += xc2 < xc2 ? -hw2 : hw2;
+        } else {
+            d = Math.abs((yc2-yc1)/(xc2-xc1));
+            xc1 += Math.min(hw1, hh1/d)*(xc1 < xc2 ? 1 : -1);
+            yc1 += Math.min(hh1, hw1*d)*(yc1 < yc2 ? 1 : -1);
+            xc2 += Math.min(hw2, hh2/d)*(xc1 < xc2 ? -1 : 1);
+            yc2 += Math.min(hh2, hw2*d)*(yc1 < yc2 ? -1 : 1);
+        }
+        line = paper.line(xc1, yc1, xc2, yc2).attr({stroke: '#555', 'stroke-width': 3});
+        if (type == '>') {
+            line.attr({markerEnd: marker})
+        }
+        paper.add(line);
+    };
+
+    var root = VNode({margin: 20, type: 'zone', align: 'center'});
+    root.add(TextNode({id: 'A', text: 'toto'}));
+    root.add(TextNode());
+    var hn = HNode({id:'F', margin: 10, type: 'box', align: 'middle'});
+    hn.add(TextNode({id: 'B', text: 'titititi', type: 'box', margin: 10}));
+    hn.add(TextNode({id: 'C', text: 'tutu', type: 'box', margin: 10}));
+    hn.add(TextNode({id: 'D', text: 'tete', type: 'box', margin: 10}));
+    root.add(hn);
+    root.add(TextNode());
+    root.add(TextNode({id: 'E', text: 'tata'}));
+
     var W = innerWidth,
         H = innerHeight;
 
     var paper = Snap(W, H);
-    var re = root.render();
+
+    var arrow = paper.polygon([0,-2.5, 5,0, 0,2.5, 0,-2.5]).attr({fill: '#555'});
+    var marker = arrow.marker(0,-2.5, 5,5, 5,0);
+
+    var rg = paper.group();
+    rg.attr({'font-family': 'gotham', 'font-size': Math.min(40, Math.min(W, H)/20)});
+    var re = root.render(rg);
     var bbox = re.getBBox();
-    re.attr({'font-family': 'gotham', 'font-size': Math.min(40, Math.min(W, H)/20)});
-    re.transform('t'+(W-bbox.width)/2+','+(H-bbox.height)/2);
+    re.transform('t'+((W-bbox.width)/2-bbox.x)+','+((H-bbox.height)/2-bbox.y));
+    link('A', '>', 'B');
+    link('A', '>', 'C');
+    link('A', '>', 'D');
+    link('E', '-', 'F');
+
+    /*var dsl = '[toto]';
+    var index = 0,
+        char,
+        state = 'vnode';
+    while (char = dsl.charAt(index++)) {
+        switch (state) {
+        case 'vnode':
+
+        }
+    }*/
 </script>
