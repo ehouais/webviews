@@ -13,193 +13,179 @@
     }
 </style>
 <body>
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
 <script src="//cdnjs.cloudflare.com/ajax/libs/snap.svg/0.4.1/snap.svg-min.js"></script>
+<script src="parser.js"></script>
 <script src="http://webviews.local/webviews.js"></script>
 <script>
-    var VNode = function(params) {
-        var nodes = [];
+    var dataUri = Webviews.uriParams(window.location.href).datauri;
+    var paper = Snap();
+    var group,
+        links;
+    var render = function(diagram, width, height) {
+        var arrow = paper.polygon([0,-2.5, 5,0, 0,2.5, 0,-2.5]).attr({fill: '#555'});
+        var marker = arrow.marker(0,-2.5, 5,5, 5,0);
+        var nodeLUT = {};
+        paper.attr({width: width, height: height});
+        group && group.remove();
+        group = paper.group().attr({'font-family': 'gotham', 'font-size': Math.min(40, Math.min(width, height)/20)});
+        links && links.remove();
+        links = paper.group();
+        var renderNode = function(node, parent) {
+            var group = paper.group(),
+                margin = node.margin || 10;
 
-        return {
-            add: function(node) {
-                nodes.push(node);
-                return this;
-            },
-            render: function(parent) {
-                var g = paper.group(),
-                    y = 0,
+            parent.add(group); // group must be added to parent prior to BBox calculations
+
+            switch (node.type) {
+            case 'text':
+                var text = paper.text(0, 0, node.text || ' ').attr('text-anchor', 'middle');
+
+                text.node.setAttributeNS('http://www.w3.org/XML/1998/namespace', 'xml:space', 'preserve');
+                group.add(text);
+                break;
+            case 'hflow':
+                var x = 0,
                     bbox,
-                    margin = params.margin || 0;
+                    align = node.align || 'middle';
 
-                parent.add(g);
-                nodes.forEach(function(node) {
-                    ne = node.render(g);
-                    bbox = ne.getBBox();
-                    switch (params.align || 'center') {
-                    case 'left':
-                        ne.transform('t'+(-bbox.x)+','+(y-bbox.y));
-                        break;
-                    case 'center':
-                        ne.transform('t'+(-bbox.width/2-bbox.x)+','+(y-bbox.y));
-                        break;
-                    case 'right':
-                        ne.transform('t'+(-bbox.width-bbox.x)+','+(y-bbox.y));
-                        break;
-                    }
-                    y += bbox.height+margin;
-                });
-                if (params.type == 'box') {
-                    bbox = g.getBBox();
-                    g.prepend(paper.rect(bbox.x-margin, bbox.y-margin, bbox.width+2*margin, bbox.height+2*margin).attr({'stroke-width': '0.05em', stroke: '#000', fill: '#fff'}));
-                } else if (params.type == 'zone') {
-                    bbox = g.getBBox();
-                    g.prepend(paper.rect(bbox.x-margin, bbox.y-margin, bbox.width+2*margin, bbox.height+2*margin).attr({rx: '0.4em', ry: '0.4em', stroke: 'none', fill: '#0bf'}));
-                }
+                node.subnodes.forEach(function(n) {
+                    var ne = renderNode(n, group),
+                        bbox = ne.getBBox();
 
-                if (params.id) {
-                    namedNodes[params.id] = g;
-                }
-
-                return g;
-            }
-        };
-    };
-    var HNode = function(params) {
-        var nodes = [];
-
-        return {
-            add: function(node) {
-                nodes.push(node);
-                return this;
-            },
-            render: function(parent) {
-                var g = paper.group(),
-                    x = 0,
-                    bbox,
-                    margin = params.margin || 0;
-
-                parent.add(g);
-                nodes.forEach(function(node) {
-                    ne = node.render(g);
-                    bbox = ne.getBBox();
-                    switch (params.align || 'middle') {
-                    case 'top':
+                    if (node.alignlt) {
                         ne.transform('t'+(x-bbox.x)+','+(-bbox.y));
-                        break;
-                    case 'middle':
-                        ne.transform('t'+(x-bbox.x)+','+(-bbox.height/2-bbox.y));
-                        break;
-                    case 'bottom':
+                    } else if (node.alignrb) {
                         ne.transform('t'+(x-bbox.x)+','+(-bbox.height-bbox.y));
-                        break;
+                    } else {
+                        ne.transform('t'+(x-bbox.x)+','+(-bbox.height/2-bbox.y));
                     }
+
                     x += bbox.width+margin;
                 });
-                if (params.type == 'box') {
-                    bbox = g.getBBox();
-                    g.prepend(paper.rect(bbox.x-margin, bbox.y-margin, bbox.width+2*margin, bbox.height+2*margin).attr({'stroke-width': '0.05em', stroke: '#000', fill: '#fff'}));
-                }
-                if (params.id) {
-                    namedNodes[params.id] = g;
-                }
+                break;
+            case 'vflow':
+                var y = 0,
+                    bbox,
+                    align = node.align || 'center';
 
-                return g;
+                node.subnodes.forEach(function(n) {
+                    var ne = renderNode(n, group),
+                        bbox = ne.getBBox();
+
+                    if (node.alignlt) {
+                        ne.transform('t'+(-bbox.x)+','+(y-bbox.y));
+                    } else if (node.alignrb) {
+                        ne.transform('t'+(-bbox.width-bbox.x)+','+(y-bbox.y));
+                    } else {
+                        ne.transform('t'+(-bbox.width/2-bbox.x)+','+(y-bbox.y));
+                    }
+
+                    y += bbox.height+margin;
+                });
+                break;
+            };
+
+            if (node.shape) {
+                bbox = group.getBBox();
+                switch (node.shape) {
+                case 'rect':
+                    group.prepend(paper.rect(bbox.x-margin, bbox.y-margin, bbox.width+2*margin, bbox.height+2*margin).attr({'stroke-width': '0.05em', stroke: '#000', fill: '#fff'}));
+                    break;
+                case 'rrect':
+                    group.prepend(paper.rect(bbox.x-margin, bbox.y-margin, bbox.width+2*margin, bbox.height+2*margin).attr({rx: '0.4em', ry: '0.4em', stroke: 'none', fill: '#0bf'}));
+                    break;
+                case 'circle':
+                    var radius = (bbox.height+2*margin)/2;
+                    group.prepend(paper.rect(bbox.x-margin, bbox.y-margin, bbox.width+2*margin, bbox.height+2*margin).attr({rx: radius, ry: radius, stroke: 'none', fill: '#0bf'}));
+                    break;
+                }
             }
-        };
-    };
-    var TextNode = function(params) {
-        params = params || ' ';
-        if (typeof params === 'string') {
-            params = {text: params};
-        }
-        return {
-            render: function(parent) {
-                var g = paper.group(),
-                    node = paper.text(0, 0, params.text),
-                    margin = params.margin || 0;
 
-                node.node.setAttributeNS("http://www.w3.org/XML/1998/namespace", "xml:space","preserve");
-                g.add(node);
-                parent.add(g);
-                if (params.type == 'box') {
-                    bbox = node.getBBox();
-                    g.prepend(paper.rect(bbox.x-margin, bbox.y-margin, bbox.width+2*margin, bbox.height+2*margin).attr({'stroke-width': '0.05em', stroke: '#000', fill: 'none'}));
-                }
-                if (params.id) {
-                    namedNodes[params.id] = g;
-                }
-
-                return g;
+            if (node.id) {
+                nodeLUT[node.id] = group;
             }
+
+            return group;
         };
+        var top = renderNode(diagram.root, group);
+
+        var bbox = top.getBBox();
+        top.transform('t'+((width-bbox.width)/2-bbox.x)+','+((height-bbox.height)/2-bbox.y));
+
+        // render links
+        diagram.links.forEach(function(link) {
+            var bbox1 = nodeLUT[link.from].node.getBoundingClientRect(),
+                bbox2 = nodeLUT[link.to].node.getBoundingClientRect(),
+                hw1 = bbox1.width/2, hh1 = bbox1.height/2,
+                xc1 = bbox1.left+hw1, yc1 = bbox1.top+hh1,
+                hw2 = bbox2.width/2, hh2 = bbox2.height/2,
+                xc2 = bbox2.left+hw2, yc2 = bbox2.top+hh2,
+                d,
+                line;
+
+            if (xc1 == xc2) {
+                yc1 += yc1 < yc2 ? hh1 : -hh1;
+                yc2 += yc1 < yc2 ? -hh2 : hh2;
+            } else if (yc1 == yc2) {
+                xc1 += xc1 < xc2 ? hw1 : -hw1;
+                xc2 += xc1 < xc2 ? -hw2 : hw2;
+            } else {
+                d = Math.abs((yc2-yc1)/(xc2-xc1));
+                xc1 += Math.min(hw1, hh1/d)*(xc1 < xc2 ? 1 : -1);
+                yc1 += Math.min(hh1, hw1*d)*(yc1 < yc2 ? 1 : -1);
+                xc2 += Math.min(hw2, hh2/d)*(xc1 < xc2 ? -1 : 1);
+                yc2 += Math.min(hh2, hw2*d)*(yc1 < yc2 ? -1 : 1);
+            }
+            line = paper.line(xc1, yc1, xc2, yc2).attr({stroke: '#555', 'stroke-width': 3});
+            if (link.type == 'oriented') {
+                line.attr({markerEnd: marker})
+            }
+            links.add(line);
+        });
+
+        return group.getBBox();
     };
-    var namedNodes = {};
-    var link = function(id1, type, id2) {
-        var bbox1 = namedNodes[id1].node.getBoundingClientRect(),
-            bbox2 = namedNodes[id2].node.getBoundingClientRect(),
-            hw1 = bbox1.width/2, hh1 = bbox1.height/2,
-            xc1 = bbox1.left+hw1, yc1 = bbox1.top+hh1,
-            hw2 = bbox2.width/2, hh2 = bbox2.height/2,
-            xc2 = bbox2.left+hw2, yc2 = bbox2.top+hh2,
-            d,
-            line;
-
-        if (xc1 == xc2) {
-            yc1 += yc1 < yc2 ? hh1 : -hh1;
-            yc2 += yc2 < yc2 ? -hh2 : hh2;
-        } else if (yc1 == yc2) {
-            xc1 += xc1 < xc2 ? hw1 : -hw1;
-            xc2 += xc2 < xc2 ? -hw2 : hw2;
-        } else {
-            d = Math.abs((yc2-yc1)/(xc2-xc1));
-            xc1 += Math.min(hw1, hh1/d)*(xc1 < xc2 ? 1 : -1);
-            yc1 += Math.min(hh1, hw1*d)*(yc1 < yc2 ? 1 : -1);
-            xc2 += Math.min(hw2, hh2/d)*(xc1 < xc2 ? -1 : 1);
-            yc2 += Math.min(hh2, hw2*d)*(yc1 < yc2 ? -1 : 1);
-        }
-        line = paper.line(xc1, yc1, xc2, yc2).attr({stroke: '#555', 'stroke-width': 3});
-        if (type == '>') {
-            line.attr({markerEnd: marker})
-        }
-        paper.add(line);
+/*
+{
+    var set = function(obj, prop, value) {
+        obj[prop] = value;
+        return obj;
     };
+    var links = [];
+}
 
-    var root = VNode({margin: 20, type: 'zone', align: 'center'});
-    root.add(TextNode({id: 'A', text: 'toto'}));
-    root.add(TextNode());
-    var hn = HNode({id:'F', margin: 10, type: 'box', align: 'middle'});
-    hn.add(TextNode({id: 'B', text: 'titititi', type: 'box', margin: 10}));
-    hn.add(TextNode({id: 'C', text: 'tutu', type: 'box', margin: 10}));
-    hn.add(TextNode({id: 'D', text: 'tete', type: 'box', margin: 10}));
-    root.add(hn);
-    root.add(TextNode());
-    root.add(TextNode({id: 'E', text: 'tata'}));
+root               = n:node_info { return {root: n, links: links}; }
+node_list          = l:("<"? node ("," node)+ ">"?) { return {alignlt: !!l[0], alignrb: !!l[3], subnodes: [l[1]].concat(l[2].map(function(e) { return e[1]; }))}; }
+node               = n:node_info l:("*" links_info)? { return l ? set(n, 'id', l[1]) : n; }
+node_info          = decorated_node / node_contents
+decorated_node     = box / rounded_box / circle
+box                = "[" n:node_contents "]" { return set(n, 'shape', 'rect'); }
+rounded_box        = "{" n:node_contents "}" { return set(n, 'shape', 'rrect'); }
+circle             = "(" n:node_contents ")" { return set(n, 'shape', 'circle'); }
+node_contents      = vertical_layout / horiz_layout / node_text
+vertical_layout    = "|" list:node_list "|" { return set(list, 'type', 'vflow'); }
+horiz_layout       = "-" list:node_list "-" { return set(list, 'type', 'hflow'); }
+node_text          = quoted_text / text
+quoted_text        = "\"" t:extended_text "\"" { return t; }
+extended_text      = chars:[A-Z a-z-|,\*]+ { return {type: 'text', text: chars.join('')}; }
+text               = chars:[A-Z a-z]+ { return {type: 'text', text: chars.join('')}; }
+links_info         = n:node_id l:link* { l.forEach(function(lk) { links.push(set(lk, 'from', n)); }); return n; }
+node_id            = chars:[A-Z]+ { return chars.join(''); }
+link               = ">" n:node_id { return {type: "oriented", to: n}; }
+*/
 
-    var W = innerWidth,
-        H = innerHeight;
+    resize = Webviews.resize(function(width, height, margins) {
+        return render(diagram, width, height);
+    });
 
-    var paper = Snap(W, H);
-
-    var arrow = paper.polygon([0,-2.5, 5,0, 0,2.5, 0,-2.5]).attr({fill: '#555'});
-    var marker = arrow.marker(0,-2.5, 5,5, 5,0);
-
-    var rg = paper.group();
-    rg.attr({'font-family': 'gotham', 'font-size': Math.min(40, Math.min(W, H)/20)});
-    var re = root.render(rg);
-    var bbox = re.getBBox();
-    re.transform('t'+((W-bbox.width)/2-bbox.x)+','+((H-bbox.height)/2-bbox.y));
-    link('A', '>', 'B');
-    link('A', '>', 'C');
-    link('A', '>', 'D');
-    link('E', '-', 'F');
-
-    /*var dsl = '[toto]';
-    var index = 0,
-        char,
-        state = 'vnode';
-    while (char = dsl.charAt(index++)) {
-        switch (state) {
-        case 'vnode':
-
+    var diagram;
+    $.get(dataUri).done(function(str) {
+        try {
+            diagram = parser.parse(str);
+        } catch(e) {
+            diagram = parser.parse('{|[oh no]*A>B, ,-[something]*B>C, , , ,[went wrong]*C-|}');
         }
-    }*/
+        resize();
+    });
 </script>
