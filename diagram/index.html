@@ -20,26 +20,26 @@
 <script>
     var dataUri = Webviews.uriParams(window.location.href).datauri;
     var paper = Snap();
+    var arrow = paper.polygon([0,-2, 5,0, 0,2, 0,-2]).attr({fill: '#555'});
+    var marker = arrow.marker(0,-2, 5,4, 2.5,0);
     var group,
         links;
-    var render = function(diagram, width, height) {
-        var arrow = paper.polygon([0,-2.5, 5,0, 0,2.5, 0,-2.5]).attr({fill: '#555'});
-        var marker = arrow.marker(0,-2.5, 5,5, 5,0);
+    var render = function(diagram, width, height, factor) {
         var nodeLUT = {};
         paper.attr({width: width, height: height});
         group && group.remove();
-        group = paper.group().attr({'font-family': 'gotham', 'font-size': Math.min(40, Math.min(width, height)/20)});
+        group = paper.group();
         links && links.remove();
         links = paper.group();
-        var renderNode = function(node, parent) {
-            var group = paper.group(),
-                margin = node.margin || 10;
+        var renderNode = function(node, parent, factor) {
+            var group = paper.group().attr('font-size', factor*15),
+                margin = node.margin || factor*5;
 
             parent.add(group); // group must be added to parent prior to BBox calculations
 
             switch (node.type) {
             case 'text':
-                var text = paper.text(0, 0, node.text || ' ').attr('text-anchor', 'middle');
+                var text = paper.text(0, 0, node.text.replace('_', ' ') || '    ').attr('text-anchor', 'middle');
 
                 text.node.setAttributeNS('http://www.w3.org/XML/1998/namespace', 'xml:space', 'preserve');
                 group.add(text);
@@ -50,7 +50,7 @@
                     align = node.align || 'middle';
 
                 node.subnodes.forEach(function(n) {
-                    var ne = renderNode(n, group),
+                    var ne = renderNode(n, group, node.shape ? factor*0.9 : factor),
                         bbox = ne.getBBox();
 
                     if (node.alignlt) {
@@ -70,7 +70,7 @@
                     align = node.align || 'center';
 
                 node.subnodes.forEach(function(n) {
-                    var ne = renderNode(n, group),
+                    var ne = renderNode(n, group, node.shape ? factor*0.9 : factor),
                         bbox = ne.getBBox();
 
                     if (node.alignlt) {
@@ -93,11 +93,11 @@
                     group.prepend(paper.rect(bbox.x-margin, bbox.y-margin, bbox.width+2*margin, bbox.height+2*margin).attr({'stroke-width': '0.05em', stroke: '#000', fill: '#fff'}));
                     break;
                 case 'rrect':
-                    group.prepend(paper.rect(bbox.x-margin, bbox.y-margin, bbox.width+2*margin, bbox.height+2*margin).attr({rx: '0.4em', ry: '0.4em', stroke: 'none', fill: '#0bf'}));
+                    group.prepend(paper.rect(bbox.x-margin, bbox.y-margin, bbox.width+2*margin, bbox.height+2*margin).attr({rx: '0.4em', ry: '0.4em', stroke: 'none', fill: '#5bf'}));
                     break;
                 case 'circle':
                     var radius = (bbox.height+2*margin)/2;
-                    group.prepend(paper.rect(bbox.x-margin, bbox.y-margin, bbox.width+2*margin, bbox.height+2*margin).attr({rx: radius, ry: radius, stroke: 'none', fill: '#0bf'}));
+                    group.prepend(paper.rect(bbox.x-margin*2, bbox.y-margin, bbox.width+2*margin*2, bbox.height+2*margin).attr({rx: radius, ry: radius, stroke: 'none', fill: '#9fb'}));
                     break;
                 }
             }
@@ -108,9 +108,9 @@
 
             return group;
         };
-        var top = renderNode(diagram.root, group);
+        var top = renderNode(diagram.root, group, factor);
 
-        var bbox = top.getBBox();
+        var bbox = group.getBBox();
         top.transform('t'+((width-bbox.width)/2-bbox.x)+','+((height-bbox.height)/2-bbox.y));
 
         // render links
@@ -122,29 +122,36 @@
                 hw2 = bbox2.width/2, hh2 = bbox2.height/2,
                 xc2 = bbox2.left+hw2, yc2 = bbox2.top+hh2,
                 d,
-                line;
+                line,
+                sw = Math.max(1, factor*1.5),
+                dt = 2.5*sw*(link.marker == 'arrow'), // stroke width * distance to center of marker
+                angle;
 
             if (xc1 == xc2) {
                 yc1 += yc1 < yc2 ? hh1 : -hh1;
-                yc2 += yc1 < yc2 ? -hh2 : hh2;
+                yc2 += yc1 < yc2 ? -hh2-dt : hh2+dt;
             } else if (yc1 == yc2) {
                 xc1 += xc1 < xc2 ? hw1 : -hw1;
-                xc2 += xc1 < xc2 ? -hw2 : hw2;
+                xc2 += xc1 < xc2 ? -hw2-dt : hw2+dt;
             } else {
                 d = Math.abs((yc2-yc1)/(xc2-xc1));
+                angle = Math.atan(d);
                 xc1 += Math.min(hw1, hh1/d)*(xc1 < xc2 ? 1 : -1);
                 yc1 += Math.min(hh1, hw1*d)*(yc1 < yc2 ? 1 : -1);
-                xc2 += Math.min(hw2, hh2/d)*(xc1 < xc2 ? -1 : 1);
-                yc2 += Math.min(hh2, hw2*d)*(yc1 < yc2 ? -1 : 1);
+                xc2 += (Math.min(hw2, hh2/d)+dt*Math.cos(angle))*(xc1 < xc2 ? -1 : 1);
+                yc2 += (Math.min(hh2, hw2*d)+dt*Math.sin(angle))*(yc1 < yc2 ? -1 : 1);
             }
-            line = paper.line(xc1, yc1, xc2, yc2).attr({stroke: '#555', 'stroke-width': 3});
-            if (link.type == 'oriented') {
+            line = paper.line(xc1, yc1, xc2, yc2).attr({stroke: '#555', 'stroke-width': sw});
+            if (link.stroke == 'dashed') {
+                line.attr('stroke-dasharray', sw+' '+sw);
+            }
+            if (link.marker == 'arrow') {
                 line.attr({markerEnd: marker})
             }
             links.add(line);
         });
 
-        return group.getBBox();
+        return bbox;
     };
 /*
 {
@@ -175,9 +182,32 @@ node_id            = chars:[A-Z]+ { return chars.join(''); }
 link               = ">" n:node_id { return {type: "oriented", to: n}; }
 */
 
-    resize = Webviews.resize(function(width, height, margins) {
-        return render(diagram, width, height);
-    });
+    var resize = window.onresize = (function() {
+        var timer;
+
+        return function() {
+            clearTimeout(timer);
+            timer = setTimeout(function() {
+                var width = window.innerWidth,
+                    height = window.innerHeight,
+                    factor =  Math.min(width, height)/100,
+                    bbox,
+                    rx, ry
+                    nb = 0;
+
+                while(true) {
+                    bbox = render(diagram, width, height, factor);
+                    nb++;
+                    rx = bbox.width/(0.95*width);
+                    ry = bbox.height/(0.95*height);
+                    if (rx < 1 && ry < 1) break;
+                    factor /= Math.max(1.05, rx, ry);
+                }
+
+                console.log(nb+' pass(es)');
+            }, 200);
+        };
+    })();
 
     var diagram;
     $.get(dataUri).done(function(str) {
