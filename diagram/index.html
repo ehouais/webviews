@@ -154,32 +154,109 @@
         return bbox;
     };
 /*
+/*
+JS diagram:
+{
+    root: {
+        id: node_id,
+        type: 'text'|'vflow'|'hflow',
+        alignlt: boolean,
+        alignrb: boolean,
+        shape: 'rect'|'rrect'|'circle'
+        subnodes: [
+            ...
+        ]
+    },
+    links: [
+        {
+            from: node_id,
+            to: node_id,
+            stroke: 'plain'|'dashed',
+            marker: 'none'|'arrow'
+        },
+        ...
+    ]
+}
+{
+    root: {
+        id: node_id, // optional
+        type: 'text'|'vsplit'|'hsplit'|'shape'
+
+        // vsplit/hsplits type only
+        iso: boolean
+        subnodes: [
+            ...
+        ]
+
+        // shape type only
+        shape: 'rect'|'rrect'|'circle'
+        subnode: node
+
+        // vsplit/hsplit/shape types only
+        maxed: boolean
+
+        // text type only
+        text: string
+
+        // added at runtime
+        svgnode: snap_node
+
+    },
+    links: [
+        {
+            from: node_id,
+            to: node_id,
+            stroke: 'plain'|'dashed',
+            marker: 'none'|'arrow'
+        },
+        ...
+    ]
+}
+
+Grammar:
 {
     var set = function(obj, prop, value) {
         obj[prop] = value;
         return obj;
     };
     var links = [];
+    var index = 0;
 }
 
-root               = n:node_info { return {root: n, links: links}; }
-node_list          = l:("<"? node ("," node)+ ">"?) { return {alignlt: !!l[0], alignrb: !!l[3], subnodes: [l[1]].concat(l[2].map(function(e) { return e[1]; }))}; }
-node               = n:node_info l:("*" links_info)? { return l ? set(n, 'id', l[1]) : n; }
+root               = n:root_node { return {root: n, links: links}; }
+root_node          = implicit_vert_flow
+                   / n:node_info
+aligned_node_list  = l:"<"? nl:node_list r:">"? { return set(set(nl, 'alignlt', !!l), 'alignrb', !!r); }
+node_list          = n:node r:("," node)+ { return { subnodes: [n].concat(r.map(function(e) { return e[1]; }))}; }
+node               = n:node_info l:("*" links)? { return l ? set(n, 'id', l[1]) : n; }
 node_info          = decorated_node / node_contents
-decorated_node     = box / rounded_box / circle
-box                = "[" n:node_contents "]" { return set(n, 'shape', 'rect'); }
-rounded_box        = "{" n:node_contents "}" { return set(n, 'shape', 'rrect'); }
-circle             = "(" n:node_contents ")" { return set(n, 'shape', 'circle'); }
-node_contents      = vertical_layout / horiz_layout / node_text
-vertical_layout    = "|" list:node_list "|" { return set(list, 'type', 'vflow'); }
-horiz_layout       = "-" list:node_list "-" { return set(list, 'type', 'hflow'); }
+decorated_node     = box
+                   / rounded_box
+                   / circle
+box                = "[" n:node_dec_contents "]" { return set(n, 'shape', 'rect'); }
+rounded_box        = "{" n:node_dec_contents "}" { return set(n, 'shape', 'rrect'); }
+circle             = "(" n:node_dec_contents ")" { return set(n, 'shape', 'circle'); }
+node_dec_contents  = implicit_vert_flow
+                   / node_contents
+node_contents      = vert_flow
+                   / horiz_flow
+                   / node_text
+vert_flow          = "|" list:aligned_node_list "|" { return set(list, 'type', 'vflow'); }
+implicit_vert_flow = list:aligned_node_list { return set(list, 'type', 'vflow'); }
+horiz_flow         = "-" list:aligned_node_list "-" { return set(list, 'type', 'hflow'); }
 node_text          = quoted_text / text
 quoted_text        = "\"" t:extended_text "\"" { return t; }
-extended_text      = chars:[A-Z a-z-|,\*]+ { return {type: 'text', text: chars.join('')}; }
-text               = chars:[A-Z a-z]+ { return {type: 'text', text: chars.join('')}; }
-links_info         = n:node_id l:link* { l.forEach(function(lk) { links.push(set(lk, 'from', n)); }); return n; }
+extended_text      = chars:[A-Z a-z_.\-|,*[\]{}()]+ { return {type: 'text', text: chars.join('')}; }
+text               = chars:[A-Z a-z_.]* { return {type: 'text', text: chars.join('')}; }
+links              = l:links_info { l.links.forEach(function(lk) { links.push(set(lk, 'from', l.from)); }); return l.from; }
+links_info         = l:link+ { return {from: 'node_'+index++, links: l}; }
+                   / id:node_id l:link* { return {from: id, links: l}; }
 node_id            = chars:[A-Z]+ { return chars.join(''); }
-link               = ">" n:node_id { return {type: "oriented", to: n}; }
+link               = t:link_type n:node_id { return {stroke: t[0], marker: t[1], to: n}; }
+link_type          = m:link_marker { return ['plain', m]; }
+                   / l:link_stroke m:link_marker? { return [l, m || 'none']; }
+link_stroke        = s:[\-.] { return s == '.' ? 'dashed' : 'plain'; }
+link_marker        = m:[>] { return 'arrow'; }
 */
 
     var resize = window.onresize = (function() {
