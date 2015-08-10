@@ -12,7 +12,6 @@
 			data: function() {
 				var local,
 					handlers = [],
-					promise,
 					ciphered = false,
 					password = (function() {
 						var password,
@@ -64,29 +63,47 @@
 							return d;
 						}
 					},
-                    dataUri = uriParams(window.location.href).datauri;
-
-                promise = $.ajax({url: dataUri, dataType: 'text', xhrFields: dataUri.substr(0, 5) == 'data:' ? {} : {withCredentials: true}}).done(function(data) {
-					var obj;
-					try {
-						obj = JSON.parse(data);
-						if (obj.iv && obj.v && obj.iter && obj.ks && obj.ts && obj.mode && obj.cipher && obj.salt && obj.ct) {
-							ciphered = true;
+                    dataUri = uriParams(window.location.href).datauri,
+					load = function() {
+						$.ajax({
+							url: dataUri,
+							dataType: 'text',
+							ifModified: true,
+							xhrFields: dataUri.substr(0, 5) == 'data:' ? {} : {withCredentials: true}
+						}).done(function(data) {
+							var obj;
 							try {
-								data = sjcl.decrypt(password(obj.label), data);
+								obj = JSON.parse(data);
+								if (obj.iv && obj.v && obj.iter && obj.ks && obj.ts && obj.mode && obj.cipher && obj.salt && obj.ct) {
+									ciphered = true;
+									try {
+										data = sjcl.decrypt(password(obj.label), data);
+									} catch(e) {
+										alert(e.message);
+										return;
+									}
+								}
 							} catch(e) {
-								alert(e.message);
-								return;
+								// hide non significant error
+							} finally {
+								local = data;
+								d.trigger();
+								setNextLoad();
 							}
-						}
-					} catch(e) {
-						// hide non significant error
-					} finally {
-						local = data;
-						d.trigger();
-					}
-				});
+						});
+					},
+					setNextLoad = (function() {
+						var timer;
 
+						return function() {
+							if (timer) {
+								clearTimeout(timer);
+							}
+							timer = setTimeout(load, 5*60*1000) // in 5 minutes
+						};
+					})();
+
+				load();
 				return d;
 			},
 			resize: function(cb) {
