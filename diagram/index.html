@@ -33,24 +33,42 @@
         links = paper.group();
         var renderNode = function(node, parent, factor) {
             var group = paper.group().attr('font-size', factor*15),
-                margin = node.margin || factor*5;
+                margin = node.margin || factor*10;
 
             parent.add(group); // group must be added to parent prior to BBox calculations
 
             switch (node.type) {
             case 'text':
-                var text = paper.text(0, 0, node.text.replace('_', ' ') || '    ').attr('text-anchor', 'middle');
+                var text = paper.text(0, 0, node.text.replace(/_/g, ' ')).attr('text-anchor', 'middle');
 
                 text.node.setAttributeNS('http://www.w3.org/XML/1998/namespace', 'xml:space', 'preserve');
                 group.add(text);
                 break;
-            case 'hflow':
+            case 'shape':
+                var ne = renderNode(node.subnode, group, factor*0.9);
+                    bbox = ne.getBBox();
+
+                switch (node.shape) {
+                case 'rect':
+                    ne.prepend(paper.rect(bbox.x-margin, bbox.y-margin, bbox.width+2*margin, bbox.height+2*margin).attr({'stroke-width': '0.05em', stroke: '#000', fill: '#fff'}));
+                    break;
+                case 'rrect':
+                    ne.prepend(paper.rect(bbox.x-margin, bbox.y-margin, bbox.width+2*margin, bbox.height+2*margin).attr({rx: '0.4em', ry: '0.4em', stroke: 'none', fill: '#5bf'}));
+                    break;
+                case 'circle':
+                    var radius = (bbox.height+2*margin)/2;
+                    ne.prepend(paper.rect(bbox.x-margin*2, bbox.y-margin, bbox.width+2*margin*2, bbox.height+2*margin).attr({rx: radius, ry: radius, stroke: 'none', fill: '#9fb'}));
+                    break;
+                }
+
+                break;
+            case 'hsplit':
                 var x = 0,
                     bbox,
                     align = node.align || 'middle';
 
                 node.subnodes.forEach(function(n) {
-                    var ne = renderNode(n, group, node.shape ? factor*0.9 : factor),
+                    var ne = renderNode(n, group, factor),
                         bbox = ne.getBBox();
 
                     if (node.alignlt) {
@@ -64,13 +82,13 @@
                     x += bbox.width+margin;
                 });
                 break;
-            case 'vflow':
+            case 'vsplit':
                 var y = 0,
                     bbox,
                     align = node.align || 'center';
 
                 node.subnodes.forEach(function(n) {
-                    var ne = renderNode(n, group, node.shape ? factor*0.9 : factor),
+                    var ne = renderNode(n, group, factor),
                         bbox = ne.getBBox();
 
                     if (node.alignlt) {
@@ -86,22 +104,6 @@
                 break;
             };
 
-            if (node.shape) {
-                bbox = group.getBBox();
-                switch (node.shape) {
-                case 'rect':
-                    group.prepend(paper.rect(bbox.x-margin, bbox.y-margin, bbox.width+2*margin, bbox.height+2*margin).attr({'stroke-width': '0.05em', stroke: '#000', fill: '#fff'}));
-                    break;
-                case 'rrect':
-                    group.prepend(paper.rect(bbox.x-margin, bbox.y-margin, bbox.width+2*margin, bbox.height+2*margin).attr({rx: '0.4em', ry: '0.4em', stroke: 'none', fill: '#5bf'}));
-                    break;
-                case 'circle':
-                    var radius = (bbox.height+2*margin)/2;
-                    group.prepend(paper.rect(bbox.x-margin*2, bbox.y-margin, bbox.width+2*margin*2, bbox.height+2*margin).attr({rx: radius, ry: radius, stroke: 'none', fill: '#9fb'}));
-                    break;
-                }
-            }
-
             if (node.id) {
                 nodeLUT[node.id] = group;
             }
@@ -114,75 +116,68 @@
         top.transform('t'+((width-bbox.width)/2-bbox.x)+','+((height-bbox.height)/2-bbox.y));
 
         // render links
-        diagram.links.forEach(function(link) {
-            var bbox1 = nodeLUT[link.from].node.getBoundingClientRect(),
-                bbox2 = nodeLUT[link.to].node.getBoundingClientRect(),
-                hw1 = bbox1.width/2, hh1 = bbox1.height/2,
-                xc1 = bbox1.left+hw1, yc1 = bbox1.top+hh1,
-                hw2 = bbox2.width/2, hh2 = bbox2.height/2,
-                xc2 = bbox2.left+hw2, yc2 = bbox2.top+hh2,
-                d,
-                line,
-                sw = Math.max(1, factor*1.5),
-                dt = 2.5*sw*(link.marker == 'arrow'), // stroke width * distance to center of marker
-                angle;
+        var linkNodes = function(node1, node2, params, tf) {
+                var bbox1 = node1.getBoundingClientRect(),
+                    bbox2 = node2.getBoundingClientRect(),
+                    hw1 = bbox1.width/2, hh1 = bbox1.height/2,
+                    xc1 = bbox1.left+hw1, yc1 = bbox1.top+hh1,
+                    hw2 = bbox2.width/2, hh2 = bbox2.height/2,
+                    xc2 = bbox2.left+hw2, yc2 = bbox2.top+hh2,
+                    d,
+                    line,
+                    sw = Math.max(1, factor*1.5),
+                    dt = 2.5*sw*(params.marker == 'arrow'), // stroke width * distance to center of marker
+                    angle;
 
-            if (xc1 == xc2) {
-                yc1 += yc1 < yc2 ? hh1 : -hh1;
-                yc2 += yc1 < yc2 ? -hh2-dt : hh2+dt;
-            } else if (yc1 == yc2) {
-                xc1 += xc1 < xc2 ? hw1 : -hw1;
-                xc2 += xc1 < xc2 ? -hw2-dt : hw2+dt;
-            } else {
-                d = Math.abs((yc2-yc1)/(xc2-xc1));
-                angle = Math.atan(d);
-                xc1 += Math.min(hw1, hh1/d)*(xc1 < xc2 ? 1 : -1);
-                yc1 += Math.min(hh1, hw1*d)*(yc1 < yc2 ? 1 : -1);
-                xc2 += (Math.min(hw2, hh2/d)+dt*Math.cos(angle))*(xc1 < xc2 ? -1 : 1);
-                yc2 += (Math.min(hh2, hw2*d)+dt*Math.sin(angle))*(yc1 < yc2 ? -1 : 1);
-            }
-            line = paper.line(xc1, yc1, xc2, yc2).attr({stroke: '#555', 'stroke-width': sw});
-            if (link.stroke == 'dashed') {
-                line.attr('stroke-dasharray', sw+' '+sw);
-            }
-            if (link.marker == 'arrow') {
-                line.attr({markerEnd: marker})
-            }
-            links.add(line);
+                if (params.text) {
+                    var text = paper.text(0, 0, params.text).attr({'font-size': 10*factor*tf}),
+                        bbox = text.getBBox();
+
+                    text.transform('t'+((xc1+xc2)/2-bbox.width/2)+','+((yc1+yc2)/2-bbox.height/2-bbox.y));
+                    linkNodes(node1, text.node, {stroke: params.stroke}, tf*0.9);
+                    linkNodes(text.node, node2, {stroke: params.stroke, marker: params.marker}, tf*0.9);
+                    links.add(text);
+                } else {
+
+                    if (xc1 == xc2) {
+                        yc1 += yc1 < yc2 ? hh1 : -hh1;
+                        yc2 += yc1 < yc2 ? -hh2-dt : hh2+dt;
+                    } else if (yc1 == yc2) {
+                        xc1 += xc1 < xc2 ? hw1 : -hw1;
+                        xc2 += xc1 < xc2 ? -hw2-dt : hw2+dt;
+                    } else {
+                        d = Math.abs((yc2-yc1)/(xc2-xc1));
+                        angle = Math.atan(d);
+                        xc1 += Math.min(hw1, hh1/d)*(xc1 < xc2 ? 1 : -1);
+                        yc1 += Math.min(hh1, hw1*d)*(yc1 < yc2 ? 1 : -1);
+                        xc2 += (Math.min(hw2, hh2/d)+dt*Math.cos(angle))*(xc1 < xc2 ? -1 : 1);
+                        yc2 += (Math.min(hh2, hw2*d)+dt*Math.sin(angle))*(yc1 < yc2 ? -1 : 1);
+                    }
+                    line = paper.line(xc1, yc1, xc2, yc2).attr({stroke: '#555', 'stroke-width': sw});
+                    if (params.stroke == 'dashed') {
+                        line.attr('stroke-dasharray', sw+' '+sw);
+                    }
+                    if (params.marker == 'arrow') {
+                        line.attr({markerEnd: marker})
+                    }
+                    links.add(line);
+                }
+            };
+
+        diagram.links.forEach(function(link) {
+            linkNodes(nodeLUT[link.from].node, nodeLUT[link.to].node, link, 1);
         });
 
         return bbox;
     };
 /*
-/*
 JS diagram:
-{
-    root: {
-        id: node_id,
-        type: 'text'|'vflow'|'hflow',
-        alignlt: boolean,
-        alignrb: boolean,
-        shape: 'rect'|'rrect'|'circle'
-        subnodes: [
-            ...
-        ]
-    },
-    links: [
-        {
-            from: node_id,
-            to: node_id,
-            stroke: 'plain'|'dashed',
-            marker: 'none'|'arrow'
-        },
-        ...
-    ]
-}
 {
     root: {
         id: node_id, // optional
         type: 'text'|'vsplit'|'hsplit'|'shape'
 
-        // vsplit/hsplits type only
+        // vsplit/hsplit types only
         iso: boolean
         subnodes: [
             ...
@@ -207,7 +202,8 @@ JS diagram:
             from: node_id,
             to: node_id,
             stroke: 'plain'|'dashed',
-            marker: 'none'|'arrow'
+            marker: 'none'|'arrow',
+           [text: string]
         },
         ...
     ]
@@ -215,48 +211,49 @@ JS diagram:
 
 Grammar:
 {
-    var set = function(obj, prop, value) {
-        obj[prop] = value;
-        return obj;
+    var extend = function(obj, add) {
+       for (var i in add) {
+          if (add.hasOwnProperty(i)) {
+             obj[i] = add[i];
+          }
+       }
+       return obj;
     };
-    var links = [];
-    var index = 0;
+    var index = 1;
 }
 
-root               = n:root_node { return {root: n, links: links}; }
-root_node          = implicit_vert_flow
-                   / n:node_info
-aligned_node_list  = l:"<"? nl:node_list r:">"? { return set(set(nl, 'alignlt', !!l), 'alignrb', !!r); }
-node_list          = n:node r:("," node)+ { return { subnodes: [n].concat(r.map(function(e) { return e[1]; }))}; }
-node               = n:node_info l:("*" links)? { return l ? set(n, 'id', l[1]) : n; }
-node_info          = decorated_node / node_contents
-decorated_node     = box
-                   / rounded_box
-                   / circle
-box                = "[" n:node_dec_contents "]" { return set(n, 'shape', 'rect'); }
-rounded_box        = "{" n:node_dec_contents "}" { return set(n, 'shape', 'rrect'); }
-circle             = "(" n:node_dec_contents ")" { return set(n, 'shape', 'circle'); }
-node_dec_contents  = implicit_vert_flow
-                   / node_contents
-node_contents      = vert_flow
-                   / horiz_flow
-                   / node_text
-vert_flow          = "|" list:aligned_node_list "|" { return set(list, 'type', 'vflow'); }
-implicit_vert_flow = list:aligned_node_list { return set(list, 'type', 'vflow'); }
-horiz_flow         = "-" list:aligned_node_list "-" { return set(list, 'type', 'hflow'); }
-node_text          = quoted_text / text
-quoted_text        = "\"" t:extended_text "\"" { return t; }
-extended_text      = chars:[A-Z a-z_.\-|,*[\]{}()]+ { return {type: 'text', text: chars.join('')}; }
-text               = chars:[A-Z a-z_.]* { return {type: 'text', text: chars.join('')}; }
-links              = l:links_info { l.links.forEach(function(lk) { links.push(set(lk, 'from', l.from)); }); return l.from; }
-links_info         = l:link+ { return {from: 'node_'+index++, links: l}; }
-                   / id:node_id l:link* { return {from: id, links: l}; }
-node_id            = chars:[A-Z]+ { return chars.join(''); }
-link               = t:link_type n:node_id { return {stroke: t[0], marker: t[1], to: n}; }
-link_type          = m:link_marker { return ['plain', m]; }
-                   / l:link_stroke m:link_marker? { return [l, m || 'none']; }
-link_stroke        = s:[\-.] { return s == '.' ? 'dashed' : 'plain'; }
-link_marker        = m:[>] { return 'arrow'; }
+root           = t:tree l:links                 { return {root: t, links: l}; }
+
+tree           = n:single_node s:split_right?   { return s ? extend(s, {subnodes: [n].concat(s.subnodes)}) : n; }
+split_right    = o:split_op t:tree              { return extend(o, {subnodes: o.type == t.type && o.iso == t.iso ? t.subnodes : [t]}); }
+split_op       = s:split_char iso:split_char?   { return {type: s, 'iso': !!iso}; }
+split_char     = "|"                            { return 'hsplit'; }
+               / "-"                            { return 'vsplit'; }
+
+single_node    = i:node_decl? n:mono_node       { return extend(n, {id: i || '#'+index++}); }
+node_decl      = i:node_id ":"                  { return i; }
+node_id        = chars:[A-Z]+                   { return chars.join(''); }
+
+mono_node      = "(" t:tree ")"                 { return t; }
+               / n:shape_node                   { return extend(n, {type: 'shape'}); }
+               / n:text_node                    { return extend(n, {type: 'text'}); }
+
+shape_node     = "[" t:tree "]"                 { return {shape: 'rect', subnode: t}; }
+               / "{" t:tree "}"                 { return {shape: 'rrect', subnode: t}; }
+
+text_node      = quoted_text
+               / text
+quoted_text    = "\"" t:extended_text "\""      { return t; }
+extended_text  = chars:[A-Z a-z_.\-|,*[\]{}()]+ { return {text: chars.join('')}; }
+text           = chars:[A-Z a-z_.]*             { return {text: chars.join('')}; }
+
+links          = l:("," link)*                  { return l.map(function(lk) { return lk[1]; }); }
+link           = f:node_id l:link_type t:node_id  { return extend(l, {from: f, to: t}); }
+link_type      = s:link_line m:link_marker?   { return extend(s, {marker: m || 'none'}); }
+link_line      = s:link_stroke c:(link_text link_stroke)? { return c ? extend(s, {text: c[0]}) : s; }
+link_stroke    = s:[\-\.]                       { return {stroke: s == '.' ? 'dashed' : 'plain'}; }
+link_text      = chars:[A-Za-z ]+               { return chars.join(''); }
+link_marker    = m:[>]                          { return 'arrow'; }
 */
 
     var resize = window.onresize = (function() {
@@ -291,7 +288,8 @@ link_marker        = m:[>] { return 'arrow'; }
         try {
             diagram = parser.parse(str);
         } catch(e) {
-            diagram = parser.parse('{|[oh no]*A>B, ,-[something]*B>C, , , ,[went wrong]*C-|}');
+            console.log(e);
+            diagram = parser.parse('{A:[Oh_no]-_-B:[something]|____|C:[went_wrong]},A->B,B.C');
         }
         resize();
     });
