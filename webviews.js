@@ -85,11 +85,12 @@
 								}
 							} catch(e) {
 								// hide non significant error
-							} finally {
-								local = data;
-								d.trigger();
-								setNextLoad();
 							}
+							local = data;
+							d.trigger();
+							setNextLoad();
+						}).fail(function() {
+							setNextLoad();
 						});
 					},
 					setNextLoad = (function() {
