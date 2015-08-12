@@ -72,26 +72,27 @@
 							dataType: 'text',
 							ifModified: true,
 							xhrFields: dataUri.substr(0, 5) == 'data:' ? {} : {withCredentials: true}
-						}).done(function(data) {
-							var obj;
-							try {
-								obj = JSON.parse(data);
-								if (obj.iv && obj.v && obj.iter && obj.ks && obj.ts && obj.mode && obj.cipher && obj.salt && obj.ct) {
-									ciphered = true;
-									try {
-										data = sjcl.decrypt(password(obj.label), data);
-									} catch(e) {
-										alert(e.message);
-										return;
+						}).done(function(data, status, xhr) {
+							if (xhr.status != 304) { // "Not Modified"
+								var obj;
+								try {
+									obj = JSON.parse(data);
+									if (obj.iv && obj.v && obj.iter && obj.ks && obj.ts && obj.mode && obj.cipher && obj.salt && obj.ct) {
+										ciphered = true;
+										try {
+											data = sjcl.decrypt(password(obj.label), data);
+										} catch(e) {
+											alert(e.message);
+											return;
+										}
 									}
+								} catch(e) {
+									// hide non significant error
 								}
-							} catch(e) {
-								// hide non significant error
+								local = data;
+								d.trigger();
 							}
-							local = data;
-							d.trigger();
-							!dataScheme && setNextLoad();
-						}).fail(function() {
+						}).always(function() {
 							!dataScheme && setNextLoad();
 						});
 					},
