@@ -1,0 +1,49 @@
+<html>
+    <head>
+        <meta charset="utf-8">
+        <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+        <link href="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.0/css/bootstrap.min.css" rel="stylesheet">
+        <style>
+            iframe {
+                border: 1px solid #ddd;
+                width: 100%;
+                height: 300px;
+            }
+            .tab-content {
+                margin-top: 20px;
+            }
+            textarea {
+                width: 100%;
+                min-height: 400px;
+            }
+        </style>
+        <script>
+            $(function() {
+            });
+        </script>
+    </head>
+    <body>
+        <div class="container">
+            <div class="page-header">
+                <h1>Webviews playground</h1>
+            </div>
+            <div class="row">
+                <div class="col-md-4"></div>
+                <div class="col-md-4">
+                    <iframe></iframe>
+                </div>
+                <div class="col-md-4"></div>
+            </div>
+            <div>
+                <ul class="nav nav-tabs" role="tablist">
+                    <li role="presentation" class="active"><a href="#format_1" aria-controls="home" role="tab" data-toggle="tab">text/plain</a></li>
+                </ul>
+                <div class="tab-content">
+                    <div role="tabpanel" class="tab-pane active" id="format_1">
+                        <textarea></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>
