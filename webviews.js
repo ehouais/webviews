@@ -65,6 +65,8 @@
 					},
                     dataUri = uriParams(window.location.href).datauri,
 					load = function() {
+						var dataScheme = dataUri.substr(0, 5) == 'data:';
+
 						$.ajax({
 							url: dataUri,
 							dataType: 'text',
@@ -88,9 +90,9 @@
 							}
 							local = data;
 							d.trigger();
-							setNextLoad();
+							!dataScheme && setNextLoad();
 						}).fail(function() {
-							setNextLoad();
+							!dataScheme && setNextLoad();
 						});
 					},
 					setNextLoad = (function() {
