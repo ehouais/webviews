@@ -114,7 +114,7 @@
                         var $frame = $getFrame(frame.id = frame.id || index),
                             setup = function() {
                                 // apply template according to resource type
-                                if (frame.uri.match(/\.(jpg|png)$/)) {
+                                if (frame.uri.match(/\.(jpg|jpeg|png)$/)) {
                                     $frame.addClass('image').css('background-image', 'url('+frame.uri+')');
                                 } else {
                                     $frame.append($('<iframe/>').attr({src: frame.uri, frameborder: 0}).css({width: '100%', height: '100%'}));
