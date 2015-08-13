@@ -8,6 +8,16 @@
 				return obj;
 			}, {});
 		},
+		debounce = function(fn, delay) {
+			var timer = null;
+			return function () {
+				var context = this, args = arguments;
+				clearTimeout(timer);
+				timer = setTimeout(function() {
+					fn.apply(context, args);
+				}, delay);
+			};
+		},
 		Webviews = {
 			data: function() {
 				var local,
@@ -26,6 +36,7 @@
 							var delay_,
 								tid,
 								save_ = $.Deferred().resolve();
+
 							return function(data) {
 								// Send update request to server when (eventual) previous one has succeeded and a 5 seconds delay has passed since function call
 								local = data;
@@ -96,16 +107,7 @@
 							!dataScheme && setNextLoad();
 						});
 					},
-					setNextLoad = (function() {
-						var timer;
-
-						return function() {
-							if (timer) {
-								clearTimeout(timer);
-							}
-							timer = setTimeout(load, 5*60*1000) // in 5 minutes
-						};
-					})();
+					setNextLoad = debounce(load, 5*60*1000); // in 5 minutes
 
 				load();
 				return d;
@@ -127,7 +129,8 @@
 					}
 				}
 			},
-			uriParams: uriParams
+			uriParams: uriParams,
+			debounce: debounce
 		};
 
 	if (window.define) {
