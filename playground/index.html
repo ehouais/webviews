@@ -4,17 +4,19 @@
         <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
         <script src="http://webviews.local/webviews.js"></script>
         <link href="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.0/css/bootstrap.min.css" rel="stylesheet">
-        <link href="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.0/js/bootstrap.min.js" rel="stylesheet">
+        <script src="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.0/js/bootstrap.min.js"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/markdown-it/4.2.2/markdown-it.js"></script>
         <style>
-            iframe {
+            .container {
+                margin-top: 50px;
+            }
+            #render {
                 border: 1px solid #ddd;
                 width: 100%;
                 height: 300px;
+                margin-bottom: 20px;
             }
-            .tab-content {
-                margin-top: 20px;
-            }
-            textarea {
+            #source {
                 width: 100%;
                 min-height: 400px;
             }
@@ -23,35 +25,68 @@
             $(function() {
                 var dataUri = Webviews.uriParams(window.location.href).datauri,
                     $source = $('#source'),
-                    $render = $('#render');
+                    $render = $('#render'),
+                    $doc = $('#doc'),
+                    updateIframe = function(uri) {
+                        $render[0].contentWindow.location.replace(uri);
+                    },
+                    update = Webviews.debounce(function() {
+                        var data = $source.val();
 
-                $source.on('keyup', function(e) {
-                    $render.attr('src', dataUri+'?datauri=data:text/plain;charset%3Dutf-8,'+$source.val());
+                        if (data) {
+                            updateIframe(dataUri+'?datauri=data:text/plain;charset%3Dutf-8,'+data);
+                        }
+                    }, 1000),
+                    md = window.markdownit({
+                        linkify: true,
+                        typographer: true
+                    });
+
+                /*$examples.on('click', 'a', function(e) {
+                    var dataUri = $(e.target).attr('href'),
+                        pos = dataUri.indexOf(',');
+
+                    type = dataUri.substr(0, pos);
+                    $source.val(dataUri.substr(pos+1));
+                    update();
+                    e.preventDefault();
+                });*/
+                $doc.on('click', 'a[href^="'+dataUri+'"]', function(e) {
+                    updateIframe($(e.target).attr('href'));
+                    e.preventDefault();
                 });
+
+                // Get webview documentation
+                $.get(dataUri, function(html) {
+                    // get doc URI from header <link> tag
+                    var docUri = $('link[rel="doc"]', $('<div>').append(html)).attr('href');
+
+                    if (docUri) {
+                        // handle relative URI
+                        if (!docUri.match(/^(https?|data):/)) {
+                            docUri = dataUri+'/'+docUri;
+                        }
+
+                        $.get(docUri+'?'+Math.random()).done(function(data) {
+                            $doc.html(md.render(data.replace(new RegExp('http://dev.ehouais.net/webviews/[^\?]*', 'g'), dataUri)));
+                        });
+                    }
+                }, 'html');
+
+                $source.on('input', update);
+
+                update();
             });
         </script>
     </head>
     <body>
         <div class="container">
-            <div class="page-header">
-                <h1>Webviews playground</h1>
-            </div>
             <div class="row">
-                <div class="col-md-4"></div>
-                <div class="col-md-4">
-                    <iframe></iframe>
+                <div class="col-md-6">
+                    <iframe id="render"></iframe>
+                    <textarea id="source"></textarea>
                 </div>
-                <div class="col-md-4"></div>
-            </div>
-            <div>
-                <ul class="nav nav-tabs" role="tablist">
-                    <li role="presentation" class="active"><a href="#format_1" aria-controls="home" role="tab" data-toggle="tab">text/plain</a></li>
-                </ul>
-                <div class="tab-content">
-                    <div role="tabpanel" class="tab-pane active" id="format_1">
-                        <textarea id="source"></textarea>
-                    </div>
-                </div>
+                <div class="col-md-6" id="doc"></div>
             </div>
         </div>
     </body>
