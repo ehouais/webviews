@@ -130,7 +130,7 @@
 
             // text/plain: {label1,label2,label3}label:val11,val12,val13|label:val21,val22, val23
             d3.xhr(dataUri).get().on('load', function(xhr) {
-                var str = xhr.response,
+                var str = xhr.response.replace(new RegExp('_', 'g'), ' '),
                     res,
                     tokens,
                     index = 0,
