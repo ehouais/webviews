@@ -20,6 +20,9 @@
                 width: 100%;
                 min-height: 400px;
             }
+            #doc h4 {
+                margin-top: 30px;
+            }
         </style>
         <script>
             $(function() {
@@ -42,15 +45,7 @@
                         typographer: true
                     });
 
-                /*$examples.on('click', 'a', function(e) {
-                    var dataUri = $(e.target).attr('href'),
-                        pos = dataUri.indexOf(',');
-
-                    type = dataUri.substr(0, pos);
-                    $source.val(dataUri.substr(pos+1));
-                    update();
-                    e.preventDefault();
-                });*/
+                // Display example in iframe
                 $doc.on('click', 'a[href^="'+dataUri+'"]', function(e) {
                     updateIframe($(e.target).attr('href'));
                     e.preventDefault();
@@ -67,6 +62,7 @@
                             docUri = dataUri+'/'+docUri;
                         }
 
+                        // Fetch documentation and insert it into page
                         $.get(docUri+'?'+Math.random()).done(function(data) {
                             $doc.html(md.render(data.replace(new RegExp('http://dev.ehouais.net/webviews/[^\?]*', 'g'), dataUri)));
                         });
