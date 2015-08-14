@@ -19,6 +19,8 @@
             #source {
                 width: 100%;
                 min-height: 400px;
+                font-family: monospace;
+                font-size: 12px;
             }
             #doc h4 {
                 margin-top: 30px;
@@ -30,16 +32,19 @@
                     $source = $('#source'),
                     $render = $('#render'),
                     $doc = $('#doc'),
+                    uriData = function(uri) {
+                        return decodeURIComponent(uri.replace(/^[^\?]*\?datauri=data:[^,]+,/, ''));
+                    },
                     updateIframe = function(uri) {
                         $render[0].contentWindow.location.replace(uri);
                     },
-                    update = Webviews.debounce(function() {
-                        var data = $source.val();
-
-                        if (data) {
-                            updateIframe(dataUri+'?datauri=data:text/plain;charset%3Dutf-8,'+data);
-                        }
-                    }, 1000),
+                    updateAll = function(uri) {
+                        // Update source
+                        $source.val(uriData(uri));
+                        // Update iframe
+                        updateIframe(uri);
+                    },
+                    userUpdate = Webviews.debounce(updateIframe, 1000),
                     md = window.markdownit({
                         linkify: true,
                         typographer: true
@@ -47,7 +52,7 @@
 
                 // Display example in iframe
                 $doc.on('click', 'a[href^="'+dataUri+'"]', function(e) {
-                    updateIframe($(e.target).attr('href'));
+                    updateAll($(e.target).attr('href'));
                     e.preventDefault();
                 });
 
@@ -64,14 +69,17 @@
 
                         // Fetch documentation and insert it into page
                         $.get(docUri+'?'+Math.random()).done(function(data) {
-                            $doc.html(md.render(data.replace(new RegExp('http://dev.ehouais.net/webviews/[^\?]*', 'g'), dataUri)));
+                            $doc.html(md.render(data.replace(new RegExp('http://dev.ehouais.net/webviews/[^\? `]*', 'g'), dataUri)));
                         });
                     }
                 }, 'html');
 
-                $source.on('input', update);
-
-                update();
+                $source.on('input', function() {
+                    var data = $source.val();
+                    if (data) {
+                        userUpdate(dataUri+'?datauri=data:text/plain;charset%3Dutf-8,'+data);
+                    }
+                });
             });
         </script>
     </head>
