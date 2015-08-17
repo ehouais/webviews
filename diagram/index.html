@@ -26,6 +26,7 @@
         links;
     var render = function(diagram, width, height, factor) {
         var nodeLUT = {};
+
         paper.attr({width: width, height: height});
         group && group.remove();
         group = paper.group();
@@ -33,7 +34,9 @@
         links = paper.group();
         var renderNode = function(node, parent, factor) {
             var group = paper.group().attr('font-size', factor*15),
-                margin = node.margin || factor*10;
+                margin = node.margin || factor*5,
+                fill,
+                bg = group;
 
             parent.add(group); // group must be added to parent prior to BBox calculations
 
@@ -50,16 +53,16 @@
 
                 switch (node.shape) {
                 case 'rect':
-                    ne.prepend(paper.rect(bbox.x-margin, bbox.y-margin, bbox.width+2*margin, bbox.height+2*margin).attr({'stroke-width': '0.05em', stroke: '#000', fill: '#fff'}));
+                    bg = paper.rect(bbox.x-margin, bbox.y-margin, bbox.width+2*margin, bbox.height+2*margin).attr({'stroke-width': '0.05em', stroke: '#000', fill: '#fff'});
                     break;
                 case 'rrect':
-                    ne.prepend(paper.rect(bbox.x-margin, bbox.y-margin, bbox.width+2*margin, bbox.height+2*margin).attr({rx: '0.4em', ry: '0.4em', stroke: 'none', fill: '#5bf'}));
+                    bg = paper.rect(bbox.x-margin, bbox.y-margin, bbox.width+2*margin, bbox.height+2*margin).attr({rx: '0.4em', ry: '0.4em', stroke: 'none', fill: '#5bf'});
                     break;
                 case 'circle':
-                    var radius = (bbox.height+2*margin)/2;
-                    ne.prepend(paper.rect(bbox.x-margin*2, bbox.y-margin, bbox.width+2*margin*2, bbox.height+2*margin).attr({rx: radius, ry: radius, stroke: 'none', fill: '#9fb'}));
+                    bg = paper.circle(bbox.x+bbox.width/2, bbox.y+bbox.height/2, (Math.max(bbox.width, bbox.height)+2*margin)/2).attr({'stroke-width': '0.05em', stroke: '#000', fill: '#fff'});
                     break;
                 }
+                ne.prepend(bg);
 
                 break;
             case 'hsplit':
@@ -105,7 +108,19 @@
             };
 
             if (node.id) {
-                nodeLUT[node.id] = group;
+                nodeLUT[node.id] = bg;
+                if (node.clickable) {
+                    group.attr('cursor', 'pointer');
+                    group.hover(function() {
+                        fill = bg.attr('fill');
+                        bg.attr('fill', '#fbb');
+                    }, function() {
+                        bg.attr('fill', fill);
+                    });
+                    group.click(function() {
+                        window.parent.postMessage({type: 'click', data: node.id}, '*');
+                    });
+                }
             }
 
             return group;
@@ -117,8 +132,8 @@
 
         // render links
         var linkNodes = function(node1, node2, params, tf) {
-                var bbox1 = node1.getBoundingClientRect(),
-                    bbox2 = node2.getBoundingClientRect(),
+                var bbox1 = node1.node.getBoundingClientRect(),
+                    bbox2 = node2.node.getBoundingClientRect(),
                     hw1 = bbox1.width/2, hh1 = bbox1.height/2,
                     xc1 = bbox1.left+hw1, yc1 = bbox1.top+hh1,
                     hw2 = bbox2.width/2, hh2 = bbox2.height/2,
@@ -127,18 +142,19 @@
                     line,
                     sw = Math.max(1, factor*1.5),
                     dt = 2.5*sw*(params.marker == 'arrow'), // stroke width * distance to center of marker
-                    angle;
+                    angle,
+                    circle1 = (node1.type == 'circle'),
+                    circle2 = (node2.type == 'circle');
 
                 if (params.text) {
                     var text = paper.text(0, 0, params.text).attr({'font-size': 10*factor*tf}),
                         bbox = text.getBBox();
 
                     text.transform('t'+((xc1+xc2)/2-bbox.width/2)+','+((yc1+yc2)/2-bbox.height/2-bbox.y));
-                    linkNodes(node1, text.node, {stroke: params.stroke}, tf*0.9);
-                    linkNodes(text.node, node2, {stroke: params.stroke, marker: params.marker}, tf*0.9);
+                    linkNodes(node1, text, {stroke: params.stroke}, tf*0.9);
+                    linkNodes(text, node2, {stroke: params.stroke, marker: params.marker}, tf*0.9);
                     links.add(text);
                 } else {
-
                     if (xc1 == xc2) {
                         yc1 += yc1 < yc2 ? hh1 : -hh1;
                         yc2 += yc1 < yc2 ? -hh2-dt : hh2+dt;
@@ -148,10 +164,10 @@
                     } else {
                         d = Math.abs((yc2-yc1)/(xc2-xc1));
                         angle = Math.atan(d);
-                        xc1 += Math.min(hw1, hh1/d)*(xc1 < xc2 ? 1 : -1);
-                        yc1 += Math.min(hh1, hw1*d)*(yc1 < yc2 ? 1 : -1);
-                        xc2 += (Math.min(hw2, hh2/d)+dt*Math.cos(angle))*(xc1 < xc2 ? -1 : 1);
-                        yc2 += (Math.min(hh2, hw2*d)+dt*Math.sin(angle))*(yc1 < yc2 ? -1 : 1);
+                        xc1 += (circle1 ? hw1*Math.cos(angle) : Math.min(hw1, hh1/d))*(xc1 < xc2 ? 1 : -1);
+                        yc1 += (circle2 ? hw1*Math.sin(angle) : Math.min(hh1, hw1*d))*(yc1 < yc2 ? 1 : -1);
+                        xc2 += ((circle1 ? hw2*Math.cos(angle) : Math.min(hw2, hh2/d))+dt*Math.cos(angle))*(xc1 < xc2 ? -1 : 1);
+                        yc2 += ((circle2 ? hw2*Math.sin(angle) : Math.min(hh2, hw2*d))+dt*Math.sin(angle))*(yc1 < yc2 ? -1 : 1);
                     }
                     line = paper.line(xc1, yc1, xc2, yc2).attr({stroke: '#555', 'stroke-width': sw});
                     if (params.stroke == 'dashed') {
@@ -165,7 +181,7 @@
             };
 
         diagram.links.forEach(function(link) {
-            linkNodes(nodeLUT[link.from].node, nodeLUT[link.to].node, link, 1);
+            linkNodes(nodeLUT[link.from], nodeLUT[link.to], link, 1);
         });
 
         return bbox;
@@ -175,6 +191,7 @@ JS diagram:
 {
     root: {
         id: node_id, // optional
+        clickable: boolean, // if id is set, optional
         type: 'text'|'vsplit'|'hsplit'|'shape'
 
         // vsplit/hsplit types only
@@ -225,14 +242,14 @@ Grammar:
 root           = t:tree l:links                 { return {root: t, links: l}; }
 
 tree           = n:single_node s:split_right?   { return s ? extend(s, {subnodes: [n].concat(s.subnodes)}) : n; }
-split_right    = o:split_op t:tree              { return extend(o, {subnodes: o.type == t.type && o.iso == t.iso ? t.subnodes : [t]}); }
+split_right    = o:split_op t:tree              { return extend(o, {subnodes: o.type == t.type && o.iso == t.iso && t.id == o.id ? t.subnodes : [t]}); }
 split_op       = s:split_char iso:split_char?   { return {type: s, 'iso': !!iso}; }
 split_char     = "|"                            { return 'hsplit'; }
                / "-"                            { return 'vsplit'; }
 
-single_node    = i:node_decl? n:mono_node       { return extend(n, {id: i || '#'+index++}); }
-node_decl      = i:node_id ":"                  { return i; }
-node_id        = chars:[A-Z]+                   { return chars.join(''); }
+single_node    = i:node_decl? n:mono_node       { return i ? extend(n, i) : n; }
+node_decl      = l:"@"? i:node_id ":"           { return {id: i, clickable: !!l}; }
+node_id        = chars:[A-Za-z]+                { return chars.join(''); }
 
 mono_node      = "(" t:tree ")"                 { return t; }
                / n:shape_node                   { return extend(n, {type: 'shape'}); }
@@ -244,12 +261,12 @@ shape_node     = "[" t:tree "]"                 { return {shape: 'rect', subnode
 text_node      = quoted_text
                / text
 quoted_text    = "\"" t:extended_text "\""      { return t; }
-extended_text  = chars:[A-Z a-z_.\-|,*[\]{}()]+ { return {text: chars.join('')}; }
-text           = chars:[A-Z a-z_.]*             { return {text: chars.join('')}; }
+extended_text  = chars:[A-Z a-z0-9_.\-:|,*[\]{}()]+ { return {text: chars.join('')}; }
+text           = chars:[A-Z a-z0-9_.]*          { return {text: chars.join('')}; }
 
 links          = l:("," link)*                  { return l.map(function(lk) { return lk[1]; }); }
 link           = f:node_id l:link_type t:node_id  { return extend(l, {from: f, to: t}); }
-link_type      = s:link_line m:link_marker?   { return extend(s, {marker: m || 'none'}); }
+link_type      = s:link_line m:link_marker?     { return extend(s, {marker: m || 'none'}); }
 link_line      = s:link_stroke c:(link_text link_stroke)? { return c ? extend(s, {text: c[0]}) : s; }
 link_stroke    = s:[\-\.]                       { return {stroke: s == '.' ? 'dashed' : 'plain'}; }
 link_text      = chars:[A-Za-z ]+               { return chars.join(''); }
@@ -277,8 +294,6 @@ link_marker    = m:[>]                          { return 'arrow'; }
                     if (rx < 1 && ry < 1) break;
                     factor /= Math.max(1.05, rx, ry);
                 }
-
-                console.log(nb+' pass(es)');
             }, 200);
         };
     })();
