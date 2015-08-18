@@ -169,8 +169,8 @@
                                 d = Math.abs((yc2-yc1)/(xc2-xc1));
                                 angle = Math.atan(d);
                                 xc1 += (circle1 ? hw1*Math.cos(angle) : Math.min(hw1, hh1/d))*(xc1 < xc2 ? 1 : -1);
-                                yc1 += (circle2 ? hw1*Math.sin(angle) : Math.min(hh1, hw1*d))*(yc1 < yc2 ? 1 : -1);
-                                xc2 += ((circle1 ? hw2*Math.cos(angle) : Math.min(hw2, hh2/d))+dt*Math.cos(angle))*(xc1 < xc2 ? -1 : 1);
+                                yc1 += (circle1 ? hw1*Math.sin(angle) : Math.min(hh1, hw1*d))*(yc1 < yc2 ? 1 : -1);
+                                xc2 += ((circle2 ? hw2*Math.cos(angle) : Math.min(hw2, hh2/d))+dt*Math.cos(angle))*(xc1 < xc2 ? -1 : 1);
                                 yc2 += ((circle2 ? hw2*Math.sin(angle) : Math.min(hh2, hw2*d))+dt*Math.sin(angle))*(yc1 < yc2 ? -1 : 1);
                             }
                             line = paper.line(xc1, yc1, xc2, yc2).attr({stroke: '#555', 'stroke-width': sw});
