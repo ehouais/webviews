@@ -86,7 +86,7 @@
                                 ne.transform('t'+(x-bbox.x)+','+(-bbox.height/2-bbox.y));
                             }
 
-                            x += bbox.width+margin;
+                            x += bbox.width+margin+(node.spacing-1)*factor*20;
                         });
                         break;
                     case 'vsplit':
@@ -106,7 +106,7 @@
                                 ne.transform('t'+(-bbox.width/2-bbox.x)+','+(y-bbox.y));
                             }
 
-                            y += bbox.height+margin;
+                            y += bbox.height+margin+(node.spacing-1)*factor*20;
                         });
                         break;
                     };
