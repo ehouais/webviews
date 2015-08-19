@@ -86,7 +86,7 @@
                                 ne.transform('t'+(x-bbox.x)+','+(-bbox.height/2-bbox.y));
                             }
 
-                            x += bbox.width+margin+(node.spacing-1)*factor*20;
+                            x += bbox.width+margin;
                         });
                         break;
                     case 'vsplit':
@@ -106,7 +106,7 @@
                                 ne.transform('t'+(-bbox.width/2-bbox.x)+','+(y-bbox.y));
                             }
 
-                            y += bbox.height+margin+(node.spacing-1)*factor*20;
+                            y += bbox.height+margin;
                         });
                         break;
                     };
@@ -191,7 +191,7 @@
                 return bbox;
             };
 /*
-diagram object:
+JS diagram:
 {
     root: {
         id: node_id, // optional
@@ -199,7 +199,7 @@ diagram object:
         type: 'text'|'vsplit'|'hsplit'|'shape'
 
         // vsplit/hsplit types only
-        spacing: integer
+        iso: boolean
         subnodes: [
             ...
         ]
