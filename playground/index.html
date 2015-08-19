@@ -28,7 +28,8 @@
         </style>
         <script>
             $(function() {
-                var dataUri = Webviews.uriParams(window.location.href).datauri,
+                var parts = window.location.href.split('?'),
+                    appUri = parts[0].replace('playground', parts[1]),
                     $source = $('#source'),
                     $render = $('#render'),
                     $doc = $('#doc'),
@@ -50,25 +51,25 @@
                     });
 
                 // Display example in iframe
-                $doc.on('click', 'a[href^="'+dataUri+'"]', function(e) {
+                $doc.on('click', 'a[href^="'+appUri+'"]', function(e) {
                     updateAll($(e.target).attr('href'));
                     e.preventDefault();
                 });
 
                 // Get webview documentation
-                $.get(dataUri, function(html) {
+                $.get(appUri, function(html) {
                     // get doc URI from header <link> tag
                     var docUri = $('link[rel="doc"]', $('<div>').append(html)).attr('href');
 
                     if (docUri) {
                         // handle relative URI
                         if (!docUri.match(/^(https?|data):/)) {
-                            docUri = dataUri+'/'+docUri;
+                            docUri = appUri+'/'+docUri;
                         }
 
                         // Fetch documentation and insert it into page
-                        $.get(docUri+'?'+Math.random()).done(function(data) {
-                            $doc.html(md.render(data.replace(new RegExp('http://dev.ehouais.net/webviews/[^\? `]*', 'g'), dataUri)));
+                        $.get(docUri).done(function(data) {
+                            $doc.html(md.render(data.replace(new RegExp('http://dev.ehouais.net/webviews/[^\? `]*', 'g'), appUri)));
                         });
                     }
                 }, 'html');
@@ -76,7 +77,7 @@
                 $source.on('input', function() {
                     var data = $source.val();
                     if (data) {
-                        userUpdate(dataUri+'?datauri=data:text/plain;charset%3Dutf-8,'+data);
+                        userUpdate(appUri+'?datauri=data:text/plain;charset%3Dutf-8,'+data);
                     }
                 });
             });
