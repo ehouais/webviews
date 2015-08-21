@@ -18,7 +18,8 @@ split_right    = o:split_op t:tree              { return extend(o, {subnodes: o.
 split_op       = s:"|"+                         { return {type: 'hsplit', 'spacing': s.length}; }
                / s:"-"+                         { return {type: 'vsplit', 'spacing': s.length}; }
 
-single_node    = i:node_decl? n:mono_node       { return i ? extend(n, i) : n; }
+single_node    = l:"<"? n:named_node r:">"?     { return extend(n, {alignlt: !!l, alignrb: !!r}); }
+named_node     = i:node_decl? n:mono_node       { return i ? extend(n, i) : n; }
 node_decl      = l:"@"? i:node_id ":"           { return {id: i, clickable: !!l}; }
 node_id        = chars:[A-Za-z]+                { return chars.join(''); }
 

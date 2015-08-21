@@ -71,42 +71,38 @@
                         break;
                     case 'hsplit':
                         var x = 0,
-                            bbox,
-                            align = node.align || 'middle';
+                            hmax = 0,
+                            y = 0;
 
                         node.subnodes.forEach(function(n) {
-                            var ne = renderNode(n, group, factor),
-                                bbox = ne.getBBox();
-
-                            if (node.alignlt) {
-                                ne.transform('t'+(x-bbox.x)+','+(-bbox.y));
-                            } else if (node.alignrb) {
-                                ne.transform('t'+(x-bbox.x)+','+(-bbox.height-bbox.y));
-                            } else {
-                                ne.transform('t'+(x-bbox.x)+','+(-bbox.height/2-bbox.y));
+                            n.element = renderNode(n, group, factor);
+                            n.bbox = n.element.getBBox();
+                            if (n.bbox.height > hmax) {
+                                hmax = n.bbox.height;
+                                y = n.bbox.y;
                             }
-
-                            x += bbox.width+margin+(node.spacing-1)*factor*20;
+                        });
+                        node.subnodes.forEach(function(n) {
+                            n.element.transform('t'+(x-n.bbox.x)+','+(y-n.bbox.y+(n.alignlt ? 0 : n.alignrb ? 2 : 1)*(hmax-n.bbox.height)/2));
+                            x += n.bbox.width+margin+(node.spacing-1)*factor*20;
                         });
                         break;
                     case 'vsplit':
                         var y = 0,
-                            bbox,
-                            align = node.align || 'center';
+                            wmax = 0,
+                            x = 0;
 
                         node.subnodes.forEach(function(n) {
-                            var ne = renderNode(n, group, factor),
-                                bbox = ne.getBBox();
-
-                            if (node.alignlt) {
-                                ne.transform('t'+(-bbox.x)+','+(y-bbox.y));
-                            } else if (node.alignrb) {
-                                ne.transform('t'+(-bbox.width-bbox.x)+','+(y-bbox.y));
-                            } else {
-                                ne.transform('t'+(-bbox.width/2-bbox.x)+','+(y-bbox.y));
+                            n.element = renderNode(n, group, factor);
+                            n.bbox = n.element.getBBox();
+                            if (n.bbox.width > wmax) {
+                                wmax = n.bbox.width;
+                                x = n.bbox.x;
                             }
-
-                            y += bbox.height+margin+(node.spacing-1)*factor*20;
+                        });
+                        node.subnodes.forEach(function(n) {
+                            n.element.transform('t'+(x-n.bbox.x+(n.alignlt ? 0 : n.alignrb ? 2 : 1)*(wmax-n.bbox.width)/2)+','+(y-n.bbox.y));
+                            y += n.bbox.height+margin+(node.spacing-1)*factor*20;
                         });
                         break;
                     };
