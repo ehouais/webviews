@@ -18,9 +18,10 @@
             }
             #source {
                 width: 100%;
-                min-height: 400px;
+                min-height: 200px;
                 font-family: monospace;
                 font-size: 12px;
+                margin-top: 20px;
             }
             #doc h4 {
                 margin-top: 30px;
@@ -45,6 +46,9 @@
                         // Update iframe
                         updateIframe(uri);
                     },
+                    fullUri = function(data) {
+                        return appUri+'?datauri=data:text/plain;charset%3Dutf-8,'+data;
+                    },
                     userUpdate = Webviews.debounce(updateIframe, 1000),
                     md = window.markdownit({
                         linkify: true
@@ -68,7 +72,7 @@
                         }
 
                         // Fetch documentation and insert it into page
-                        $.get(docUri).done(function(data) {
+                        $.get(docUri+'?'+(new Date())).done(function(data) {
                             $doc.html(md.render(data.replace(new RegExp('http://dev.ehouais.net/webviews/[^\? `]*', 'g'), appUri)));
                         });
                     }
@@ -77,8 +81,18 @@
                 $source.on('input', function() {
                     var data = $source.val();
                     if (data) {
-                        userUpdate(appUri+'?datauri=data:text/plain;charset%3Dutf-8,'+data);
+                        userUpdate(fullUri(data));
                     }
+                });
+                $('#reset').on('click', function() {
+                    $source.val('');
+                    updateIframe(fullUri(''));
+                });
+                $('#geturi').on('click', function() {
+                    window.prompt('URL', $render[0].contentWindow.location);
+                });
+                $('#gethtml').on('click', function() {
+                    window.prompt('URL', '<iframe src="'+$render[0].contentWindow.location+'">"</iframe>');
                 });
             });
         </script>
@@ -88,6 +102,11 @@
             <div class="row">
                 <div class="col-md-6">
                     <iframe id="render"></iframe>
+                    <div id="buttons">
+                        <button id="reset" class="btn btn-default">Reset</button>
+                        <button id="geturi" class="btn btn-default">Get URI</button>
+                        <button id="gethtml" class="btn btn-default">Get HTML</button>
+                    </div>
                     <textarea id="source"></textarea>
                 </div>
                 <div class="col-md-6" id="doc"></div>
