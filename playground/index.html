@@ -30,7 +30,7 @@
         <script>
             $(function() {
                 var parts = window.location.href.split('?'),
-                    appUri = parts[0].replace('playground', parts[1]),
+                    appUri = parts[0].replace(/playground\/?/, parts[1]),
                     $source = $('#source'),
                     $render = $('#render'),
                     $doc = $('#doc'),
