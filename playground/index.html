@@ -79,14 +79,10 @@
                 }, 'html');
 
                 $source.on('input', function() {
-                    var data = $source.val();
-                    if (data) {
-                        userUpdate(fullUri(data));
-                    }
+                    userUpdate(fullUri($source.val()));
                 });
                 $('#reset').on('click', function() {
-                    $source.val('');
-                    updateIframe(fullUri(''));
+                    $source.val('').trigger('input');
                 });
                 $('#geturi').on('click', function() {
                     window.prompt('URL', $render[0].contentWindow.location);
