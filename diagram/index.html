@@ -45,11 +45,11 @@
                     parent.add(group); // group must be added to parent prior to BBox calculations
 
                     switch (node.type) {
+                    case 'padding':
+                        group.add(bg = paper.rect(margin, margin, factor*5, factor*5).attr('fill', 'none'));
+                        break;
                     case 'text':
-                        bg = paper.text(0, 0, node.text.replace(/_/g, ' ')).attr('text-anchor', 'middle');
-
-                        bg.node.setAttributeNS('http://www.w3.org/XML/1998/namespace', 'xml:space', 'preserve');
-                        group.add(bg);
+                        group.add(bg = paper.text(0, 0, node.text.replace(/_/g, ' ')).attr('text-anchor', 'middle'));
                         break;
                     case 'shape':
                         var ne = renderNode(node.subnode, group, factor*0.9);
@@ -84,7 +84,7 @@
                         });
                         node.subnodes.forEach(function(n) {
                             n.element.transform('t'+(x-n.bbox.x)+','+(y-n.bbox.y+(n.alignlt ? 0 : n.alignrb ? 2 : 1)*(hmax-n.bbox.height)/2));
-                            x += n.bbox.width+margin+(node.spacing-1)*factor*20;
+                            x += n.bbox.width+margin;
                         });
                         break;
                     case 'vsplit':
@@ -102,7 +102,7 @@
                         });
                         node.subnodes.forEach(function(n) {
                             n.element.transform('t'+(x-n.bbox.x+(n.alignlt ? 0 : n.alignrb ? 2 : 1)*(wmax-n.bbox.width)/2)+','+(y-n.bbox.y));
-                            y += n.bbox.height+margin+(node.spacing-1)*factor*20;
+                            y += n.bbox.height+margin;
                         });
                         break;
                     };
@@ -191,11 +191,12 @@ JS diagram:
 {
     root: {
         id: node_id, // optional
+        type: 'text'|'vsplit'|'hsplit'|'shape'|'padding'
+        alignlt: boolean
+        alignrb: boolean
         clickable: boolean, // if id is set, optional
-        type: 'text'|'vsplit'|'hsplit'|'shape'
 
         // vsplit/hsplit types only
-        iso: boolean
         subnodes: [
             ...
         ]
@@ -204,15 +205,8 @@ JS diagram:
         shape: 'rect'|'rrect'|'circle'
         subnode: node
 
-        // vsplit/hsplit/shape types only
-        maxed: boolean
-
         // text type only
         text: string
-
-        // added at runtime
-        svgnode: snap_node
-
     },
     links: [
         {
