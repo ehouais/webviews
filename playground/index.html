@@ -72,7 +72,7 @@
                         }
 
                         // Fetch documentation and insert it into page
-                        $.get(docUri+'?'+(new Date())).done(function(data) {
+                        $.get(docUri).done(function(data) {
                             $doc.html(md.render(data.replace(new RegExp('http://dev.ehouais.net/webviews/[^\? `]*', 'g'), appUri)));
                         });
                     }
