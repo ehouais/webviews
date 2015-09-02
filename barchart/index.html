@@ -27,6 +27,7 @@
                 stroke-dasharray: 1,2;
             }
         </style>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
         <script src="//cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
         <script src="http://dev.ehouais.net/webviews/webviews.js"></script>
     </head>
@@ -48,7 +49,7 @@
                 cScale = d3.scale.category10(),
                 nb,
                 indexes,
-                data,
+                values,
                 labels,
                 legend,
                 groups,
@@ -57,7 +58,7 @@
                 text,
                 lrects,
                 ltexts,
-                dataUri = Webviews.uriParams(window.location.href).datauri,
+                dataSource = Webviews.data();
                 resize = Webviews.resize(function(width, height, margins) {
                     var cwidth = width-margins.left-margins.right,
                         cheight = height-margins.top-margins.bottom,
@@ -78,7 +79,7 @@
                         .attr('transform', 'translate(0,' + cheight + ')')
                         .call(xAxis)
                         .selectAll('text')
-                        .text(function(d, i) { return data[i].label || ''; })
+                        .text(function(d, i) { return values[i].label || ''; })
                         .style('font-size', fs+'px');
 
                     yScale
@@ -129,14 +130,14 @@
                 });
 
             // text/plain: {label1,label2,label3}label:val11,val12,val13|label:val21,val22, val23
-            d3.xhr(dataUri).get().on('load', function(xhr) {
-                var str = xhr.response.replace(new RegExp('_', 'g'), ' '),
+            dataSource.bind(function(data) {
+                var str = data.replace(new RegExp('_', 'g'), ' '),
                     res,
                     tokens,
                     index = 0,
                     max = [];
 
-                data = [];
+                values = [];
                 labels = [];
                 indexes = [];
 
@@ -161,7 +162,7 @@
                     if (tokens.length == 1) {
                         tokens.unshift('');
                     }
-                    data[i] = {
+                    values[i] = {
                         index: i,
                         label: tokens[0], // group label
                         values: tokens[1].split(',').map(function(val) {
@@ -173,12 +174,12 @@
                 });
 
                 if (!nb) {
-                    nb = data[0].values.length;
+                    nb = values[0].values.length;
                     labels = indexes.map(function(i) { return 'series #'+(i+1); })
                 }
 
-                xScale.domain(d3.range(data.length)),
-                yScale.domain([0, d3.max(data, function(d) {
+                xScale.domain(d3.range(values.length)),
+                yScale.domain([0, d3.max(values, function(d) {
                     return d3.max(d.values.reduce(function(stacks, value, i) {
                         var index = indexes[i];
                         stacks[index] = (stacks[index] || 0) + value;
@@ -188,7 +189,7 @@
 
                 groups = chart.append('g')
                     .selectAll('.group')
-                    .data(data)
+                    .data(values)
                     .enter()
                     .append('g')
                     .attr('class', 'group');

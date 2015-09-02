@@ -21,6 +21,7 @@
         </style>
     </head>
     <body>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
         <script src="//cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
         <script src="http://dev.ehouais.net/webviews/webviews.js"></script>
         <script>
@@ -28,7 +29,7 @@
                 chart = svg.append('g'),
                 color = d3.scale.category10(),
                 arc = d3.svg.arc().innerRadius(0),
-                dataUri = Webviews.uriParams(window.location.href).datauri,
+                dataSource = Webviews.data(),
                 pie = d3.layout.pie().value(function(d) { return d.value; }),
                 path,
                 ticks,
@@ -81,8 +82,8 @@
                 });
 
             // text/plain: label1:value1,label2:value2,...
-            d3.xhr(dataUri).get().on('load', function(xhr) {
-                var data = pie(xhr.response.replace(new RegExp('_', 'g'), ' ').split('|').map(function(token) {
+            dataSource.bind(function(data) {
+                var data = pie(data.replace(new RegExp('_', 'g'), ' ').split('|').map(function(token) {
                         var parts = token.split(':');
 
                         return {label: parts[0], value: parts[1]};
