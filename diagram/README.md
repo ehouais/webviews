@@ -18,7 +18,7 @@ Simple diagram webservice
 [Shapes](http://dev.ehouais.net/webviews/diagram?datauri=data:text/plain;charset%3Dutf-8,[(A)]|[B]|(C)) /
 [Inclusion](<http://dev.ehouais.net/webviews/diagram?datauri=data:text/plain;charset%3Dutf-8,[(A|[B-(C|[D]|E)])]>) /
 [Explicit grouping](http://dev.ehouais.net/webviews/diagram?datauri=data:text/plain;charset%3Dutf-8,[(A-B|C)]|[({A-B}|C)]) /
-[Explicit spacing](<http://dev.ehouais.net/webviews/diagram?datauri=data:text/plain;charset%3Dutf-8,[({(A)|(B)}-{(C)|(D)|(E)}-{(F)|(G)})]|[({(A)|||(B)}--{(C)||(--D--)||(E)}--{(F)|||(G)})]>) /
+[Explicit spacing](<http://dev.ehouais.net/webviews/diagram?datauri=data:text/plain;charset%3Dutf-8,[({(A)|(B)}-{(C)|(D)|(E)}-{(F)|(G)})]|[({(A)||||(B)}--{(C)||(--D--)||(E)}--{(F)||||(G)})]>) /
 [Horizontal alignment](http://dev.ehouais.net/webviews/diagram?datauri=data:text/plain;charset%3Dutf-8,[one_two_three]-<[four]-[five]>) /
 [Vertical alignment](http://dev.ehouais.net/webviews/diagram?datauri=data:text/plain;charset%3Dutf-8,[one-two-three]|<[four]|[five]>) /
 [Linking](http://dev.ehouais.net/webviews/diagram?datauri=data:text/plain;charset%3Dutf-8,A:(A)-_-B:[node_1]|C:node_2|D:node_3|[(E:node_4)],A-B,A.C,A->D,A.>E) /
