@@ -48,7 +48,13 @@
 										if (ciphered) {
 											local = sjcl.encrypt(password(), local);
 										}
-										save_ = $.ajax({url: dataUri, type: 'PUT', contentType: 'text/plain', data: local, xhrFields: {withCredentials: true}});
+										save_ = $.ajax({
+											url: dataUri,
+											type: 'PUT',
+											contentType: 'text/plain',
+											data: local,
+											xhrFields: {withCredentials: true}
+										});
 									});
 								}
 								tid = setTimeout(function() {
