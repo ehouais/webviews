@@ -22,7 +22,7 @@
         <script src="parser.js"></script>
         <script src="http://dev.ehouais.net/webviews/webviews.js"></script>
         <script>
-            var dataUri = Webviews.uriParams(window.location.href).datauri;
+            var dataSource = Webviews.data();
             var paper = Snap();
             var arrow = paper.polygon([0,-2, 5,0, 0,2, 0,-2]).attr({fill: '#555'});
             var marker = arrow.marker(0,-2, 5,4, 2.5,0);
@@ -247,7 +247,7 @@ JS diagram:
             })();
 
             var diagram;
-            $.get(dataUri).done(function(str) {
+            dataSource.bind(function(str) {
                 try {
                     diagram = parser.parse(str);
                 } catch(e) {
