@@ -41,6 +41,7 @@
         </style>
     </head>
     <body>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
         <script src="//cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
         <script src="http://dev.ehouais.net/webviews/webviews.js"></script>
         <script>
@@ -93,7 +94,7 @@
                 bars,
                 rects,
                 texts,
-                dataUri = Webviews.uriParams(window.location.href).datauri;
+                dataSource = Webviews.data();
                 resize = Webviews.resize(function(width, height, margins) {
                     var cwidth = width-margins.left-margins.right,
                         cheight = height-margins.top-margins.bottom,
@@ -118,7 +119,6 @@
                         ][mode],
                         fs = Math.max(Math.min(Math.min(cwidth, cheight)/20, 20), 11);
 
-console.log((end-start)/(24*60*60*1000)/cwidth, mode);
                     svg
                         .attr('width', width)
                         .attr('height', height);
@@ -217,7 +217,7 @@ console.log((end-start)/(24*60*60*1000)/cwidth, mode);
                     return svg[0][0].getBBox();
                 });
 
-            d3.xhr(dataUri).get().on('load', function(xhr) {
+            dataSource.bind(function(data) {
                 var parse = function(str) {
                         var res;
                         if (res = str.match(/(\d{2})\/(\d{2})(\/(\d+))?/)) {
@@ -245,7 +245,7 @@ console.log((end-start)/(24*60*60*1000)/cwidth, mode);
                 start = +Infinity,
                 end = -Infinity;
 
-                data = xhr.response.replace(new RegExp('_', 'g'), ' ').split('|').map(function(str) {
+                data = data.replace(new RegExp('_', 'g'), ' ').split('|').map(function(str) {
                     var line = {label: '', events: []},
                         res,
                         events = [],
