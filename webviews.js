@@ -8,6 +8,9 @@
 				return obj;
 			}, {});
 		},
+		uriData = function(uri) {
+			return decodeURIComponent(uri.replace(/^data:[^,]+,/, ''));
+		},
 		debounce = function(fn, delay) {
 			var timer = null;
 			return function () {
@@ -65,6 +68,7 @@
 						})(),
 						bind: function(handler) {
 							handlers.push(handler);
+							if (local) handler(local); // publish data if already fetched
 							return d;
 						},
 						unbind: function(handler) {
@@ -81,37 +85,44 @@
 						}
 					},
                     dataUri = uriParams(window.location.href).datauri,
+					dataScheme = dataUri.substr(0, 5) == 'data:',
+					publish = function(data) {
+						local = data;
+						d.trigger();
+					},
 					load = function() {
-						var dataScheme = dataUri.substr(0, 5) == 'data:';
-
-						$.ajax({
-							url: dataUri,
-							dataType: 'text',
-							ifModified: true,
-							xhrFields: dataUri.substr(0, 5) == 'data:' ? {} : {withCredentials: true}
-						}).done(function(data, status, xhr) {
-							if (xhr.status != 304) { // "Not Modified"
-								var obj;
-								try {
-									obj = JSON.parse(data);
-									if (obj.iv && obj.v && obj.iter && obj.ks && obj.ts && obj.mode && obj.cipher && obj.salt && obj.ct) {
-										ciphered = true;
-										try {
-											data = sjcl.decrypt(password(obj.label), data);
-										} catch(e) {
-											alert(e.message);
-											return;
+						if (dataScheme) {
+							// data: URIs are (for now...) parsed and not fetched because browsers have difficulties handling them in a CORS context
+							publish(uriData(dataUri));
+						} else {
+							$.ajax({
+								url: dataUri,
+								dataType: 'text',
+								ifModified: true,
+								xhrFields: {withCredentials: true}
+							}).done(function(data, status, xhr) {
+								if (xhr.status != 304) { // "Not Modified"
+									var obj;
+									try {
+										obj = JSON.parse(data);
+										if (obj.iv && obj.v && obj.iter && obj.ks && obj.ts && obj.mode && obj.cipher && obj.salt && obj.ct) {
+											ciphered = true;
+											try {
+												data = sjcl.decrypt(password(obj.label), data);
+											} catch(e) {
+												alert(e.message);
+												return;
+											}
 										}
+									} catch(e) {
+										// hide non significant error
 									}
-								} catch(e) {
-									// hide non significant error
+									publish(data);
 								}
-								local = data;
-								d.trigger();
-							}
-						}).always(function() {
-							!dataScheme && setNextLoad();
-						});
+							}).always(function() {
+								!dataScheme && setNextLoad();
+							});
+						}
 					},
 					setNextLoad = debounce(load, 5*60*1000); // in 5 minutes
 
