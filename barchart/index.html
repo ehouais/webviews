@@ -114,17 +114,19 @@
                         .attr('width', Math.ceil(xScale.rangeBand()/nb))
                         .attr('height', function(d) { return cheight-yScale(d); });
 
-                    legend
-                        .attr('transform', function(d, i) { return 'translate(0,'+(-(i+2)*fs)+')'; });
+                    if (labels) {
+                        legend
+                            .attr('transform', function(d, i) { return 'translate(0,'+(-(i+2)*fs)+')'; });
 
-                    lrects
-                        .attr('x', cwidth-18)
-                        .attr('height', fs*0.9);
+                        lrects
+                            .attr('x', cwidth-18)
+                            .attr('height', fs*0.9);
 
-                    ltexts
-                        .attr('x', cwidth-24)
-                        .attr('y', fs/2)
-                        .style('font-size', fs+'px');
+                        ltexts
+                            .attr('x', cwidth-24)
+                            .attr('y', fs/2)
+                            .style('font-size', fs+'px');
+                    }
 
                     return svg[0][0].getBBox();
                 });
@@ -138,11 +140,11 @@
                     max = [];
 
                 values = [];
-                labels = [];
                 indexes = [];
 
                 // get serie labels
                 if (res = str.match(/^\{([^\}]+)\}(.*)/)) {
+                    labels = [];
                     tokens = res[1].split(',');
                     nb = tokens.length;
                     tokens.forEach(function(token, i) {
@@ -152,8 +154,6 @@
                         });
                     });
                     str = res[2];
-                } else {
-                    indexes = d3.range(nb);
                 }
 
                 // get serie values
@@ -173,9 +173,9 @@
                     };
                 });
 
-                if (!nb) {
+                if (!labels) {
                     nb = values[0].values.length;
-                    labels = indexes.map(function(i) { return 'series #'+(i+1); })
+                    indexes = d3.range(nb);
                 }
 
                 xScale.domain(d3.range(values.length)),
@@ -205,20 +205,22 @@
                 rects.append('title')
                     .text(function(d) { return d; });
 
-                legend = chart.append('g').selectAll('.legend')
-                    .data(labels)
-                    .enter()
-                    .append('g')
-                    .attr('class', 'legend');
+                if (labels) {
+                    legend = chart.append('g').selectAll('.legend')
+                        .data(labels)
+                        .enter()
+                        .append('g')
+                        .attr('class', 'legend');
 
-                lrects = legend.append('rect')
-                    .attr('width', 18)
-                    .style('fill', function(d, i) { return cScale(i); });
+                    lrects = legend.append('rect')
+                        .attr('width', 18)
+                        .style('fill', function(d, i) { return cScale(i); });
 
-                ltexts = legend.append('text')
-                    .attr('dy', '.35em')
-                    .style('text-anchor', 'end')
-                    .text(function(d) { return d; });
+                    ltexts = legend.append('text')
+                        .attr('dy', '.35em')
+                        .style('text-anchor', 'end')
+                        .text(function(d) { return d; });
+                }
 
                 setTimeout(resize, 0);
             });
