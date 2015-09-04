@@ -71,37 +71,33 @@
                         break;
                     case 'hsplit':
                         var x = 0,
-                            hmax = 0,
-                            y = 0;
+                            bbox;
 
                         node.subnodes.forEach(function(n) {
                             n.element = renderNode(n, group, factor);
                             n.bbox = n.element.getBBox();
-                            if (n.bbox.height > hmax) {
-                                hmax = n.bbox.height;
-                                y = n.bbox.y;
+                            if (!bbox || n.bbox.height > bbox.height) {
+                                bbox = n.bbox;
                             }
                         });
                         node.subnodes.forEach(function(n) {
-                            n.element.transform('t'+(x-n.bbox.x)+','+(y-n.bbox.y+(n.alignlt ? 0 : n.alignrb ? 2 : 1)*(hmax-n.bbox.height)/2));
+                            n.element.transform('t'+(x-n.bbox.x)+','+((bbox.y-n.bbox.y)+(n.alignlt ? 0 : n.alignrb ? 2 : 1)*(bbox.height-n.bbox.height)/2));
                             x += n.bbox.width+margin;
                         });
                         break;
                     case 'vsplit':
                         var y = 0,
-                            wmax = 0,
-                            x = 0;
+                            bbox;
 
                         node.subnodes.forEach(function(n) {
                             n.element = renderNode(n, group, factor);
                             n.bbox = n.element.getBBox();
-                            if (n.bbox.width > wmax) {
-                                wmax = n.bbox.width;
-                                x = n.bbox.x;
+                            if (!bbox || n.bbox.width > bbox.width) {
+                                bbox = n.bbox;
                             }
                         });
                         node.subnodes.forEach(function(n) {
-                            n.element.transform('t'+(x-n.bbox.x+(n.alignlt ? 0 : n.alignrb ? 2 : 1)*(wmax-n.bbox.width)/2)+','+(y-n.bbox.y));
+                            n.element.transform('t'+((bbox.x-n.bbox.x)+(n.alignlt ? 0 : n.alignrb ? 2 : 1)*(bbox.width-n.bbox.width)/2)+','+(y-n.bbox.y));
                             y += n.bbox.height+margin;
                         });
                         break;
