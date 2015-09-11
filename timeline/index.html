@@ -200,7 +200,7 @@
                             var x1 = xScale(d.period.start),
                                 x2 = xScale(d.period.end),
                                 h = yScale.rangeBand(),
-                                th = Math.min(h, 60),
+                                th = Math.max(Math.min(h, 60), 8),
                                 vh = -2*h*d.value;
 
                             if (d.value) {
