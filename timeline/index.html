@@ -38,6 +38,12 @@
                 stroke-dasharray: 1,2;
                 shape-rendering: crispEdges;
             }
+            line.now {
+                stroke: red;
+                stroke-width: 2px;
+                shape-rendering: crispEdges;
+                stroke-dasharray: 2,2;
+            }
         </style>
     </head>
     <body>
@@ -94,6 +100,7 @@
                 bars,
                 rects,
                 texts,
+                nline,
                 dataSource = Webviews.data();
                 resize = Webviews.resize(function(width, height, margins) {
                     var cwidth = width-margins.left-margins.right,
@@ -214,6 +221,14 @@
                         })
                         .style('text-anchor', function(d) { return d.period.end ? 'start' : 'middle'; });
 
+                    if (nline) {
+                        var xnow = xScale(Date.now());
+                        nline
+                            .attr('x1', xnow)
+                            .attr('x2', xnow)
+                            .attr("y2", cheight);
+                    }
+
                     return svg[0][0].getBBox();
                 });
 
@@ -321,6 +336,13 @@
                 texts = bars.append('text')
                     .text(function(event) { return event.label; })
                     .style('fill', '#000');
+
+                var now = Date.now();
+                if (now > start && now < end) {
+                    nline = chart.append("line")
+                        .attr('class', 'now')
+                        .attr("y1", 0);
+                }
 
                 setTimeout(resize, 0);
             });
