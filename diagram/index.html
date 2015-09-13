@@ -139,17 +139,45 @@
                             sw = Math.max(1, factor*1.5),
                             dt = 2.5*sw*(params.marker == 'arrow'), // stroke width * distance to center of marker
                             angle,
+                            rect1 = (node1.type == 'rect'),
+                            rect2 = (node2.type == 'rect'),
                             circle1 = (node1.type == 'circle'),
-                            circle2 = (node2.type == 'circle');
+                            circle2 = (node2.type == 'circle'),
+                            dx = xc1 < xc2 ? +1 : -1,
+                            dy = yc1 < yc2 ? +1 : -1;
 
                         if (xc1 == xc2) {
-                            yc1 += yc1 < yc2 ? hh1 : -hh1;
-                            yc2 += yc1 < yc2 ? -hh2-dt : hh2+dt;
+                            yc1 += dy*hh1;
+                            yc2 += -dy*(hh2+dt);
                         } else if (yc1 == yc2) {
-                            xc1 += xc1 < xc2 ? hw1 : -hw1;
-                            xc2 += xc1 < xc2 ? -hw2-dt : hw2+dt;
+                            xc1 += dx*hw1;
+                            xc2 += -dx*(hw2+dt);
                         } else {
                             d = Math.abs((yc2-yc1)/(xc2-xc1));
+
+                            // Algo to improve link layout for rects
+                            sign = (d > 0 ? +1 : -1);
+                            if (Math.abs(d) < 1) {
+                                if (rect1 && hw1 > hh1) {
+                                    xc1 += dx*(hw1-hh1)*sign;
+                                    hw1 = hh1;
+                                }
+                                if (rect2 && hw2 > hh2) {
+                                    xc2 += -dx*(hw2-hh2)*sign;
+                                    hw2 = hh2;
+                                }
+                            } else if (Math.abs(d) < 1) {
+                                if (rect1 && hw1 < hh1) {
+                                    yc1 += -dy*(hw1-hh1)*sign;
+                                    hh1 = hw1;
+                                }
+                                if (rect2 && hw2 < hh2) {
+                                    yc2 += dy*(hw2-hh2)*sign;
+                                    hh2 = hw2;
+                                }
+                            }
+                            d = Math.abs((yc2-yc1)/(xc2-xc1));
+
                             angle = Math.atan(d);
                             xc1 += (circle1 ? hw1*Math.cos(angle) : Math.min(hw1, hh1/d))*(xc1 < xc2 ? 1 : -1);
                             yc1 += (circle1 ? hw1*Math.sin(angle) : Math.min(hh1, hw1*d))*(yc1 < yc2 ? 1 : -1);
