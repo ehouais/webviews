@@ -65,8 +65,7 @@
                     months: ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre"],
                     shortMonths: ["janv.", "févr.", "mars", "avr.", "mai", "juin", "juil.", "août", "sept.", "oct.", "nov.", "déc."]
                 }),
-                start,
-                end,
+                viewbox,
                 svg = d3.select('body').append('svg'),
                 chart = svg.append('g'),
                 xScale = d3.time.scale(),
@@ -110,7 +109,7 @@
                             while (bounds[index] && val < bounds[index]) index++;
                             return index;
                         },
-                        mode = findInterval((end-start)/(24*60*60*1000)/cwidth, [30, 14, 7, 2, 1.2, 0.6, 0.3, 0.06, 0.04, 0.02]),
+                        mode = findInterval((viewbox.end-viewbox.start)/(24*60*60*1000)/cwidth, [30, 14, 7, 2, 1.2, 0.6, 0.3, 0.06, 0.04, 0.02]),
                         ticks = [ // major interval, major format, minor interval, nb. intervals, minor format
                             [  'year', 100,       '%Y',   'year', 10,     '\'%y'],
                             [    null,   1,       null,   'year',  1,     '\'%y'],
@@ -255,12 +254,13 @@
                     },
                     res,
                     delta,
-                    data;
+                    data,
+                    start = +Infinity,
+                    end = -Infinity,
+                    match;
 
-                start = +Infinity,
-                end = -Infinity;
-
-                data = data.replace(new RegExp('_', 'g'), ' ').split('|').map(function(str) {
+                data = data.replace(new RegExp('_', 'g'), ' ');
+                data = data.split('|').map(function(str) {
                     var line = {label: '', events: []},
                         res,
                         events = [],
@@ -297,12 +297,13 @@
                     return line;
                 });
 
-                delta = (end-start)/10;
-                start = new Date(start-delta);
-                end = new Date(end+delta);
+                viewbox = viewbox || {start: start, end: end};
+                delta = (viewbox.end-viewbox.start)/10;
+                viewbox.start = new Date(viewbox.start-delta);
+                viewbox.end = new Date(viewbox.end+delta);
 
                 xScale
-                    .domain([start, end]);
+                    .domain([viewbox.start, viewbox.end]);
 
                 yScale
                     .domain(d3.range(data.length));
@@ -338,7 +339,7 @@
                     .style('fill', '#000');
 
                 var now = Date.now();
-                if (now > start && now < end) {
+                if (now > viewbox.start && now < viewbox.end) {
                     nline = chart.append("line")
                         .attr('class', 'now')
                         .attr("y1", 0);
