@@ -186,7 +186,7 @@
                         .attr('transform', function(d, i) { return 'translate(0,'+(yScale(i)+yScale.rangeBand()/2)+')'; });
 
                     titles
-                        .style('font-size', fs)
+                        .style('font-size', fs+'px')
                         .attr('y', function(d) { return fs/4; });
 
                     hticks
@@ -213,7 +213,7 @@
                         });
 
                     texts
-                        .style('font-size', fs)
+                        .style('font-size', fs+'px')
                         .attr('x', function(d) { return xScale(d.period.start); })
                         .attr('y', function(d) {
                             var h = yScale.rangeBand();
