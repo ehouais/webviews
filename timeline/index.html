@@ -50,6 +50,7 @@
         <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
         <script src="//cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
         <script src="http://dev.ehouais.net/webviews/webviews.js"></script>
+        <script src="parser.js"></script>
         <script>
             var FR = d3.locale({
                     decimal: ",",
@@ -65,7 +66,6 @@
                     months: ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre"],
                     shortMonths: ["janv.", "févr.", "mars", "avr.", "mai", "juin", "juil.", "août", "sept.", "oct.", "nov.", "déc."]
                 }),
-                viewbox,
                 svg = d3.select('body').append('svg'),
                 chart = svg.append('g'),
                 xScale = d3.time.scale(),
@@ -100,6 +100,8 @@
                 rects,
                 texts,
                 nline,
+                start,
+                end,
                 dataSource = Webviews.data();
                 resize = Webviews.resize(function(width, height, margins) {
                     var cwidth = width-margins.left-margins.right,
@@ -109,7 +111,7 @@
                             while (bounds[index] && val < bounds[index]) index++;
                             return index;
                         },
-                        mode = findInterval((viewbox.end-viewbox.start)/(24*60*60*1000)/cwidth, [30, 14, 7, 2, 1.2, 0.6, 0.3, 0.06, 0.04, 0.02]),
+                        mode = findInterval((end-start)/(24*60*60*1000)/cwidth, [30, 14, 7, 2, 1.2, 0.6, 0.3, 0.06, 0.04, 0.02]),
                         ticks = [ // major interval, major format, minor interval, nb. intervals, minor format
                             [  'year', 100,       '%Y',   'year', 10,     '\'%y'],
                             [    null,   1,       null,   'year',  1,     '\'%y'],
@@ -186,7 +188,8 @@
 
                     titles
                         .style('font-size', fs+'px')
-                        .attr('y', function(d) { return fs/4; });
+                        .attr('x', -fs/2)
+                        .attr('y', fs/4);
 
                     hticks
                         .attr('x1', 0)
@@ -196,29 +199,30 @@
 
                     rects
                         .attr('d', function(d) {
-                            var x1 = xScale(d.period.start),
-                                x2 = xScale(d.period.end),
+                            var x1 = xScale(d.start),
+                                x2 = xScale(d.end),
+                                x = xScale(d.datetime),
                                 h = yScale.rangeBand(),
                                 th = Math.max(Math.min(h, 60), 8),
                                 vh = -2*h*d.value;
 
                             if (d.value) {
                                 return 'M'+x1+' 0L'+x1+' '+vh+'L'+x2+' '+vh+'L'+x2+' 0Z';
-                            } else if (x2) {
-                                return 'M'+x1+' '+(-h/2)+'L'+x2+' '+(-h/2)+'L'+x2+' '+(h/2)+'L'+x1+' '+(h/2)+'Z';
+                            } else if (x) {
+                                return 'M'+(x-th/2)+' '+(-th)+'l'+(th)+' 0l'+(-th/2)+' '+th+'l'+(-th/2)+' '+(-th)+'Z';
                             } else {
-                                return 'M'+(x1-th/2)+' '+(-th)+'l'+(th)+' 0l'+(-th/2)+' '+th+'l'+(-th/2)+' '+(-th)+'Z';
+                                return 'M'+x1+' '+(-h/2)+'L'+x2+' '+(-h/2)+'L'+x2+' '+(h/2)+'L'+x1+' '+(h/2)+'Z';
                             }
                         });
 
                     texts
                         .style('font-size', fs+'px')
-                        .attr('x', function(d) { return xScale(d.period.start); })
+                        .attr('x', function(d) { return xScale(d.start || d.datetime); })
                         .attr('y', function(d) {
                             var h = yScale.rangeBand();
-                            return (d.value ? -2*h*d.value : d.period.end ? -h/2 : -Math.min(h, 60))-fs/8;
+                            return (d.value ? -2*h*d.value : d.end ? -h/2 : -Math.min(h, 60))-fs/8;
                         })
-                        .style('text-anchor', function(d) { return d.period.end ? 'start' : 'middle'; });
+                        .style('text-anchor', function(d) { return d.datetime ? 'middle' : 'start'; });
 
                     if (nline) {
                         var xnow = xScale(Date.now());
@@ -231,121 +235,104 @@
                     return svg[0][0].getBBox();
                 });
 
-            dataSource.bind(function(data) {
-                var parse = function(str) {
-                        var res;
-                        if (res = str.match(/(\d{2})\/(\d{2})(\/(\d+))?/)) {
-                            return new Date(res[4] ? res[4] > 99 ? res[4] : +res[4]+2000 : new Date().getFullYear(), res[2]-1, res[1]);
-                        }
-                    },
-                    strToPeriod = function(str) {
-                        var tokens = str.split('-'),
-                            date;
-                        if (tokens.length > 1) {
-                            return  {
-                                start:parse(tokens[0]),
-                                end: new Date(+parse(tokens[1])+24*60*60*1000-1000)
-                            }
-                        } else {
-                            return {
-                                start: date = parse(str)
-                            }
-                        }
-                    },
-                    res,
-                    delta,
-                    data,
-                    start = +Infinity,
-                    end = -Infinity,
-                    match;
+            dataSource.bind(function(str) {
+                var timelines;
 
-                data = data.replace(new RegExp('_', 'g'), ' ');
-                data = data.split('|').map(function(str) {
-                    var line = {label: '', events: []},
-                        res,
-                        events = [],
-                        event,
-                        period,
-                        max = 0;
+                try {
+                    timelines = parser.parse(str);
 
-                    if (res = str.match(/^([^\[]+)(.*)/)) {
-                        line.label = res[1];
-                        str = res[2];
+                    if (timelines.viewbox) {
+                        start = timelines.viewbox.start,
+                        end = timelines.viewbox.end;
+                    } else {
+                        start = +Infinity,
+                        end = -Infinity;
                     }
 
-                    while (res = str.match(/\[([^\]]+)]([^\[]*)(.*)/)) {
-                        event = {str: res[1], period: strToPeriod(res[1])};
-                        value = res[2];
-                        if (value.substr(0, 1) == '+') {
-                            event.value = value = +value.substr(1);
-                            max = Math.max(max, value);
-                        }
-                        event.label = value;
+                    timelines.timelines.forEach(function(timeline) {
+                        var max = 0;
 
-                        line.events.push(event);
-                        start = Math.min(start, event.period.start);
-                        end = Math.max(end, event.period.end || event.period.start);
-                        str = res[3];
-                    }
-
-                    if (max > 0) {
-                        line.events.forEach(function(event) {
-                            event.value /= max;
+                        timeline.events.forEach(function(event, i) {
+                            if (timelines.viewbox) {
+                                if (event.datetime) {
+                                    if (event.datetime < start || event.datetime > end) {
+                                        timeline.events.splice(i, 1);
+                                    }
+                                } else if (event.start > end || event.end < start){
+                                    timeline.events.splice(i, 1);
+                                } else {
+                                    event.start = Math.max(event.start, start);
+                                    event.end = Math.min(event.end, end);
+                                }
+                            } else {
+                                start = Math.min(start, event.start || event.datetime);
+                                end = Math.max(end, event.end || event.datetime);
+                            }
+                            if (event.value) {
+                                max = Math.max(max, event.value);
+                            }
                         });
+                        if (max > 0) {
+                            timeline.events.forEach(function(event) {
+                                event.value /= max;
+                            });
+                        }
+                    });
+
+                    if (!timelines.viewbox) {
+                        var delta = (end-start)/10;
+                        start = new Date(start-delta);
+                        end = new Date(end+delta);
                     }
 
-                    return line;
-                });
+                    var now = Date.now();
+                    if (now > start && now < end) {
+                        nline = chart.append("line")
+                            .attr('class', 'now')
+                            .attr("y1", 0);
+                    }
 
-                viewbox = viewbox || {start: start, end: end};
-                delta = (viewbox.end-viewbox.start)/10;
-                viewbox.start = new Date(viewbox.start-delta);
-                viewbox.end = new Date(viewbox.end+delta);
 
-                xScale
-                    .domain([viewbox.start, viewbox.end]);
+                    xScale
+                        .domain([start, end]);
 
-                yScale
-                    .domain(d3.range(data.length));
+                    yScale
+                        .domain(d3.range(timelines.timelines.length));
 
-                lines = chart.append('g')   // lines container
-                    .selectAll('g')         // lines
-                    .data(data)
-                    .enter()
-                    .append('g')
-                    .style('fill', function(d, i) { return cScale(i+1); });
+                    lines = chart.append('g')   // lines container
+                        .selectAll('g')         // lines
+                        .data(timelines.timelines)
+                        .enter()
+                        .append('g')
+                        .style('fill', function(d, i) { return cScale(i+1); });
 
-                titles = lines.append('text')
-                    .text(function(d) { return d.label; })
-                    .style('text-anchor', 'end');
+                    titles = lines.append('text')
+                        .text(function(d) { return d.label; })
+                        .style('text-anchor', 'end');
 
-                hticks = lines.append('line')
-                    .attr('class', 'hline')
-                    .style('stroke', function(d, i) { return cScale(i+1); });
+                    hticks = lines.append('line')
+                        .attr('class', 'hline')
+                        .style('stroke', function(d, i) { return cScale(i+1); });
 
-                bars = lines.selectAll('g')      // line events
-                    .data(function(d) { return d.events; })
-                    .enter()
-                    .append('g')
-                    .style('fill', function(d, i) { return d.period.end ? '' : cScale(0); });
+                    bars = lines.selectAll('g')      // line events
+                        .data(function(d) { return d.events; })
+                        .enter()
+                        .append('g')
+                        .style('fill', function(d, i) { return d.start ? '' : cScale(0); });
 
-                rects = bars.append('path');
+                    rects = bars.append('path');
 
-                rects.append('title')
-                    .text(function(event) { return event.str; });
+                    rects.append('title')
+                        .text(function(event) { return event.start ? event.start+'-'+event.end : event.datetime; });
 
-                texts = bars.append('text')
-                    .text(function(event) { return event.label; })
-                    .style('fill', '#000');
+                    texts = bars.append('text')
+                        .text(function(event) { return event.label; })
+                        .style('fill', '#000');
 
-                var now = Date.now();
-                if (now > viewbox.start && now < viewbox.end) {
-                    nline = chart.append("line")
-                        .attr('class', 'now')
-                        .attr("y1", 0);
+                    setTimeout(resize, 0);
+                } catch(e) {
+                    console.log(e);
                 }
-
-                setTimeout(resize, 0);
             });
         </script>
     </body>
