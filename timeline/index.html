@@ -102,7 +102,10 @@
                 nline,
                 start,
                 end,
-                dataSource = Webviews.data();
+                dataSource = Webviews.data(),
+                formatDT = function(date) {
+                    return (new Date(date)).toLocaleDateString();
+                },
                 resize = Webviews.resize(function(width, height, margins) {
                     var cwidth = width-margins.left-margins.right,
                         cheight = height-margins.top-margins.bottom,
@@ -323,7 +326,7 @@
                     rects = bars.append('path');
 
                     rects.append('title')
-                        .text(function(event) { return event.start ? event.start+'-'+event.end : event.datetime; });
+                        .text(function(event) { return event.start ? formatDT(event.start)+'-'+formatDT(event.end) : formatDT(event.datetime); });
 
                     texts = bars.append('text')
                         .text(function(event) { return event.label; })
