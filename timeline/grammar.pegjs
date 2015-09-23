@@ -32,7 +32,6 @@ event           = "[" interval:interval "]" "+" v:value     { return extend(inte
                 / "[" interval:interval "]" label:label?    { return extend(interval, {label: label}); }
                 / "[" dt:datetime "]" label:label?          { return extend({datetime: dt}, {label: label}); }
 
-label           = chars:char+                               { return chars.join('').replace(new RegExp('_', 'g'), ' '); }
+label           = chars:[^\[|]+                             { return chars.join('').replace(/_/g, ' '); }
 value           = digits:digit+                             { return +digits.join(''); }
-char            = [A-Za-z_0-9.'_ ()]
 digit           = [0-9]
