@@ -203,15 +203,24 @@
                             frame = $frame.data('frame');
                             onMessage = function(e) {
                                 var event = e.originalEvent,
-                                    msg = event.data;
+                                    msg = event.data,
+                                    iframe,
+                                    tokens,
+                                    uri;
 
                                 if (event.origin == formDomain && msg.type != 'resize') {
                                     if (msg.type == 'submit' && msg.data.uri != '') {
                                         frame.uri = msg.data.uri;
                                         refresh();
                                     } else if (msg.type == 'refresh') {
-                                        // TODO check if img background
-                                        $('iframe', $frame)[0].src = $('iframe', $frame)[0].src;
+                                        iframe = $('iframe', $frame)[0];
+                                        tokens = frame.uri.split('?');
+                                        uri = tokens[0]+(tokens[1] ? '?'+tokens[1]+'&' : '?')+'random='+(new Date()).getTime();
+                                        if (iframe) {
+                                            iframe.src = uri;
+                                        } else {
+                                            $frame.css('background-image', 'url('+uri+')');
+                                        }
                                     } else if (msg.type == 'newpage') {
                                         window.open(frame.uri);
                                     } else if (msg.type == 'delete' && confirm('Are you sure ?')) {
