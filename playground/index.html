@@ -32,31 +32,33 @@
                 var parts = window.location.href.split('?'),
                     appUri = parts[0].replace(/playground\/?/, parts[1]),
                     $source = $('#source'),
-                    $render = $('#render'),
+                    iframeWindow = $('#render')[0].contentWindow,
                     $doc = $('#doc'),
-                    uriData = function(uri) {
+                    dataFromUri = function(uri) {
                         return decodeURIComponent(uri.replace(/^[^\?]*\?datauri=data:[^,]+,/, ''));
                     },
-                    updateIframe = function(uri) {
-                        $render[0].contentWindow.location.replace(uri);
-                    },
-                    updateAll = function(uri) {
-                        // Update source
-                        $source.val(uriData(uri));
-                        // Update iframe
-                        updateIframe(uri);
-                    },
-                    fullUri = function(data) {
+                    uriFromData = function(data) {
                         return appUri+'?datauri=data:text/plain;charset%3Dutf-8,'+data;
                     },
-                    userUpdate = Webviews.debounce(updateIframe, 1000),
+                    updateViews = function(uri, data) {
+                        uri != iframeWindow.location && iframeWindow.location.replace(uri);
+                        data != $source.val() && $source.val(data);
+                        $('#buttons button').prop('disabled', !data);
+                    },
+                    updateData = function(data) {
+                        updateViews(uriFromData(data), data);
+                    },
+                    updateUri = function(uri) {
+                        updateViews(uri, dataFromUri(uri));
+                    },
+                    debouncedUpdate = Webviews.debounce(updateData, 1000),
                     md = window.markdownit({
                         linkify: true
                     });
 
                 // Display example in iframe
                 $doc.on('click', 'a[href^="'+appUri+'"]', function(e) {
-                    updateAll($(e.target).attr('href'));
+                    updateUri($(e.target).attr('href'));
                     e.preventDefault();
                 });
 
@@ -79,16 +81,16 @@
                 }, 'html');
 
                 $source.on('input', function() {
-                    userUpdate(fullUri($source.val()));
+                    debouncedUpdate($source.val());
                 });
                 $('#reset').on('click', function() {
-                    $source.val('').trigger('input');
+                    updateData('');
                 });
                 $('#geturi').on('click', function() {
-                    window.prompt('URL', $render[0].contentWindow.location);
+                    window.prompt('URL', iframeWindow.location);
                 });
                 $('#gethtml').on('click', function() {
-                    window.prompt('URL', '<iframe src="'+$render[0].contentWindow.location+'">"</iframe>');
+                    window.prompt('URL', '<iframe src="'+iframeWindow.location+'">"</iframe>');
                 });
             });
         </script>
@@ -99,9 +101,9 @@
                 <div class="col-md-6">
                     <iframe id="render"></iframe>
                     <div id="buttons">
-                        <button id="reset" class="btn btn-default">Reset</button>
-                        <button id="geturi" class="btn btn-default">Get URI</button>
-                        <button id="gethtml" class="btn btn-default">Get HTML</button>
+                        <button id="reset" class="btn btn-default" disabled="disabled">Reset</button>
+                        <button id="geturi" class="btn btn-default" disabled="disabled">URI</button>
+                        <button id="gethtml" class="btn btn-default" disabled="disabled">Embed</button>
                     </div>
                     <textarea id="source"></textarea>
                 </div>
