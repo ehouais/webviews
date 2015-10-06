@@ -50,6 +50,8 @@
                 nb,
                 indexes,
                 values,
+                unit,
+                unitl,
                 labels,
                 legend,
                 groups,
@@ -128,6 +130,11 @@
                             .style('font-size', fs+'px');
                     }
 
+                    if (unitl) {
+                        unitl
+                            .style('font-size', fs+'px');
+                    }
+
                     return svg[0][0].getBBox();
                 });
 
@@ -166,6 +173,10 @@
                         index: i,
                         label: tokens[0], // group label
                         values: tokens[1].split(',').map(function(val) {
+                            if (res = val.match(/([^(]+)\(([^)]+)\)$/)) {
+                                val = res[1];
+                                unit = res[2];
+                            }
                             return val.split('+').reduce(function(sum, item) {
                                 return +item+sum;
                             }, 0);
@@ -220,6 +231,13 @@
                         .attr('dy', '.35em')
                         .style('text-anchor', 'end')
                         .text(function(d) { return d; });
+                }
+
+                if (unit) {
+                    unitl = chart.append('text')
+                        .attr('dy', '-1em')
+                        .style('text-anchor', 'end')
+                        .text(unit);
                 }
 
                 setTimeout(resize, 0);
