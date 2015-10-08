@@ -52,21 +52,7 @@
         <script src="http://dev.ehouais.net/webviews/webviews.js"></script>
         <script src="parser.js"></script>
         <script>
-            var FR = d3.locale({
-                    decimal: ",",
-                    thousands: ".",
-                    grouping: [3],
-                    currency: ["", " €"],
-                    dateTime: "%A, le %e %B %Y, %X",
-                    date: "%d/%m/%Y",
-                    time: "%H:%M:%S",
-                    periods: ["AM", "PM"], // unused
-                    days: ["dimanche", "lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi"],
-                    shortDays: ["dim.", "lun.", "mar.", "mer.", "jeu.", "ven.", "sam."],
-                    months: ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre"],
-                    shortMonths: ["janv.", "févr.", "mars", "avr.", "mai", "juin", "juil.", "août", "sept.", "oct.", "nov.", "déc."]
-                }),
-                svg = d3.select('body').append('svg'),
+            var svg = d3.select('body').append('svg'),
                 chart = svg.append('g'),
                 xScale = d3.time.scale(),
                 minor = chart.append('g')
@@ -144,7 +130,7 @@
                     if (ticks[0]) {
                         MtAxis
                             .ticks(d3.time[ticks[0]], ticks[1])
-                            .tickFormat(FR.timeFormat(ticks[2]));
+                            .tickFormat(d3.time.format(ticks[2]));
 
                         Mticks
                             .attr('transform', 'translate(0,' + cheight + ')')
@@ -165,7 +151,7 @@
 
                     mtAxis
                         .ticks(d3.time[ticks[3]], ticks[4])
-                        .tickFormat(FR.timeFormat(ticks[5]));
+                        .tickFormat(d3.time.format(ticks[5]));
 
                     mticks
                         .attr('transform', 'translate(0,' + cheight + ')')
