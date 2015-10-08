@@ -60,7 +60,7 @@
                             bg = paper.rect(bbox.x-margin, bbox.y-margin, bbox.width+2*margin, bbox.height+2*margin).attr({'stroke-width': '0.05em', stroke: '#000', fill: '#fff'});
                             break;
                         case 'rrect':
-                            bg = paper.rect(bbox.x-margin, bbox.y-margin, bbox.width+2*margin, bbox.height+2*margin).attr({rx: '0.4em', ry: '0.4em', stroke: 'none', fill: '#5bf'});
+                            bg = paper.rect(bbox.x-margin, bbox.y-margin, bbox.width+2*margin, bbox.height+2*margin).attr({rx: '0.4em', ry: '0.4em', stroke: 'none', fill: 'rgba(85, 187, 255, 0.5)'});
                             break;
                         case 'circle':
                             bg = paper.circle(bbox.x+bbox.width/2, bbox.y+bbox.height/2, (Math.max(bbox.width, bbox.height)+2*margin)/2).attr({'stroke-width': '0.05em', stroke: '#000', fill: '#fff'});
