@@ -36,95 +36,133 @@
                 group = paper.group();
                 links && links.remove();
                 links = paper.group();
+                // SVG rendering functions
                 var renderNode = function(node, parent, factor) {
-                    var group = paper.group().attr('font-size', factor*15),
-                        margin = node.margin || factor*5,
-                        fill,
-                        bg = group;
+                        var element = node.element,
+                            margin = factor*5,
+                            fill,
+                            bg,
+                            bbox,
+                            x,
+                            y;
 
-                    parent.add(group); // group must be added to parent prior to BBox calculations
+                        // create SVG node if this hasn't been done yet
+                        if (!element) {
+                            switch (node.type) {
+                            case 'padding':
+                                bg = element = paper.rect(0, 0, 0, 0).attr('fill', 'none');
+                                break;
+                            case 'text':
+                                bg = element = paper.text(0, 0, node.text.replace(/_/g, ' ')).attr('text-anchor', 'middle');
+                                break;
+                            case 'shape':
+                                element = paper.group();
+                                renderNode(node.subnode, element, factor*0.9);
 
-                    switch (node.type) {
-                    case 'padding':
-                        group.add(bg = paper.rect(margin, margin, factor*5, factor*5).attr('fill', 'none'));
-                        break;
-                    case 'text':
-                        group.add(bg = paper.text(0, 0, node.text.replace(/_/g, ' ')).attr('text-anchor', 'middle'));
-                        break;
-                    case 'shape':
-                        var ne = renderNode(node.subnode, group, factor*0.9);
-                            bbox = ne.getBBox();
+                                switch (node.shape) {
+                                case 'rect':
+                                    bg = paper.rect(0, 0, 0, 0).attr({'stroke-width': '0.05em', stroke: '#000', fill: '#fff'});
+                                    break;
+                                case 'rrect':
+                                    bg = paper.rect(0, 0, 0, 0).attr({rx: '0.4em', ry: '0.4em', stroke: 'none', fill: 'rgba(85, 187, 255, 0.5)'});
+                                    break;
+                                case 'circle':
+                                    bg = paper.circle(0, 0, 0).attr({'stroke-width': '0.05em', stroke: '#000', fill: '#fff'});
+                                    break;
+                                }
+                                node.subnode.element.before(bg);
 
-                        switch (node.shape) {
-                        case 'rect':
-                            bg = paper.rect(bbox.x-margin, bbox.y-margin, bbox.width+2*margin, bbox.height+2*margin).attr({'stroke-width': '0.05em', stroke: '#000', fill: '#fff'});
-                            break;
-                        case 'rrect':
-                            bg = paper.rect(bbox.x-margin, bbox.y-margin, bbox.width+2*margin, bbox.height+2*margin).attr({rx: '0.4em', ry: '0.4em', stroke: 'none', fill: 'rgba(85, 187, 255, 0.5)'});
-                            break;
-                        case 'circle':
-                            bg = paper.circle(bbox.x+bbox.width/2, bbox.y+bbox.height/2, (Math.max(bbox.width, bbox.height)+2*margin)/2).attr({'stroke-width': '0.05em', stroke: '#000', fill: '#fff'});
-                            break;
+                                break;
+                            case 'hsplit':
+                            case 'vsplit':
+                                bg = element = paper.group();
+
+                                // render subnodes and keep track of max width
+                                node.subnodes.forEach(function(n) {
+                                    renderNode(n, element, factor);
+                                });
+                                break;
+                            };
+
+                            parent.add(node.element = element);
                         }
-                        ne.prepend(bg);
 
-                        break;
-                    case 'hsplit':
-                        var x = 0,
-                            bbox;
+                        // set position and dimensions
+                        switch (node.type) {
+                        case 'padding':
+                            element.attr({width: margin, height: margin});
+                            break;
+                        case 'shape':
+                            bg = element.select('*:nth-child(1)');
+                            bbox = node.subnode.element.getBBox();
 
-                        node.subnodes.forEach(function(n) {
-                            n.element = renderNode(n, group, factor);
-                            n.bbox = n.element.getBBox();
-                            if (!bbox || n.bbox.height > bbox.height) {
-                                bbox = n.bbox;
+                            switch (node.shape) {
+                            case 'rect':
+                            case 'rrect':
+                                bg.attr({width: bbox.width+2*margin, height: bbox.height+2*margin}).transform('t'+Math.round(bbox.x-margin)+','+Math.round(bbox.y-margin));
+                                break;
+                            case 'circle':
+                                bg.attr({r: bbox.r0}).transform('t'+(bbox.x+bbox.width/2)+','+(bbox.y+bbox.height/2));
+                                break;
                             }
-                        });
-                        node.subnodes.forEach(function(n) {
-                            n.element.transform('t'+(x-n.bbox.x)+','+((bbox.y-n.bbox.y)+(n.alignlt ? 0 : n.alignrb ? 2 : 1)*(bbox.height-n.bbox.height)/2));
-                            x += n.bbox.width+margin;
-                        });
-                        break;
-                    case 'vsplit':
-                        var y = 0,
-                            bbox;
 
-                        node.subnodes.forEach(function(n) {
-                            n.element = renderNode(n, group, factor);
-                            n.bbox = n.element.getBBox();
-                            if (!bbox || n.bbox.width > bbox.width) {
-                                bbox = n.bbox;
+                            break;
+                        case 'hsplit':
+                            bbox = element.getBBox();
+                            // position subnodes vertically according to alignment property and max height
+                            x = 0;
+                            node.subnodes.forEach(function(n) {
+                                var nbbox = n.element.getBBox();
+                                //if (n.alignlt && n.alignrb && n.bbox.height < bbox.height) {
+                                //    renderNode(n, element, factor*0.9, bbox.height);
+                                //} else {
+                                    n.element.transform('t'+Math.round(x-nbbox.x)+','+Math.round((bbox.y-nbbox.y)+(n.alignlt ? 0 : n.alignrb ? 2 : 1)*(bbox.height-nbbox.height)/2));
+                                //}
+                                x += nbbox.width+margin;
+                            });
+                            break;
+                        case 'vsplit':
+                            bbox = element.getBBox();
+                            // position subnodes horizontally according to alignment property and max width
+                            y = 0;
+                            node.subnodes.forEach(function(n) {
+                                var nbbox = n.element.getBBox();
+                                //if (n.alignlt && n.alignrb && n.bbox.width < bbox.width) {
+                                //    setWidth(n, bbox.width);
+                                //} else {
+                                    n.element.transform('t'+Math.round((bbox.x-nbbox.x)+(n.alignlt ? 0 : n.alignrb ? 2 : 1)*(bbox.width-nbbox.width)/2)+','+Math.round(y-nbbox.y));
+                                //}
+                                y += nbbox.height+margin;
+                            });
+                            break;
+                        };
+
+                        // apply style
+                        element.attr('font-size', factor*15);
+
+                        // node with identifier
+                        if (node.id) {
+                            nodeLUT[node.id] = bg;
+                            if (node.clickable) {
+                                element.attr('cursor', 'pointer');
+                                element.hover(function() {
+                                    fill = bg.attr('fill');
+                                    bg.attr('fill', '#fbb');
+                                }, function() {
+                                    bg.attr('fill', fill);
+                                });
+                                element.click(function() {
+                                    window.parent.postMessage({type: 'click', data: node.id}, '*');
+                                });
                             }
-                        });
-                        node.subnodes.forEach(function(n) {
-                            n.element.transform('t'+((bbox.x-n.bbox.x)+(n.alignlt ? 0 : n.alignrb ? 2 : 1)*(bbox.width-n.bbox.width)/2)+','+(y-n.bbox.y));
-                            y += n.bbox.height+margin;
-                        });
-                        break;
+                        }
                     };
 
-                    if (node.id) {
-                        nodeLUT[node.id] = bg;
-                        if (node.clickable) {
-                            group.attr('cursor', 'pointer');
-                            group.hover(function() {
-                                fill = bg.attr('fill');
-                                bg.attr('fill', '#fbb');
-                            }, function() {
-                                bg.attr('fill', fill);
-                            });
-                            group.click(function() {
-                                window.parent.postMessage({type: 'click', data: node.id}, '*');
-                            });
-                        }
-                    }
-
-                    return group;
-                };
-                var top = renderNode(diagram.root, group, factor);
+                renderNode(diagram.root, group, factor);
+                var top = diagram.root.element;
 
                 var bbox = group.getBBox();
-                top.transform('t'+((width-bbox.width)/2-bbox.x)+','+((height-bbox.height)/2-bbox.y));
+                top.transform('t'+Math.round((width-bbox.width)/2-bbox.x)+','+Math.round((height-bbox.height)/2-bbox.y));
 
                 // render links
                 var linkNodes = function(node1, node2, params, tf) {
@@ -258,6 +296,7 @@ JS diagram:
                             rx, ry
                             nb = 0;
 
+                        // decrease factor until rendered diagram fits into viewbox
                         while(true) {
                             bbox = render(diagram, width, height, factor);
                             nb++;
