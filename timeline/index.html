@@ -95,26 +95,25 @@
                 resize = Webviews.resize(function(width, height, margins) {
                     var cwidth = width-margins.left-margins.right,
                         cheight = height-margins.top-margins.bottom,
+                        fs = Math.max(Math.min(Math.min(cwidth, cheight)/20, 20), 11),
                         findInterval = function (val, bounds) {
                             var index = 0;
                             while (bounds[index] && val < bounds[index]) index++;
                             return index;
                         },
-                        mode = findInterval((end-start)/(24*60*60*1000)/cwidth, [30, 14, 7, 2, 1.2, 0.6, 0.3, 0.06, 0.04, 0.02]),
+                        mode = findInterval((end-start)/(24*60*60*1000)*fs/12/cwidth, [30, 14, 5, 2, 0.6, 0.3, 0.06, 0.04, 0.02]),
                         ticks = [ // major interval, major format, minor interval, nb. intervals, minor format
                             [  'year', 100,       '%Y',   'year', 10,     '\'%y'],
                             [    null,   1,       null,   'year',  1,     '\'%y'],
                             [    null,   1,       null,   'year',  1,       '%Y'],
-                            [  'year',   1,       '%Y',  'month',  3,       '%m'],
-                            [  'year',   1,       '%Y',  'month',  1,       '%m'],
+                            [  'year',   1,       '%Y',  'month',  3,       '%b'],
                             [  'year',   1,       '%Y',  'month',  1,       '%b'],
                             [  'year',   1,       '%Y',  'month',  1,       '%B'],
                             [ 'month',   1,    '%B %Y', 'monday',  1,       '%d'],
                             ['monday',   1, '%d/%m/%Y',    'day',  1,         ''],
                             ['monday',   1, '%d/%m/%Y',    'day',  1,       '%a'],
                             ['monday',   1,         '',    'day',  1, '%a %d/%m']
-                        ][mode],
-                        fs = Math.max(Math.min(Math.min(cwidth, cheight)/20, 20), 11);
+                        ][mode];
 
                     svg
                         .attr('width', width)
@@ -136,6 +135,7 @@
                             .attr('transform', 'translate(0,' + cheight + ')')
                             .call(MtAxis)
                             .selectAll('.tick text')
+                            .style('font-size', Math.max(fs*0.7, 11)+'px')
                             .style('text-anchor', 'start')
                             .attr('x', 2)
                             .attr('y', 15);
@@ -157,6 +157,7 @@
                         .attr('transform', 'translate(0,' + cheight + ')')
                         .call(mtAxis)
                         .selectAll(".tick text")
+                        .style('font-size', Math.max(fs*0.6, 10)+'px')
                         .style("text-anchor", "start")
                         .attr("x", 2)
                         .attr("y", 4);
@@ -209,7 +210,7 @@
                         .attr('x', function(d) { return xScale(d.start || d.datetime); })
                         .attr('y', function(d) {
                             var h = yScale.rangeBand();
-                            return (d.value ? -2*h*d.value : d.end ? -h/2 : -Math.min(h, 60))-fs/8;
+                            return (d.value ? -2*h*d.value : d.end ? -h/2 : -Math.min(h, 60))-fs/6;
                         })
                         .style('text-anchor', function(d) { return d.datetime ? 'middle' : 'start'; });
 
