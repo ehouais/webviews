@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html>
     <head>
         <meta charset="utf-8">
@@ -58,8 +58,9 @@
                         .attr('d', function(d) {
                             var angle = (d.startAngle+d.endAngle)/2-Math.PI/2,
                                 cos = Math.cos(angle),
-                                sin = Math.sin(angle);
-                            return 'M'+(radius+2)*cos+' '+(radius+2)*sin+'l'+(fs/2)*cos+' '+(fs/2)*sin+'l'+radius*0.2*(cos > 0 ? 1 : -1)+' 0';
+                                sin = Math.sin(angle),
+                                dr = fs/2+Math.tan(angle);
+                            return 'M'+(radius+2)*cos+' '+(radius+2)*sin+'l'+dr*cos+' '+dr*sin+'l'+radius*0.2*(cos > 0 ? 1 : -1)+' 0';
                         });
 
                     labels
@@ -73,9 +74,10 @@
                         .attr('transform', function(d) {
                             var angle = (d.startAngle+d.endAngle)/2-Math.PI/2,
                                 cos = Math.cos(angle),
-                                sin = Math.sin(angle);
+                                sin = Math.sin(angle),
+                                dr = fs/2+Math.tan(angle);
 
-                            return 'translate('+((radius+2+fs/2)*cos+radius*0.21*(cos > 0 ? 1 : -1))+','+(radius+2+fs/2)*sin+')';
+                            return 'translate('+((radius+2+dr)*cos+radius*0.21*(cos > 0 ? 1 : -1))+','+(radius+2+dr)*sin+')';
                         });
 
                     return svg[0][0].getBBox();
