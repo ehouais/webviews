@@ -11,7 +11,6 @@
                 font-style: normal;
             }
             body {
-                font-family: gotham;
                 margin: 0;
                 border: 0;
                 overflow: hidden;
@@ -55,7 +54,7 @@
         <script src="parser.js"></script>
         <script>
             var svg = d3.select('body').append('svg'),
-                chart = svg.append('g'),
+                chart = svg.append('g').attr('font-family', 'gotham'),
                 xScale = d3.time.scale(),
                 minor = chart.append('g')
                     .attr('class', 'x axis minor'),

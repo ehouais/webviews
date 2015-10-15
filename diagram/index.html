@@ -11,7 +11,6 @@
                 font-style: normal;
             }
             body {
-                font-family: gotham;
                 margin: 0;
                 border: 0;
                 overflow: hidden;
@@ -35,7 +34,7 @@
 
                 paper.attr({width: width, height: height});
                 group && group.remove();
-                group = paper.group();
+                group = paper.group().attr('font-family', 'gotham');
                 links && links.remove();
                 links = paper.group();
                 var renderNode = function(node, parent, factor) {
