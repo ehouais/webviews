@@ -276,7 +276,7 @@
                     // get SVG tag from iframe document
                     var document = iframeWindow.document
                     var svg = $('svg', document)[0];
-                    saveSvgAsPng(svg, "diagram.png", {document: document});
+                    saveSvgAsPng(svg, "diagram.png", {document: document, scale: 2});
                 });
             });
         </script>
