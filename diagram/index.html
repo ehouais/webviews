@@ -36,7 +36,7 @@
                 group && group.remove();
                 group = paper.group().attr('font-family', 'gotham');
                 links && links.remove();
-                links = paper.group();
+                links = paper.group().attr('font-family', 'gotham');
                 var renderNode = function(node, parent, factor) {
                     var group = paper.group().attr('font-size', factor*15),
                         margin = node.margin || factor*5,
