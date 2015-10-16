@@ -37,7 +37,7 @@
                 group = paper.group().attr('font-family', 'gotham');
                 links && links.remove();
                 links = paper.group().attr('font-family', 'gotham');
-                var renderNode = function(node, parent, factor) {
+                var renderNode = function(node, parent, factor, depth) {
                     var group = paper.group().attr('font-size', factor*15),
                         margin = node.margin || factor*5,
                         fill,
@@ -53,7 +53,7 @@
                         group.add(bg = paper.text(0, 0, node.text.replace(/_/g, ' ')).attr('text-anchor', 'middle'));
                         break;
                     case 'shape':
-                        var ne = renderNode(node.subnode, group, factor*0.9);
+                        var ne = renderNode(node.subnode, group, factor*0.9, node.shape == 'rrect' ? depth+1 : depth);
                             bbox = ne.getBBox();
 
                         switch (node.shape) {
@@ -61,7 +61,7 @@
                             bg = paper.rect(bbox.x-margin, bbox.y-margin, bbox.width+2*margin, bbox.height+2*margin).attr({'stroke-width': '0.05em', stroke: '#000', fill: '#fff'});
                             break;
                         case 'rrect':
-                            bg = paper.rect(bbox.x-margin, bbox.y-margin, bbox.width+2*margin, bbox.height+2*margin).attr({rx: '0.4em', ry: '0.4em', stroke: 'none', fill: 'rgba(85, 187, 255, 0.5)'});
+                            bg = paper.rect(bbox.x-margin, bbox.y-margin, bbox.width+2*margin, bbox.height+2*margin).attr({rx: '0.4em', ry: '0.4em', stroke: 'none', fill: 'hsl(200,80,'+(85-10*depth)+')'});
                             break;
                         case 'circle':
                             bg = paper.circle(bbox.x+bbox.width/2, bbox.y+bbox.height/2, (Math.max(bbox.width, bbox.height)+2*margin)/2).attr({'stroke-width': '0.05em', stroke: '#000', fill: '#fff'});
@@ -75,7 +75,7 @@
                             bbox;
 
                         node.subnodes.forEach(function(n) {
-                            n.element = renderNode(n, group, factor);
+                            n.element = renderNode(n, group, factor, depth);
                             n.bbox = n.element.getBBox();
                             if (!bbox || n.bbox.height > bbox.height) {
                                 bbox = n.bbox;
@@ -91,7 +91,7 @@
                             bbox;
 
                         node.subnodes.forEach(function(n) {
-                            n.element = renderNode(n, group, factor);
+                            n.element = renderNode(n, group, factor, depth);
                             n.bbox = n.element.getBBox();
                             if (!bbox || n.bbox.width > bbox.width) {
                                 bbox = n.bbox;
@@ -122,7 +122,7 @@
 
                     return group;
                 };
-                var top = renderNode(diagram.root, group, factor);
+                var top = renderNode(diagram.root, group, factor, 0);
 
                 var bbox = group.getBBox();
                 top.transform('t'+((width-bbox.width)/2-bbox.x)+','+((height-bbox.height)/2-bbox.y));
