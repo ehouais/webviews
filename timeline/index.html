@@ -244,6 +244,9 @@
                         var max = 0;
 
                         timeline.events.forEach(function(event, i) {
+                            if (event.end) {
+                                event.end = d3.time.day.offset(event.end, 1);
+                            }
                             if (timelines.viewbox) {
                                 if (event.datetime) {
                                     if (event.datetime < start || event.datetime > end) {
