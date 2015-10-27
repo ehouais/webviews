@@ -21,7 +21,7 @@ split_op       = "|"                            { return {type: 'hsplit'}; }
 single_node    = l:"<"? n:named_node r:">"?     { return extend(n, {alignlt: !!l, alignrb: !!r}); }
 named_node     = i:node_decl? n:mono_node       { return i ? extend(n, i) : n; }
 node_decl      = l:"@"? i:node_id ":"           { return {id: i, clickable: !!l}; }
-node_id        = chars:[A-Za-z]+                { return chars.join(''); }
+node_id        = chars:[A-Za-z0-9]+             { return chars.join(''); }
 
 mono_node      = "{" t:tree "}"                 { return t; }
                / n:shape_node                   { return extend(n, {type: 'shape'}); }
