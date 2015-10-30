@@ -291,6 +291,10 @@
                         saveSvgAsPng(svg, "diagram.png", {document: document, scale: 2});
                     });
 
+                    $(window).on('beforeunload', function() {
+                        if ($source.val()) return 'Warning: data will be lost !';
+                    });
+
                     $('#playground').show();
                 } else {
                     $('#menu a').each(function() {
