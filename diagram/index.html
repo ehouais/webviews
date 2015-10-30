@@ -273,7 +273,6 @@ JS diagram:
                 try {
                     diagram = parser.parse(str);
                 } catch(e) {
-                    console.log(e);
                     diagram = parser.parse('{A:[Oh_no]-_-B:[something]|____|C:[went_wrong]},A->B,B.C');
                 }
                 resize();
