@@ -154,11 +154,15 @@
                             xc2 += -sdx*(hw2+dt);
                         } else {
                             // Algo to improve link layout for rects, using shortest distance between ellipses, approximated with circles
+                            // http://www.had2know.com/makeit/ellipse-approximation-normal-circular-arc.html
                             var d1 = rect1 && Math.abs(hw1*hw1-hh1*hh1)/Math.sqrt(hw1*hw1+hh1*hh1),
                                 d2 = rect2 && Math.abs(hw2*hw2-hh2*hh2)/Math.sqrt(hw2*hw2+hh2*hh2);
 
-                            paper.circle(xc1+d1, yc1, hw1-d1).attr({fill: 'none', stroke: '#000'});
-                            paper.circle(xc1, yc1-d1, hh1+d1).attr({fill: 'none', stroke: '#000'});
+                            group.add(paper.ellipse(xc1, yc1, hw1, hh1).attr({fill: 'none', stroke: '#000'}));
+                            group.add(paper.circle(xc1+hw1*hw1/Math.sqrt(hw1*hw1+hh1*hh1), yc1+hh1*hh1/Math.sqrt(hw1*hw1+hh1*hh1), 5).attr({fill: 'red'}));
+                            group.add(paper.circle(xc1+d1, yc1, hw1-d1).attr({fill: 'none', stroke: '#000'}));
+                            group.add(paper.circle(xc1, yc1-d1, hh1+d1).attr({fill: 'none', stroke: '#000'}));
+                            console.log(hw1, hh1, Math.sqrt(hw1*hw1+hh1*hh1), hw1*hw1/Math.sqrt(hw1*hw1+hh1*hh1), hh1*hh1/Math.sqrt(hw1*hw1+hh1*hh1), d1);
                             if (Math.abs(yc2-yc1)/Math.abs(xc2+d2-xc1-d1) < 1) {
                                 xc1 += d1*sdx;
                                 xc2 += -d2*sdx;
