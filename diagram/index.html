@@ -153,40 +153,18 @@
                             xc1 += sdx*hw1;
                             xc2 += -sdx*(hw2+dt);
                         } else {
-                            // Algo to improve link layout for rects
-                            var dx = Math.abs(xc2-xc1),
-                                dy = Math.abs(yc2-yc1),
-                                dx1 = rect1 && dx > dy && Math.max(hw1-hh1, 0),
-                                dy1 = rect1 && dy > dx && Math.max(hh1-hw1, 0),
-                                dx2 = rect2 && dx > dy && Math.max(hw2-hh2, 0),
-                                dy2 = rect2 && dy > dx && Math.max(hh2-hw2, 0),
-                                f = dx1 || dx2 ? Math.min((dx-dy)/Math.abs(dx1+dx2), 1)
-                                  : dy1 || dy2 ? Math.min((dy-dx)/Math.abs(dy1+dy2), 1)
-                                  : 0;
-
-                            /*
-                            //f = Math.pow(f,1/2);
-                            xc1 += sdx*f*dx1;
-                            yc1 += sdy*f*dy1;
-                            hw1 -= f*dx1;
-                            hh1 -= f*dy1;
-                            xc2 += -sdx*f*dx2;
-                            yc2 += -sdy*f*dy2;
-                            hw2 -= f*dx2;
-                            hh2 -= f*dy2;
-                            */
-
-                            // Algo using shortest distance between ellipses, approximated with circles
+                            // Algo to improve link layout for rects, using shortest distance between ellipses, approximated with circles
                             var d1 = rect1 && Math.abs(hw1*hw1-hh1*hh1)/Math.sqrt(hw1*hw1+hh1*hh1),
                                 d2 = rect2 && Math.abs(hw2*hw2-hh2*hh2)/Math.sqrt(hw2*hw2+hh2*hh2);
 
-                            console.log(d1, d2, Math.abs(yc2-yc1)/Math.abs(xc2+d2-xc1-d1));
+                            paper.circle(xc1+d1, yc1, hw1-d1).attr({fill: 'none', stroke: '#000'});
+                            paper.circle(xc1, yc1-d1, hh1+d1).attr({fill: 'none', stroke: '#000'});
                             if (Math.abs(yc2-yc1)/Math.abs(xc2+d2-xc1-d1) < 1) {
-                                xc1 += d1;
-                                xc2 += d2;
+                                xc1 += d1*sdx;
+                                xc2 += -d2*sdx;
                             } else {
-                                yc1 += d1;
-                                yc2 += d2;
+                                yc1 += -d1*sdy;
+                                yc2 += d2*sdy;
                             }
 
                             /*d = Math.abs((yc2-yc1)/(xc2-xc1));
