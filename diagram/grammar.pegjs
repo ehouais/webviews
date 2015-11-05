@@ -34,13 +34,13 @@ shape_node     = "[(" t:tree ")]"               { return {shape: 'rrect', subnod
 text_node      = quoted_text
                / text
 quoted_text    = "\"" t:extended_text "\""      { return t; }
-extended_text  = chars:[A-Z a-z0-9_.\-:|,*[\]{}()]+ { return {text: chars.join('')}; }
-text           = chars:[A-Z a-z0-9_.]+          { return {text: chars.join('')}; }
+extended_text  = chars:[^"]+                    { return {text: chars.join('')}; }
+text           = chars:[^-[\]{}:|]+             { return {text: chars.join('')}; }
 
 links          = l:("," link)*                  { return l.map(function(lk) { return lk[1]; }); }
-link           = f:node_id l:link_type t:node_id  { return extend(l, {from: f, to: t}); }
+link           = f:node_id l:link_type t:node_id { return extend(l, {from: f, to: t}); }
 link_type      = s:link_line m:link_marker?     { return extend(s, {marker: m || 'none'}); }
 link_line      = s:link_stroke c:(link_text link_stroke)? { return c ? extend(s, {text: c[0]}) : s; }
 link_stroke    = s:[\-\.]                       { return {stroke: s == '.' ? 'dashed' : 'plain'}; }
-link_text      = chars:[A-Za-z ]+               { return chars.join(''); }
+link_text      = chars:[^\-\.\>]+               { return chars.join(''); }
 link_marker    = m:[>]                          { return 'arrow'; }
