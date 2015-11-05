@@ -84,7 +84,7 @@
                         .selectAll('text')
                         .style('font-size', fs+'px')
                         .each(function(d, i) {
-                            var text = d3.select(this).text(null);
+                            var text = d3.select(this).text(null).attr('y', 4);
                             (values[i].label || '').split('  ').forEach(function(line, l) {
                                 text.append('tspan').text(line).attr({x: 0, dy: fs});
                             });
