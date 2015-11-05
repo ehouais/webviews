@@ -82,8 +82,13 @@
                         .attr('transform', 'translate(0,' + cheight + ')')
                         .call(xAxis)
                         .selectAll('text')
-                        .text(function(d, i) { return values[i].label || ''; })
-                        .style('font-size', fs+'px');
+                        .style('font-size', fs+'px')
+                        .each(function(d, i) {
+                            var text = d3.select(this).text(null);
+                            (values[i].label || '').split('  ').forEach(function(line, l) {
+                                text.append('tspan').text(line).attr({x: 0, dy: fs});
+                            });
+                        });
 
                     yScale
                         .range([cheight, 0]);
