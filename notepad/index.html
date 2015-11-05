@@ -83,12 +83,10 @@
                     };
 
                 $render.perfectScrollbar();
-                Notes.bind((function() {
-                    return function(data) {
-                        $source.val(data);
-                        update();
-                    };
-                })());
+                Notes.bind(function(data) {
+                    $source.val(data);
+                    update();
+                });
                 $render.on('dblclick', function() {
                     toggle();
                     $source.focus();
