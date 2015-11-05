@@ -230,7 +230,7 @@
                             return decodeURIComponent(uri.replace(/^[^\?]*\?datauri=data:[^,]+,/, ''));
                         },
                         uriFromData = function(data) {
-                            return appUri+'?datauri=data:text/plain;charset%3Dutf-8,'+data;
+                            return appUri+'?datauri=data:text/plain;charset%3Dutf-8,'+encodeURIComponent(data.replace(/\n/g, '').replace(/%/g, '%25'));
                         },
                         updateViews = function(uri, data) {
                             uri != iframeWindow.location && iframeWindow.location.replace(uri);
