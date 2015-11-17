@@ -36,28 +36,27 @@
         <script>
             var svg = d3.select('body').append('svg'),
                 chart = svg.append('g').attr('font-family', 'gotham'),
-                xScale = d3.scale.ordinal(),
-                xAxis = d3.svg.axis()
-                    .scale(xScale),
-                xx = chart.append('g')
-                    .attr('class', 'x axis'),
                 yScale = d3.scale.linear(),
                 yAxis = d3.svg.axis()
                     .scale(yScale)
                     .orient('left'),
                 yy = chart.append('g')
                     .attr('class', 'y axis'),
+                lines = chart.append('g'),
+                xScale = d3.scale.ordinal(),
+                xAxis = d3.svg.axis()
+                    .scale(xScale),
+                xx = chart.append('g')
+                    .attr('class', 'x axis'),
                 cScale = d3.scale.category10(),
                 nb,
-                indexes,
                 values,
                 unit,
                 unitl,
+                line,
+                svgline,
                 labels,
                 legend,
-                groups,
-                bars,
-                rects,
                 text,
                 lrects,
                 ltexts,
@@ -76,7 +75,7 @@
                         .attr('transform', 'translate('+margins.left+','+margins.top+')');
 
                     xScale
-                        .rangeRoundBands([0, cwidth], nb > 1 ? 0.2 : 0.1);
+                        .rangePoints([0, cwidth]);
 
                     xx
                         .attr('transform', 'translate(0,' + cheight + ')')
@@ -85,7 +84,7 @@
                         .style('font-size', fs+'px')
                         .each(function(d, i) {
                             var text = d3.select(this).text(null).attr('y', 4);
-                            (values[i].label || '').split('  ').forEach(function(line, l) {
+                            (values.labels[i]).split('  ').forEach(function(line, l) {
                                 text.append('tspan').text(line).attr({x: 0, dy: fs});
                             });
                         });
@@ -107,20 +106,9 @@
                         .filter(function(d) { return d; })
                         .classed('minor', true);
 
-                    groups
-                        .attr('transform', function(d, i) { return 'translate('+xScale(i)+',0)'; });
-
-                    rects
-                        .attr('x', function(d, i) { return indexes[i]*Math.ceil(xScale.rangeBand()/nb); })
-                        .attr('y', function(d, i) {
-                            var index = d3.select(this.parentNode.parentNode).datum().index;
-
-                            heights[index] = heights[index] || [];
-                            heights[index][indexes[i]] = (heights[index][indexes[i]] || 0) + d;
-                            return yScale(heights[index][indexes[i]]);
-                        })
-                        .attr('width', Math.ceil(xScale.rangeBand()/nb))
-                        .attr('height', function(d) { return cheight-yScale(d); });
+                    line
+                        .attr('d', svgline)
+                        .attr('stroke-width', fs/5);
 
                     if (labels) {
                         legend
@@ -128,7 +116,8 @@
 
                         lrects
                             .attr('x', cwidth-18)
-                            .attr('height', fs*0.9);
+                            .attr('y', fs/2)
+                            .attr('height', fs/5);
 
                         ltexts
                             .attr('x', cwidth-24)
@@ -147,71 +136,57 @@
             dataSource.bind(function(data) {
                 var str = data.replace(/_/g, ' '),
                     res,
-                    tokens,
-                    index = 0,
-                    max = [];
-
-                values = [];
-                indexes = [];
+                    tokens;
 
                 // get serie labels
                 if (res = str.match(/^\{([^\}]+)\}(.*)/)) {
                     labels = [];
                     tokens = res[1].split(',');
-                    nb = tokens.length;
                     tokens.forEach(function(token, i) {
-                        labels.push(label);
-                        indexes[index++] = i;
+                        labels.push(token);
                     });
                     str = res[2];
                 }
 
                 // get serie values
-                str.split('|').forEach(function(value, i) {
+                values = str.split('|').reduce(function(obj, value, i) {
                     var tokens = value.split(':');
                     if (tokens.length == 1) {
                         tokens.unshift('');
                     }
-                    values[i] = {
-                        index: i,
-                        label: tokens[0], // group label
-                        values: tokens[1].split(',').map(function(val) {
-                            if (res = val.match(/([^(]+)\(([^)]+)\)$/)) {
-                                val = res[1];
-                                unit = res[2];
-                            }
-                            return val.split('+').reduce(function(sum, item) {
-                                return +item+sum;
-                            }, 0);
-                        })
-                    };
-                });
+                    obj.labels.push(tokens[0]);
+                    tokens[1].split(',').forEach(function(value, i) {
+                        if (res = value.match(/([^(]+)\(([^)]+)\)$/)) {
+                            value = res[1];
+                            unit = res[2];
+                        }
+                        (obj.series[i] = obj.series[i] || []).push(value.split('+').reduce(function(sum, item) {
+                            return +item+sum;
+                        }, 0));
+                    });
+                    return obj;
+                }, {labels: [], series: []});
 
-                if (!labels) {
-                    nb = values[0].values.length;
-                    indexes = d3.range(nb);
-                }
+                xScale.domain(d3.range(0, values.labels.length));
+                yScale.domain([0, d3.max(values.series, function(d) { return d3.max(d); })]);
 
-                xScale.domain(d3.range(values.length)),
-                yScale.domain([0, d3.max(values, function(d) {
-                    return d3.max(d.values.reduce(function(stacks, value, i) {
-                        var index = indexes[i];
-                        stacks[index] = (stacks[index] || 0) + value;
-                        return stacks;
-                    }, []));
-                })]);
+                // SVG line generator
+                svgline = d3.svg.line()
+                    .x(function(d, i) {
+                        return xScale(i);
+                    })
+                    .y(function(d) { return yScale(d); });
 
-                line = d3.svg.line()
-                    .x(function(d) { return x(d.date); })
-                    .y(function(d) { return y(d.close); });
-
-                lines = chart.append('g')
+                line = lines
                     .selectAll('.line')
-                    .data(values)
+                    .data(values.series)
                     .enter()
                     .append('path')
                     .attr('class', 'line')
-                    .attr('d', line());
+                    .attr({
+                        stroke: function(d, i) { return cScale(i); },
+                        fill: 'none'
+                    });
 
                 if (labels) {
                     legend = chart.append('g').selectAll('.legend')
