@@ -15,10 +15,10 @@
                 border: 0;
                 overflow: hidden;
             }
-            .axis path {
+            .y.axis path {
                 display: none;
             }
-            .axis line {
+            .x.axis path, .axis line {
                 fill: none;
                 stroke: #000;
                 shape-rendering: crispEdges;
@@ -36,17 +36,20 @@
         <script>
             var svg = d3.select('body').append('svg'),
                 chart = svg.append('g').attr('font-family', 'gotham'),
-                xScale = d3.scale.ordinal(),
-                xAxis = d3.svg.axis()
-                    .scale(xScale),
-                xx = chart.append('g')
-                    .attr('class', 'x axis'),
                 yScale = d3.scale.linear(),
                 yAxis = d3.svg.axis()
                     .scale(yScale)
                     .orient('left'),
                 yy = chart.append('g')
                     .attr('class', 'y axis'),
+                groups = chart.append('g'),
+                group,
+                xScale = d3.scale.ordinal(),
+                xAxis = d3.svg.axis()
+                    .outerTickSize(0)
+                    .scale(xScale),
+                xx = chart.append('g')
+                    .attr('class', 'x axis'),
                 cScale = d3.scale.category10(),
                 nb,
                 indexes,
@@ -55,7 +58,6 @@
                 unitl,
                 labels,
                 legend,
-                groups,
                 bars,
                 rects,
                 text,
@@ -107,7 +109,7 @@
                         .filter(function(d) { return d; })
                         .classed('minor', true);
 
-                    groups
+                    group
                         .attr('transform', function(d, i) { return 'translate('+xScale(i)+',0)'; });
 
                     rects
@@ -204,14 +206,14 @@
                     }, []));
                 })]);
 
-                groups = chart.append('g')
+                group = groups
                     .selectAll('.group')
                     .data(values)
                     .enter()
                     .append('g')
                     .attr('class', 'group');
 
-                bars = groups.selectAll('g')
+                bars = group.selectAll('g')
                     .data(function(d) { return d.values; })
                     .enter()
                     .append('g');
