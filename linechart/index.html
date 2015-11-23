@@ -50,6 +50,7 @@
                     .attr('class', 'x axis'),
                 cScale = d3.scale.category10(),
                 nb,
+                offset,
                 values,
                 unit,
                 unitl,
@@ -139,13 +140,11 @@
                     tokens;
 
                 // get serie labels
-                if (res = str.match(/^\{([^\}]+)\}(.*)/)) {
-                    labels = [];
-                    tokens = res[1].split(',');
-                    tokens.forEach(function(token, i) {
-                        labels.push(token);
-                    });
-                    str = res[2];
+                offset = 0;
+                if (res = str.match(/^\{([^\}|]*)(\|([^\}]+))?\}(.*)/)) {
+                    labels = res[1].split(',');
+                    if (res[3]) offset = res[3];
+                    str = res[4];
                 }
 
                 // get serie values
@@ -168,7 +167,7 @@
                 }, {labels: [], series: []});
 
                 xScale.domain(d3.range(0, values.labels.length));
-                yScale.domain([0, d3.max(values.series, function(d) { return d3.max(d); })]);
+                yScale.domain([offset, d3.max(values.series, function(d) { return d3.max(d); })]);
 
                 // SVG line generator
                 svgline = d3.svg.line()
