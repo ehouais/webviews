@@ -27,6 +27,12 @@
                 stroke: #999;
                 stroke-dasharray: 1,2;
             }
+            .line {
+                fill: none;
+            }
+            .circleMarker {
+                stroke: none;
+            }
         </style>
         <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
         <script src="//cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
@@ -55,6 +61,7 @@
                 unit,
                 unitl,
                 line,
+                marker,
                 svgline,
                 labels,
                 legend,
@@ -142,7 +149,7 @@
                 // get serie labels
                 offset = 0;
                 if (res = str.match(/^\{([^\}|]*)(\|([^\}]+))?\}(.*)/)) {
-                    labels = res[1].split(',');
+                    if (res[1]) labels = res[1].split(',');
                     if (res[3]) offset = res[3];
                     str = res[4];
                 }
@@ -171,9 +178,7 @@
 
                 // SVG line generator
                 svgline = d3.svg.line()
-                    .x(function(d, i) {
-                        return xScale(i);
-                    })
+                    .x(function(d, i) { return xScale(i); })
                     .y(function(d) { return yScale(d); });
 
                 line = lines
@@ -181,10 +186,32 @@
                     .data(values.series)
                     .enter()
                     .append('path')
-                    .attr('class', 'line')
                     .attr({
+                        class: 'line',
                         stroke: function(d, i) { return cScale(i); },
-                        fill: 'none'
+                        'marker-start': function(d, i) { return 'url(#marker_'+i+')'; },
+                        'marker-mid': function(d, i) { return 'url(#marker_'+i+')'; },
+                        'marker-end': function(d, i) { return 'url(#marker_'+i+')'; }
+                    });
+
+                marker = svg.append('defs').selectAll('marker')
+                    .data(values.series)
+                    .enter()
+                    .append('marker')
+                    .attr({
+                        id: function(d, i) { return 'marker_'+i; },
+                        markerWidth: 8,
+                        markerHeight: 8,
+                        refX: 5,
+                        refY: 5
+                    })
+                    .append('circle')
+                    .attr({
+                        cx: 5,
+                        cy: 5,
+                        r: 1.5,
+                        fill: function(d, i) { return cScale(i); },
+                        class: 'circleMarker'
                     });
 
                 if (labels) {
