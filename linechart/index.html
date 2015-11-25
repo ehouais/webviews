@@ -162,11 +162,12 @@
                     }
                     obj.labels.push(tokens[0]);
                     tokens[1].split(',').forEach(function(value, i) {
-                        if (res = value.match(/([^(]+)\(([^)]+)\)$/)) {
+                        if (res = value.match(/([^(]*)\(([^)]+)\)$/)) {
                             value = res[1];
                             unit = res[2];
                         }
-                        (obj.series[i] = obj.series[i] || []).push(value.split('+').reduce(function(sum, item) {
+                        if (value == '') value = null;
+                        (obj.series[i] = obj.series[i] || []).push(value == null ? null : value.split('+').reduce(function(sum, item) {
                             return +item+sum;
                         }, 0));
                     });
@@ -179,7 +180,8 @@
                 // SVG line generator
                 svgline = d3.svg.line()
                     .x(function(d, i) { return xScale(i); })
-                    .y(function(d) { return yScale(d); });
+                    .y(function(d) { return yScale(d); })
+                    .defined(function(d) { return d != null; });
 
                 line = lines
                     .selectAll('.line')
