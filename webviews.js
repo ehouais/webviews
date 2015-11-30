@@ -27,6 +27,7 @@
                     handlers = [],
                     dataUri = uriParams(window.location.href).datauri,
                     dataScheme = dataUri.substr(0, 5) == 'data:',
+                    lastModified,
                     cipher = (function() {
                         var password;
 
@@ -112,10 +113,12 @@
                             $.ajax({
                                 url: dataUri,
                                 dataType: 'text',
-                                ifModified: true,
                                 xhrFields: {withCredentials: true}
                             }).done(function(data, status, xhr) {
-                                if (xhr.status != 304) { // "Not Modified"
+                                // Detect resource modification without interfering with browser cache management
+                                var lm = xhr.getResponseHeader("Last-Modified");
+                                if (lm != lastModified) {
+                                    lastModified = lm;
                                     publish(cipher.in(data));
                                 }
                             }).always(function() {
