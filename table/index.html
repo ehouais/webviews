@@ -38,9 +38,9 @@
                 Table.bind(function(data) {
                     var lines = data.split('\n'),
                         $table = $('table'),
-                        $tbody = $('tbody', $table);
+                        $tbody = $('tbody', $table).empty();
 
-                    $table.find('thead').append('<tr>'+lines.shift().split(',').map(function(column) {
+                    ('thead', $table).empty().append('<tr>'+lines.shift().split(',').map(function(column) {
                         return '<th>'+column+'</th>';
                     })+'</tr>');
 
