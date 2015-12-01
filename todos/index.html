@@ -7,6 +7,8 @@
         <link href="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.4/css/bootstrap.min.css" rel="stylesheet">
         <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.3/moment.min.js"></script>
         <script src="//cdnjs.cloudflare.com/ajax/libs/blueimp-md5/1.1.0/js/md5.min.js"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/jquery.perfect-scrollbar/0.6.7/js/min/perfect-scrollbar.jquery.min.js"></script>
+        <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/jquery.perfect-scrollbar/0.6.7/css/perfect-scrollbar.min.css"/>
         <script src="http://dev.ehouais.net/webviews/webviews.js"></script>
         <style>
             @font-face {
@@ -16,7 +18,7 @@
                 font-style: normal;
             }
             body {
-				font-family: gotham;
+                font-family: gotham;
                 background-color: transparent;
                 display: flex;
                 flex-direction: column;
@@ -30,8 +32,8 @@
                 background-color: #f3f3f3;
                 height: 24px;
                 padding: 1px 3px;
-                margin: 2px;
-                border-radius: 5px;
+                margin: 1px 0;
+                border-radius: 4px;
                 position: relative;
                 overflow: hidden;
             }
@@ -125,9 +127,9 @@
             .week ul, .project ul {
                 padding-left: 0px;
             }
-			#weeks {
-				display: none;
-			}
+            #weeks {
+                display: none;
+            }
             #weeks .weekn {
                 display: none;
             }
@@ -143,23 +145,14 @@
             #projects > li {
                 background-color: transparent;
                 border: none;
+                padding: 10px 0 0 0;
             }
-            .project .header {
-                height: 10px;
-                padding: 1px;
-            }
-            .project .header .mylabel {
-                position: relative;
-                left: -12px;
-                top: -5px;
-				cursor: pointer;
+            .project .mylabel {
+                cursor: pointer;
             }
             .weekcol {
                 width: 60px;
-				float: left;
-            }
-            .project ul li:first-child {
-                margin-top: 9px;
+                float: left;
             }
             #form .col-lg-7 {
                 padding: 0;
@@ -180,29 +173,31 @@
                 padding-left: 4px;
                 padding-right: 4px;
             }
-			.week {
-				min-height: 90px;
-				padding-left: 0;
-			}
-			.week .todos {
-				margin-left: 55px;
-			}
+            .week {
+                min-height: 90px;
+                padding-left: 0;
+            }
+            .week .todos {
+                margin-left: 55px;
+            }
             #display {
-                margin-bottom: 4px;
+                display: none;
+                margin-bottom: 2px;
                 line-height: 21px;
             }
-			#display label {
-				margin-left: 10px;
-			}
+            #display label {
+                margin-left: 10px;
+            }
             #form {
                 border: none;
-                margin: 5px;
+                margin-bottom: 5px;
             }
             #projects, #weeks {
-                flex: 1;
-                overflow: auto;
                 margin-bottom: 0;
-                border-top: 1px solid #e2e2e2;
+            }
+            #list {
+                height: 100%;
+                position: relative;
             }
         </style>
         <script>
@@ -217,53 +212,54 @@
                     return '#'+md5(str).substr(-7, 6);
                 };
 
-			var Todos = Webviews.data();
+            var Todos = Webviews.data();
 
             $(function() {
-				$('#display input[value="project"]').on('click', function() { $('#projects').show(); $('#weeks').hide(); });
-				$('#display input[value="week"]').on('click', function() { $('#projects').hide(); $('#weeks').show(); });
+                $('#display input[value="project"]').on('click', function() { $('#projects').show(); $('#weeks').hide(); });
+                $('#display input[value="week"]').on('click', function() { $('#projects').hide(); $('#weeks').show(); });
+                $('#list').perfectScrollbar();
 
                 Todos.bind((function() {
-					var $wlst = $('#weeks'), $wtpl = $wlst.find('.template').removeClass('template').remove(),
-						$plst = $('#projects'), $ptpl = $plst.find('.template').removeClass('template').remove(),
-						$ttpl = $ptpl.find('.todo').remove(),
-						update = function() {
-							Todos.save(JSON.stringify(todos));
-							Todos.trigger();
-						},
-						todos,
-						$todo = function(todo, index, project) {
-							var done = todo.done !== undefined && todo.done,
-								$t = $ttpl.clone().data('index', index);
+                    var $wlst = $('#weeks'), $wtpl = $wlst.find('.template').removeClass('template').remove(),
+                        $plst = $('#projects'), $ptpl = $plst.find('.template').removeClass('template').remove(),
+                        $ttpl = $ptpl.find('.todo').remove(),
+                        update = function() {
+                            Todos.save(JSON.stringify(todos));
+                            Todos.trigger();
+                        },
+                        todos,
+                        $todo = function(todo, index, project) {
+                            var done = todo.done !== undefined && todo.done,
+                                $t = $ttpl.clone().data('index', index);
 
-							$t.toggleClass('done', done);
-							$t.attr('title', todo.description);
-							$t.find('.titre').text(todo.description.substr(0, 75)+(todo.description.length > 75 ? '...' : ''));
-							$t.find('.mylabel').text(project.title).css('background-color', colorFromString(project.title));
-							$t.find('.todook').toggleClass('active', done).on('click', function() { todo.done = !done; update(); });
-							$t.find('.weekn').on('click', function() { todo.week = cweek.iso; todo.year = cweek.year; update(); });
-							$t.find('.prevweek').on('click', function() { todo.week = todo.week+1; update(); });
-							$t.find('.nextweek').on('click', function() { todo.week = todo.week-1; update(); });
-							$t.find('.noweek').on('click', function() { delete todo.week; update(); });
+                            $t.toggleClass('done', done);
+                            $t.attr('title', todo.description);
+                            $t.find('.titre').text(todo.description.substr(0, 75)+(todo.description.length > 75 ? '...' : ''));
+                            $t.find('.mylabel').text(project.title).css('background-color', colorFromString(project.title));
+                            $t.find('.todook').toggleClass('active', done).on('click', function() { todo.done = !done; update(); });
+                            $t.find('.weekn').on('click', function() { todo.week = cweek.iso; todo.year = cweek.year; update(); });
+                            $t.find('.prevweek').on('click', function() { todo.week = todo.week+1; update(); });
+                            $t.find('.nextweek').on('click', function() { todo.week = todo.week-1; update(); });
+                            $t.find('.noweek').on('click', function() { delete todo.week; update(); });
 
-							var $md = $t.find('.btn-group.md').addClass('md'+todo.workload);
-							if (todo.done) {
-								$md.find('button').prop('disabled', true);
-							} else {
-								$md.on('mouseenter mouseleave', '.btn', function(e) {
-									var md = $(this).data('md');
-									$(this).parent().toggleClass('md'+md, e.type == 'mouseenter' || todo.workload == md);
-								})
-								.on('click', '.btn', function(e) {
-									var md = $(this).data('md');
-									todo.workload = (todo.workload == md ? 0 : md);
-									update();
-								});
-							}
+                            var $md = $t.find('.btn-group.md').addClass('md'+todo.workload);
+                            if (todo.done) {
+                                $md.find('button').prop('disabled', true);
+                            } else {
+                                $md.on('mouseenter mouseleave', '.btn', function(e) {
+                                    var md = $(this).data('md');
+                                    $(this).parent().toggleClass('md'+md, e.type == 'mouseenter' || todo.workload == md);
+                                })
+                                .on('click', '.btn', function(e) {
+                                    var md = $(this).data('md');
+                                    todo.workload = (todo.workload == md ? 0 : md);
+                                    update();
+                                });
+                            }
 
-							return $t;
-						},
-						weeks, windex, projects, pindex,
+                            return $t;
+                        },
+                        weeks, windex, projects, pindex,
                         $form = $('#form');
 
                     $(window).on('message', function(e) {
@@ -281,131 +277,131 @@
                         }
                     });
 
-					return function(data) {
-						todos = JSON.parse(data);
-						weeks = [];
-						windex = {};
-						projects = [];
-						pindex = {};
-						$wlst.empty();
-						$plst.empty();
+                    return function(data) {
+                        todos = JSON.parse(data);
+                        weeks = [];
+                        windex = {};
+                        projects = [];
+                        pindex = {};
+                        $wlst.empty();
+                        $plst.empty();
 
-						$('#projects, #weeks').off('click', '.delete').on('click', '.delete', function(e) {
-							todos.splice($(e.currentTarget).parent().parent().data('index'), 1);
-							update();
-						});
-						todos.forEach(function(todo, i) {
-							var project = pindex[todo.project];
-							if (!project) {
-								var $dom = $ptpl.clone();
-								project = {title: todo.project, id: projects.length, dom: $dom};
-								$dom.appendTo($plst);
-								$dom.find('.header .mylabel')
-								.text(project.title)
-								.css('background-color', colorFromString(project.title))
-								.on('click', function() {
+                        $('#projects, #weeks').off('click', '.delete').on('click', '.delete', function(e) {
+                            todos.splice($(e.currentTarget).parent().parent().data('index'), 1);
+                            update();
+                        });
+                        todos.forEach(function(todo, i) {
+                            var project = pindex[todo.project];
+                            if (!project) {
+                                var $dom = $ptpl.clone();
+                                project = {title: todo.project, id: projects.length, dom: $dom};
+                                $dom.appendTo($plst);
+                                $dom.find('.mylabel')
+                                .text(project.title)
+                                .css('background-color', colorFromString(project.title))
+                                .on('click', function() {
                                     $form[0].contentWindow.postMessage({type: 'set', values: {project: project.title}}, 'http://dev.ehouais.net');
-								});
-								projects.push(project);
-								pindex[todo.project] = project;
-							}
-							if (todo.week) {
-								var key = todo.year+'-'+todo.week,
-									week = windex[key];
-								if (!week) {
-									var date = moment().year(todo.year).isoWeek(todo.week),
-										$dom = $wtpl.clone();
-									week = {year: todo.year, iso: todo.week, dom: $dom};
-									$dom.toggleClass('list-group-item-info', compareWeeks(week, cweek) < 0);
-									$dom.find('.weeknb').text(todo.week);
-									$dom.find('.weekrng').html(date.day("Monday").format('DD/MM')+'<br/>'+date.day("Friday").format('DD/MM'));
-									weeks.push(week);
-									windex[key] = week;
-								}
-								$todo(todo, i, project).appendTo(week.dom.find('ul'));
-							} else {
-								$todo(todo, i, project).appendTo(project.dom.find('ul'));
-							}
-						});
-						weeks.sort(compareWeeks);
-						weeks.forEach(function(week) {
-							week.dom.prependTo($wlst);
-						});
-						$('#project, #description').val('');
-					};
-				})());
+                                });
+                                projects.push(project);
+                                pindex[todo.project] = project;
+                            }
+                            if (todo.week) {
+                                var key = todo.year+'-'+todo.week,
+                                    week = windex[key];
+                                if (!week) {
+                                    var date = moment().year(todo.year).isoWeek(todo.week),
+                                        $dom = $wtpl.clone();
+                                    week = {year: todo.year, iso: todo.week, dom: $dom};
+                                    $dom.toggleClass('list-group-item-info', compareWeeks(week, cweek) < 0);
+                                    $dom.find('.weeknb').text(todo.week);
+                                    $dom.find('.weekrng').html(date.day("Monday").format('DD/MM')+'<br/>'+date.day("Friday").format('DD/MM'));
+                                    weeks.push(week);
+                                    windex[key] = week;
+                                }
+                                $todo(todo, i, project).appendTo(week.dom.find('ul'));
+                            } else {
+                                $todo(todo, i, project).appendTo(project.dom.find('ul'));
+                            }
+                        });
+                        weeks.sort(compareWeeks);
+                        weeks.forEach(function(week) {
+                            week.dom.prependTo($wlst);
+                        });
+                        $('#project, #description').val('');
+                    };
+                })());
             });
         </script>
     </head>
     <body>
         <iframe src="http://dev.ehouais.net/webviews/forms?datauri=data:text/plain,project:Project,description:Description" id="form"></iframe>
-		<form id="display">
-			<label class="radio-inline">
-				<input type="radio" name="groupby" value="project" checked> Group by project
-			</label>
-			<label class="radio-inline">
-				<input type="radio" name="groupby" value="week"> Group by week
-			</label>
-			<label class="checkbox-inline">
-				<input type="checkbox" name="showall" value="showall"> Show all
-			</label>
-		</form>
-		<ul id="projects" class="list-group">
-			<li class="list-group-item project template">
-				<div class="header">
-					<span class="mylabel"></span>
-				</div>
-				<ul>
-					<li class="todo">
-						<span class="mylabel"></span>
-						<span class="titre"></span>
-						<div class="md btn-group btn-group-xs pull-right">
-							<button type="button" class="btn btn-default md5" data-md="5" title="0,5 hj">&nbsp;</button>
-							<button type="button" class="btn btn-default md10" data-md="10" title="1 hj">&nbsp;</button>
-							<button type="button" class="btn btn-default md15" data-md="15" title="1,5 hj">&nbsp;</button>
-							<button type="button" class="btn btn-default md20" data-md="20" title="2 hj">&nbsp;</button>
-							<button type="button" class="btn btn-default md25" data-md="25" title="2,5 hj">&nbsp;</button>
-							<button type="button" class="btn btn-default md30" data-md="30" title="3 hj">&nbsp;</button>
-							<button type="button" class="btn btn-default md35" data-md="35" title="3,5 hj">&nbsp;</button>
-							<button type="button" class="btn btn-default md40" data-md="40" title="4 hj">&nbsp;</button>
-							<button type="button" class="btn btn-default md45" data-md="45" title="4,5 hj">&nbsp;</button>
-							<button type="button" class="btn btn-default md50" data-md="50" title="5 hj">&nbsp;</button>
-						</div>
-						<span class="buttons pull-right">
-							<button type="button" class="btn btn-default btn-xs todook" title="Toggle todo as done/to do">
-								<span class="glyphicon glyphicon-ok"></span>
-							</button>
-							<button type="button" class="btn btn-default btn-xs weekn" title="Add todo to current week">
-								<span class="glyphicon glyphicon-chevron-right"></span>
-							</button>
-							<button type="button" class="btn btn-default btn-xs prevweek" title="Move todo to previous week">
-								<span class="glyphicon glyphicon-chevron-up"></span>
-							</button>
-							<button type="button" class="btn btn-default btn-xs nextweek" title="Move todo to next week">
-								<span class="glyphicon glyphicon-chevron-down"></span>
-							</button>
-							<button type="button" class="btn btn-default btn-xs noweek" title="Remove todo from planning">
-								<span class="glyphicon glyphicon-chevron-left"></span>
-							</button>
-							<button type="button" class="btn btn-default btn-xs delete" title="Delete todo">
-								<span class="glyphicon glyphicon-remove"></span>
-							</button>
-						</span>
-					</li>
-				</ul>
-			</li>
-		</ul>
-		<ul id="weeks" class="list-group">
-			<li class="list-group-item week template">
-				<div class="text-center weekcol">
-					<div class="weeknb"></div>
-					<div class="weekrng"></div>
-				</div>
-				<div class="todos">
-					<ul>
-					</ul>
-				</div>
-			</li>
-		</ul>
+        <form id="display">
+            <label class="radio-inline">
+                <input type="radio" name="groupby" value="project" checked> Group by project
+            </label>
+            <label class="radio-inline">
+                <input type="radio" name="groupby" value="week"> Group by week
+            </label>
+            <label class="checkbox-inline">
+                <input type="checkbox" name="showall" value="showall"> Show all
+            </label>
+        </form>
+        <div id="list">
+            <ul id="projects" class="list-group">
+                <li class="list-group-item project template">
+                    <span class="mylabel"></span>
+                    <ul>
+                        <li class="todo">
+                            <span class="mylabel"></span>
+                            <span class="titre"></span>
+                            <div class="md btn-group btn-group-xs pull-right">
+                                <button type="button" class="btn btn-default md5" data-md="5" title="0,5 hj">&nbsp;</button>
+                                <button type="button" class="btn btn-default md10" data-md="10" title="1 hj">&nbsp;</button>
+                                <button type="button" class="btn btn-default md15" data-md="15" title="1,5 hj">&nbsp;</button>
+                                <button type="button" class="btn btn-default md20" data-md="20" title="2 hj">&nbsp;</button>
+                                <button type="button" class="btn btn-default md25" data-md="25" title="2,5 hj">&nbsp;</button>
+                                <button type="button" class="btn btn-default md30" data-md="30" title="3 hj">&nbsp;</button>
+                                <button type="button" class="btn btn-default md35" data-md="35" title="3,5 hj">&nbsp;</button>
+                                <button type="button" class="btn btn-default md40" data-md="40" title="4 hj">&nbsp;</button>
+                                <button type="button" class="btn btn-default md45" data-md="45" title="4,5 hj">&nbsp;</button>
+                                <button type="button" class="btn btn-default md50" data-md="50" title="5 hj">&nbsp;</button>
+                            </div>
+                            <span class="buttons pull-right">
+                                <button type="button" class="btn btn-default btn-xs todook" title="Toggle todo as done/to do">
+                                    <span class="glyphicon glyphicon-ok"></span>
+                                </button>
+                                <button type="button" class="btn btn-default btn-xs weekn" title="Add todo to current week">
+                                    <span class="glyphicon glyphicon-chevron-right"></span>
+                                </button>
+                                <button type="button" class="btn btn-default btn-xs prevweek" title="Move todo to previous week">
+                                    <span class="glyphicon glyphicon-chevron-up"></span>
+                                </button>
+                                <button type="button" class="btn btn-default btn-xs nextweek" title="Move todo to next week">
+                                    <span class="glyphicon glyphicon-chevron-down"></span>
+                                </button>
+                                <button type="button" class="btn btn-default btn-xs noweek" title="Remove todo from planning">
+                                    <span class="glyphicon glyphicon-chevron-left"></span>
+                                </button>
+                                <button type="button" class="btn btn-default btn-xs delete" title="Delete todo">
+                                    <span class="glyphicon glyphicon-remove"></span>
+                                </button>
+                            </span>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+            <ul id="weeks" class="list-group">
+                <li class="list-group-item week template">
+                    <div class="text-center weekcol">
+                        <div class="weeknb"></div>
+                        <div class="weekrng"></div>
+                    </div>
+                    <div class="todos">
+                        <ul>
+                        </ul>
+                    </div>
+                </li>
+            </ul>
+        </div>
     </body>
 </html>
