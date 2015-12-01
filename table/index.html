@@ -40,7 +40,7 @@
             var Table = Webviews.data();
 
             $(function() {
-                //$render.perfectScrollbar();
+                $(document.body).perfectScrollbar();
 
                 Table.bind(function(data) {
                     var lines = data.split('\n'),
