@@ -57,14 +57,13 @@
                         })+'</tr>');
                     });
 
-                    $table.attr('data-sortable', '');
                     Sortable.init();
                 });
             });
         </script>
     </head>
     <body>
-        <table class="sortable-theme-bootstrap">
+        <table data-sortable class="sortable-theme-bootstrap">
             <thead></thead>
             <tbody></tbody>
         </table>
