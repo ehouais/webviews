@@ -40,7 +40,7 @@
                         $table = $('table'),
                         $tbody = $('tbody', $table).empty();
 
-                    ('thead', $table).empty().append('<tr>'+lines.shift().split(',').map(function(column) {
+                    $('thead', $table).empty().append('<tr>'+lines.shift().split(',').map(function(column) {
                         return '<th>'+column+'</th>';
                     })+'</tr>');
 
