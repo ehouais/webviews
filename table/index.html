@@ -41,7 +41,7 @@
 
             $(function() {
                 var $table = $('table'),
-                    $tbody = $('tbody', $table).empty();
+                    $tbody = $('tbody', $table);
 
                 $(document.body).perfectScrollbar();
 
@@ -52,6 +52,7 @@
                         return '<th>'+column+'</th>';
                     })+'</tr>');
 
+                    $tbody.empty();
                     lines.forEach(function(line) {
                         $tbody.append('<tr>'+line.split(',').map(function(column) {
                             return '<td>'+column+'</td>';
