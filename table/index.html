@@ -28,6 +28,12 @@
                 text-align: left;
                 padding: 0.4em;
             }
+            table[data-sortable] th[data-sorted-direction="descending"]:after {
+                margin-top: 5px;
+            }
+            table[data-sortable] th[data-sorted-direction="ascending"]:after {
+                margin-top: 0;
+            }
         </style>
         <script>
             var Table = Webviews.data();
