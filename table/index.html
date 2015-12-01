@@ -40,12 +40,13 @@
             var Table = Webviews.data();
 
             $(function() {
+                var $table = $('table'),
+                    $tbody = $('tbody', $table).empty();
+
                 $(document.body).perfectScrollbar();
 
                 Table.bind(function(data) {
-                    var lines = data.split('\n'),
-                        $table = $('table'),
-                        $tbody = $('tbody', $table).empty();
+                    var lines = data.split('\n');
 
                     $('thead', $table).empty().append('<tr>'+lines.shift().split(',').map(function(column) {
                         return '<th>'+column+'</th>';
