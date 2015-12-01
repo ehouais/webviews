@@ -57,6 +57,7 @@
                         })+'</tr>');
                     });
 
+                    $table.removeAttr('data-sortable-initialized');
                     Sortable.initTable($table[0]);
                 });
             });
