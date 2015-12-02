@@ -64,7 +64,7 @@
                     });
 
                     $table.removeAttr('data-sortable-initialized');
-                    Sortable.initTable($table[0]);
+                    data ? Sortable.initTable($table.show()[0]) : $table.hide();
                 });
             });
         </script>
