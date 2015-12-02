@@ -141,7 +141,7 @@
                     load = function() {
                         if (dataScheme) {
                             // data: URIs are (for now...) parsed and not fetched because browsers have difficulties handling them in a CORS context
-                            publish(cipher.in(uriData(dataUri), dataUri));
+                            cipher.in(uriData(dataUri), publish);
                         } else {
                             $.ajax({
                                 url: dataUri,
