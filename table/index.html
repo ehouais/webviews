@@ -50,7 +50,7 @@
                 $(document.body).perfectScrollbar();
 
                 Table.bind(function(data) {
-                    var lines = data.split('\n');
+                    var lines = (data || '').split('\n');
 
                     $('thead', $table).empty().append('<tr>'+lines.shift().split(',').map(function(column) {
                         return '<th>'+column+'</th>';
