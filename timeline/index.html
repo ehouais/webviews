@@ -200,18 +200,19 @@
                             if (d.value) {
                                 return 'M'+x1+' 0L'+x1+' '+vh+'L'+x2+' '+vh+'L'+x2+' 0Z';
                             } else if (x) {
-                                return 'M'+(x-th/2)+' '+(-th)+'l'+(th)+' 0l'+(-th/2)+' '+th+'l'+(-th/2)+' '+(-th)+'Z';
+                                return 'M'+x+' '+(-th/2)+'l'+(th/3)+' '+(th/2)+'l'+(-th/3)+' '+(th/2)+'l'+(-th/3)+' '+(-th/2)+'Z';
                             } else {
                                 return 'M'+x1+' '+(-h/2)+'L'+x2+' '+(-h/2)+'L'+x2+' '+(h/2)+'L'+x1+' '+(h/2)+'Z';
                             }
-                        });
+                        })
+                        .attr('stroke', function(d) { return d.datetime ? '#fff' : 'none'; });
 
                     texts
                         .style('font-size', fs+'px')
                         .attr('x', function(d) { return xScale(d.start || d.datetime); })
                         .attr('y', function(d) {
                             var h = yScale.rangeBand();
-                            return (d.value ? -2*h*d.value : d.end ? -h/2 : -Math.min(h, 60))-fs/6;
+                            return (d.value ? -2*h*d.value : -h/2)-fs/6;
                         })
                         .style('text-anchor', function(d) { return d.datetime ? 'middle' : 'start'; });
 
