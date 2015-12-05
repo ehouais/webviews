@@ -53,7 +53,13 @@
                     var lines = (data || '').split('\n');
 
                     $('thead', $table).empty().append('<tr>'+lines.shift().split(',').map(function(column) {
-                        return '<th>'+column+'</th>';
+                        var ds = '';
+
+                        if (column.substr(-1) == '*') {
+                            ds = ' data-sortable="false"';
+                            column = column.substr(0, column.length-1);
+                        }
+                        return '<th'+ds+'>'+column+'</th>';
                     })+'</tr>');
 
                     $tbody.empty();
