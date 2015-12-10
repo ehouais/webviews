@@ -28,6 +28,9 @@
                 width: 100%;
                 line-height: inherit;
             }
+            table[data-sortable] th {
+                text-align: center;
+            }
             table[data-sortable] th, table[data-sortable] td {
                 text-align: left;
                 padding: 0.4em;
@@ -37,6 +40,9 @@
             }
             table[data-sortable] th[data-sorted-direction="ascending"]:after {
                 margin-top: 0;
+            }
+            table[data-sortable] th[data-sortable="false"]:after {
+                display: none;
             }
         </style>
         <script>
