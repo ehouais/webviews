@@ -86,7 +86,7 @@
                                 cb(data);
                             },
                             out: function(data) {
-                                return password ? sjcl.encrypt(password, data) : data;
+                                return password ? sjcl.encrypt(password, data, {ks: 256}) : data;
                             }
                         };
                     })(),
