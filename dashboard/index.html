@@ -6,23 +6,23 @@
         <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
         <script src="http://dev.ehouais.net/webviews/webviews.js"></script>
         <style>
-			* {
-				-moz-box-sizing: border-box;
-				-webkit-box-sizing: border-box;
-				box-sizing: border-box;
-				font-family: arial;
-			}
-			body {
-				margin: 0;
-				padding: 0;
-				overflow: hidden;
-			}
-			#dom  {
-				width: 100%;
-				height: 100%;
-				overflow: hidden;
-				background-color: #74A9D8;
-			}
+            * {
+                -moz-box-sizing: border-box;
+                -webkit-box-sizing: border-box;
+                box-sizing: border-box;
+                font-family: arial;
+            }
+            body {
+                margin: 0;
+                padding: 0;
+                overflow: hidden;
+            }
+            #dom  {
+                width: 100%;
+                height: 100%;
+                overflow: hidden;
+                background-color: #74A9D8;
+            }
             #container {
                 display: table;
                 height: 100%;
@@ -36,42 +36,42 @@
                 border: none;
                 width: 400px;
             }
-			.frame {
-				position: absolute;
-				overflow: hidden;
-				background-color: rgba(255, 255, 255, 0.4);
-			}
+            .frame {
+                position: absolute;
+                overflow: hidden;
+                background-color: rgba(255, 255, 255, 0.4);
+            }
             .image {
                 background-repeat: no-repeat;
                 background-position: center;
                 background-size: cover;
             }
-			.label {
-				font-family: encode;
-			}
-			.link {
-				font-family: encode;
-				display: block;
-				height: 16px;
-				background-color: #ddd;
-				border-radius: 4px;
-				text-align: center;
-				font-size: 12px;
-				text-decoration: none;
-				color: rgb(0, 0, 238);
-				line-height: 125%;
-			}
-			.link:hover {
-				background-color: #fff;
-				color: #f00;
-			}
-			#overlay, #creation_popup, #edition_popup, #popup_overlay {
-				position: absolute;
-				top: 0;
-				width: 100%;
-				height: 100%;
+            .label {
+                font-family: encode;
+            }
+            .link {
+                font-family: encode;
+                display: block;
+                height: 16px;
+                background-color: #ddd;
+                border-radius: 4px;
+                text-align: center;
+                font-size: 12px;
+                text-decoration: none;
+                color: rgb(0, 0, 238);
+                line-height: 125%;
+            }
+            .link:hover {
+                background-color: #fff;
+                color: #f00;
+            }
+            #overlay, #creation_popup, #edition_popup, #popup_overlay {
+                position: absolute;
+                top: 0;
+                width: 100%;
+                height: 100%;
                 display: none;
-			}
+            }
             #popup_overlay {
                 background-color: #000;
                 opacity: 0.6;
@@ -79,15 +79,15 @@
             #creation_popup, #edition_popup {
                 border: none;
             }
-			.mask {
-				position: absolute;
-				cursor: pointer;
-				background-color: #ffffff;
-				opacity: 0.3;
-			}
+            .mask {
+                position: absolute;
+                cursor: pointer;
+                background-color: #ffffff;
+                opacity: 0.3;
+            }
         </style>
         <script>
-			var dataSource = Webviews.data(),
+            var dataSource = Webviews.data(),
                 maxId = 0,
                 dashboard,
                 formDomain = 'http://dev.ehouais.net',
@@ -96,9 +96,9 @@
                     dataSource.trigger();
                 };
 
-			$(function() {
-				var $db = $(document.body),
-				    $dom = $('#dom'),
+            $(function() {
+                var $db = $(document.body),
+                    $dom = $('#dom'),
                     $getFrame = function(id) {
                         return $('#frame_'+id, $dom);
                     },
@@ -150,11 +150,11 @@
                 });
 
                 // Setup controllers
-				(function() {
+                (function() {
                     var $overlay = $('#overlay'),
                         $creation_popup = $('#creation_popup'),
                         $edition_popup = $('#edition_popup'),
-				        step = 4,
+                        step = 4,
                         selected,
                         updateMask = function($mask) {
                             setFrame($mask, $getFrame($mask.data('frame_id')).data('frame'));
@@ -176,9 +176,9 @@
                         };
 
                     // Prevent some default behaviours
-					$dom.on('mousedown mousewheel', function(e) {
-						e.preventDefault();
-					});
+                    $dom.on('mousedown mousewheel', function(e) {
+                        e.preventDefault();
+                    });
 
                     // edit mode toggle ans masks creation
                     $dom.on('mousedown', function() {
@@ -244,8 +244,8 @@
                     });
 
                     // Creation popup using "Forms" webview
-					$dom.on('dblclick', function() {
-						var onMessage = function(e) {
+                    $dom.on('dblclick', function() {
+                        var onMessage = function(e) {
                                 var event = e.originalEvent,
                                     msg = event.data;
 
@@ -266,73 +266,73 @@
                         $creation_popup.show();
                         $('#popup_overlay').show();
                         $(window).on('message', onMessage);
-					});
+                    });
 
-					// Overlay installment for frames manipulation
-					$overlay.on('click', function(e) {
-						if (selected) {
-							$(selected).css('background-color', '#ffffff');
-						}
-						if (e.target == $overlay.get(0)) {
-							selected = null;
+                    // Overlay installment for frames manipulation
+                    $overlay.on('click', function(e) {
+                        if (selected) {
+                            $(selected).css('background-color', '#ffffff');
+                        }
+                        if (e.target == $overlay.get(0)) {
+                            selected = null;
                             $('.mask', $overlay).remove();
-							$overlay.hide();
-						} else {
-							selected = e.target;
-							$(selected).css('background-color', '#ff0000');
-						}
-					});
+                            $overlay.hide();
+                        } else {
+                            selected = e.target;
+                            $(selected).css('background-color', '#ff0000');
+                        }
+                    });
 
                     // Frame handling through masks
-					$overlay.on('mousedown', '.mask', function(e) {
-						var $mask = $(e.target),
+                    $overlay.on('mousedown', '.mask', function(e) {
+                        var $mask = $(e.target),
                             $frame = $getFrame($mask.data('frame_id')),
                             frame = $frame.data('frame'),
-						    mx = e.pageX, my = e.pageY,
-						    dx1 = mx-frame.left, dy1 = my-frame.top,
-						    dx2 = frame.right-mx, dy2 = frame.bottom-my,
-						    moving = (dx2 > 10 || dy2 > 10),
+                            mx = e.pageX, my = e.pageY,
+                            dx1 = mx-frame.left, dy1 = my-frame.top,
+                            dx2 = frame.right-mx, dy2 = frame.bottom-my,
+                            moving = (dx2 > 10 || dy2 > 10),
                             snap = function(val) {
                                 return val-val%step;
                             },
-							mm = function(e) {
+                            mm = function(e) {
                                 frame = $frame.data('frame'),
-								mx = e.pageX;
-								my = e.pageY;
-								if (moving) {
-									frame.left = snap(mx-dx1);
+                                mx = e.pageX;
+                                my = e.pageY;
+                                if (moving) {
+                                    frame.left = snap(mx-dx1);
                                     frame.top = snap(my-dy1);
-								}
-								frame.right = snap(mx+dx2);
+                                }
+                                frame.right = snap(mx+dx2);
                                 frame.bottom = snap(my+dy2);
                                 updateMask($mask);
                                 refresh();
-							},
-							mu = function() {
-								$overlay.off('mousemove', mm).off('mouseup', mu);
-							};
+                            },
+                            mu = function() {
+                                $overlay.off('mousemove', mm).off('mouseup', mu);
+                            };
 
-						$overlay.on('mousemove', mm).on('mouseup', mu);
-						e.preventDefault();
-					});
-					$overlay.on('mousedown mousewheel', function(e) {
-						e.preventDefault();
-					});
+                        $overlay.on('mousemove', mm).on('mouseup', mu);
+                        e.preventDefault();
+                    });
+                    $overlay.on('mousedown mousewheel', function(e) {
+                        e.preventDefault();
+                    });
 
                     // DnD
-					$dom.on({
-						'dragstart dragenter dragleave dragover dragend': function noop(e) {
-    						e.stopPropagation();
-    						e.preventDefault();
-    					},
-						'drop': function(e) {
-							noop(e);
-							var link = e.originalEvent.dataTransfer.getData('text/uri-list');
-							frame(200, 200, link);
-						}
-					});
-				})();
-			});
+                    $dom.on({
+                        'dragstart dragenter dragleave dragover dragend': function noop(e) {
+                            e.stopPropagation();
+                            e.preventDefault();
+                        },
+                        'drop': function(e) {
+                            noop(e);
+                            var link = e.originalEvent.dataTransfer.getData('text/uri-list');
+                            frame(200, 200, link);
+                        }
+                    });
+                })();
+            });
         </script>
     </head>
     <body>
