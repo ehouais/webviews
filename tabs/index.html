@@ -35,9 +35,11 @@
                 Tabs.bind(function(data) {
                     var tabs = JSON.parse(data);
 
+                    tabs.favicon && $('<link>').attr({rel: 'icon', type: 'image/png', href: tabs.favicon}).appendTo($('head'));
+
                     $tlst.empty();
                     $tplst.empty();
-                    tabs.forEach(function(tab, i) {
+                    tabs.tabs.forEach(function(tab, i) {
                         var id = 'tabpane_'+i;
 
                         $ttpl.clone().appendTo($tlst).find('a').attr('href', '#'+id).text(tab.label).on('shown.bs.tab', function() {
