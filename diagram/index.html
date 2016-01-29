@@ -26,7 +26,7 @@
             var dataSource = Webviews.data();
             var paper = Snap();
             var arrow = paper.polygon([0,-2, 5,0, 0,2, 0,-2]).attr({fill: '#555'});
-            var marker = arrow.marker(0,-2, 5,4, 2.5,0);
+            var marker = arrow.marker(0,-2, 5,4, 2.5,0).attr('orient', 'auto-start-reverse');
             var group,
                 links;
             var render = function(diagram, width, height, factor) {
@@ -137,7 +137,8 @@
                             xc2 = bbox2.left+hw2, yc2 = bbox2.top+hh2,
                             line,
                             sw = Math.max(1, factor*1.5),
-                            dt = 2.5*sw*(params.marker == 'arrow'), // stroke width * distance to center of marker
+                            dtf = 2.5*sw*(params.from_marker == 'arrow'), // stroke width * distance to center of marker
+                            dtt = 2.5*sw*(params.to_marker == 'arrow'), // stroke width * distance to center of marker
                             angle,
                             rect1 = (node1.type == 'rect'),
                             rect2 = (node2.type == 'rect'),
@@ -147,11 +148,11 @@
                             sdy = yc2 > yc1 ? +1 : -1;
 
                         if (xc1 == xc2) {
-                            yc1 += sdy*hh1;
-                            yc2 += -sdy*(hh2+dt);
+                            yc1 += sdy*(hh1+dtf);
+                            yc2 += -sdy*(hh2+dtt);
                         } else if (yc1 == yc2) {
-                            xc1 += sdx*hw1;
-                            xc2 += -sdx*(hw2+dt);
+                            xc1 += sdx*(hw1+dtf);
+                            xc2 += -sdx*(hw2+dtt);
                         } else {
                             // Algo to improve link layout for rects
                             var dx = Math.abs(xc2-xc1),
@@ -177,25 +178,28 @@
                             d = Math.abs((yc2-yc1)/(xc2-xc1));
 
                             angle = Math.atan(d);
-                            xc1 += (circle1 ? hw1*Math.cos(angle) : Math.min(hw1, hh1/d))*(xc1 < xc2 ? 1 : -1);
-                            yc1 += (circle1 ? hw1*Math.sin(angle) : Math.min(hh1, hw1*d))*(yc1 < yc2 ? 1 : -1);
-                            xc2 += ((circle2 ? hw2*Math.cos(angle) : Math.min(hw2, hh2/d))+dt*Math.cos(angle))*(xc1 < xc2 ? -1 : 1);
-                            yc2 += ((circle2 ? hw2*Math.sin(angle) : Math.min(hh2, hw2*d))+dt*Math.sin(angle))*(yc1 < yc2 ? -1 : 1);
+                            xc1 += ((circle1 ? hw1*Math.cos(angle) : Math.min(hw1, hh1/d))+dtf*Math.cos(angle))*(xc1 < xc2 ? 1 : -1);
+                            yc1 += ((circle1 ? hw1*Math.sin(angle) : Math.min(hh1, hw1*d))+dtf*Math.sin(angle))*(yc1 < yc2 ? 1 : -1);
+                            xc2 += ((circle2 ? hw2*Math.cos(angle) : Math.min(hw2, hh2/d))+dtt*Math.cos(angle))*(xc1 < xc2 ? -1 : 1);
+                            yc2 += ((circle2 ? hw2*Math.sin(angle) : Math.min(hh2, hw2*d))+dtt*Math.sin(angle))*(yc1 < yc2 ? -1 : 1);
                         }
                         if (params.text) {
                             var text = paper.text(0, 0, params.text).attr({'font-size': 10*factor*tf}),
                                 bbox = text.getBBox();
 
                             text.transform('t'+((xc1+xc2)/2-bbox.width/2)+','+((yc1+yc2)/2-bbox.height/2-bbox.y));
-                            linkNodes(node1, text, {stroke: params.stroke}, tf*0.9);
-                            linkNodes(text, node2, {stroke: params.stroke, marker: params.marker}, tf*0.9);
+                            linkNodes(node1, text, {stroke: params.stroke, from_marker: params.from_marker}, tf*0.9);
+                            linkNodes(text, node2, {stroke: params.stroke, to_marker: params.to_marker}, tf*0.9);
                             links.add(text);
                         } else {
                             line = paper.line(xc1, yc1, xc2, yc2).attr({stroke: '#555', 'stroke-width': sw});
                             if (params.stroke == 'dashed') {
                                 line.attr('stroke-dasharray', sw+' '+sw);
                             }
-                            if (params.marker == 'arrow') {
+                            if (params.from_marker == 'arrow') {
+                                line.attr({markerStart: marker})
+                            }
+                            if (params.to_marker == 'arrow') {
                                 line.attr({markerEnd: marker})
                             }
                             links.add(line);
@@ -235,7 +239,8 @@ JS diagram:
             from: node_id,
             to: node_id,
             stroke: 'plain'|'dashed',
-            marker: 'none'|'arrow',
+            from_marker: 'none'|'arrow',
+            to_marker: 'none'|'arrow',
            [text: string]
         },
         ...
