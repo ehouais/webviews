@@ -271,7 +271,7 @@ JS diagram:
             var diagram;
             dataSource.bind(function(str) {
                 try {
-                    diagram = parser.parse(str);
+                    diagram = parser.parse(str.replace(/(\n|\r)/g, ''));
                 } catch(e) {
                     diagram = parser.parse('{A:[Oh_no]--B:[something]||C:[went_wrong]},A->B,B.C');
                 }
