@@ -39,8 +39,10 @@ text           = chars:[^-[\]{}:|()<>]+         { return {text: chars.join('')};
 
 links          = l:("," link)*                  { return l.map(function(lk) { return lk[1]; }); }
 link           = f:node_id l:link_type t:node_id { return extend(l, {from: f, to: t}); }
-link_type      = s:link_line m:link_marker?     { return extend(s, {marker: m || 'none'}); }
+link_type      = fm:link_start? s:link_line tm:link_end? { return extend(s, {from_marker: fm || 'none', to_marker: tm || 'none'}); }
 link_line      = s:link_stroke c:(link_text link_stroke)? { return c ? extend(s, {text: c[0]}) : s; }
-link_stroke    = s:[\-\.]                       { return {stroke: s == '.' ? 'dashed' : 'plain'}; }
-link_text      = chars:[^-.>,]+                 { return chars.join(''); }
-link_marker    = m:[>]                          { return 'arrow'; }
+link_stroke    = s:[\-\.]+                      { return {stroke: s[0] == '.' ? 'dashed' : 'plain'}; }
+link_text      = "\"" chars:[^"]* "\""          { return chars.join(''); }
+               / chars:[^-.>,]+                 { return chars.join(''); }
+link_start     = m:[<]                          { return 'arrow'; }
+link_end       = m:[>]                          { return 'arrow'; }

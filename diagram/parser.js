@@ -93,16 +93,18 @@ parser = (function() {
           { type: "literal", value: ",", description: "\",\"" },
           function(l) { return l.map(function(lk) { return lk[1]; }); },
           function(f, l, t) { return extend(l, {from: f, to: t}); },
-          function(s, m) { return extend(s, {marker: m || 'none'}); },
+          function(fm, s, tm) { return extend(s, {from_marker: fm || 'none', to_marker: tm || 'none'}); },
           function(s, c) { return c ? extend(s, {text: c[0]}) : s; },
           /^[\-.]/,
           { type: "class", value: "[\\-\\.]", description: "[\\-\\.]" },
-          function(s) { return {stroke: s == '.' ? 'dashed' : 'plain'}; },
+          function(s) { return {stroke: s[0] == '.' ? 'dashed' : 'plain'}; },
           /^[^\-.>,]/,
           { type: "class", value: "[^-.>,]", description: "[^-.>,]" },
+          /^[<]/,
+          { type: "class", value: "[<]", description: "[<]" },
+          function(m) { return 'arrow'; },
           /^[>]/,
-          { type: "class", value: "[>]", description: "[>]" },
-          function(m) { return 'arrow'; }
+          { type: "class", value: "[>]", description: "[>]" }
         ],
 
         peg$bytecode = [
@@ -122,11 +124,12 @@ parser = (function() {
           peg$decode("%$4R\"\"5!7S/,#0)*4R\"\"5!7S&&&#/' 8!:Q!! )"),
           peg$decode("%$%2T\"\"6T7U/,#;//#$+\")(\"'#&'#0<*%2T\"\"6T7U/,#;//#$+\")(\"'#&'#&/' 8!:V!! )"),
           peg$decode("%;'/<#;0/3$;'/*$8#:W##\"! )(#'#(\"'#&'#"),
-          peg$decode("%;1/7#;4.\" &\"/)$8\":X\"\"! )(\"'#&'#"),
+          peg$decode("%;4.\" &\"/A#;1/8$;5.\" &\"/*$8#:X##\"! )(#'#(\"'#&'#"),
           peg$decode("%;2/J#%;3/,#;2/#$+\")(\"'#&'#.\" &\"/)$8\":Y\"\"! )(\"'#&'#"),
-          peg$decode("%4Z\"\"5!7[/' 8!:\\!! )"),
-          peg$decode("%$4]\"\"5!7^/,#0)*4]\"\"5!7^&&&#/' 8!:6!! )"),
-          peg$decode("%4_\"\"5!7`/' 8!:a!! )")
+          peg$decode("%$4Z\"\"5!7[/,#0)*4Z\"\"5!7[&&&#/' 8!:\\!! )"),
+          peg$decode("%2M\"\"6M7N/S#$4O\"\"5!7P0)*4O\"\"5!7P&/7$2M\"\"6M7N/($8#:6#!!)(#'#(\"'#&'#.H &%$4]\"\"5!7^/,#0)*4]\"\"5!7^&&&#/' 8!:6!! )"),
+          peg$decode("%4_\"\"5!7`/' 8!:a!! )"),
+          peg$decode("%4b\"\"5!7c/' 8!:a!! )")
         ],
 
         peg$currPos          = 0,
