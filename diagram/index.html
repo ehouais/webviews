@@ -29,6 +29,35 @@
             var marker = arrow.marker(0,-2, 5,4, 2.5,0);
             var group,
                 links;
+            var closestPoint = function(x1, y1, a1, b1, x2, y2, a2, b2) {
+                    var dmin = Infinity,
+                        xt1, yt1,
+                        xm1, ym1,
+                        xt2, yt2,
+                        xm2, ym2,
+                        t1, t2,
+                        n = 100;
+                        r = 2*Math.PI/n;
+
+                    for (t1=0; t1 < n; t1++) {
+                        xt1 = x1 + a1*Math.cos(t1*r);
+                        yt1 = y1 + b1*Math.sin(t1*r);
+                        for (t2=0; t2 < n; t2++) {
+                            xt2 = x2 + a2*Math.cos(t2*r);
+                            yt2 = y2 + b2*Math.sin(t2*r);
+                            d = Math.hypot(xt2 - xt1, yt2 - yt1);
+                            if (d < dmin) {
+                                xm1 = xt1;
+                                ym1 = yt1;
+                                xm2 = xt2;
+                                ym2 = yt2;
+                                dmin = d;
+                            }
+                        }
+                    }
+
+                    return [[xm1, ym1], [xm2, ym2]];
+                };
             var render = function(diagram, width, height, factor) {
                 var nodeLUT = {};
 
@@ -153,32 +182,26 @@
                             xc1 += sdx*hw1;
                             xc2 += -sdx*(hw2+dt);
                         } else {
-                            // Algo to improve link layout for rects, using shortest distance between ellipses, approximated with circles
-                            // http://www.had2know.com/makeit/ellipse-approximation-normal-circular-arc.html
-                            var d1 = rect1 && Math.abs(hw1*hw1-hh1*hh1)/Math.sqrt(hw1*hw1+hh1*hh1),
-                                d2 = rect2 && Math.abs(hw2*hw2-hh2*hh2)/Math.sqrt(hw2*hw2+hh2*hh2);
+                            var coords = closestPoint(xc1, yc1, hw1, hh1, xc2, yc2, hw2, hh2);
+                            dx1 = coords[0][0]-xc1;
+                            dy1 = coords[0][1]-yc1;
+                            dx2 = coords[1][0]-xc2;
+                            dy2 = coords[1][1]-yc2;
 
-                            group.add(paper.ellipse(xc1, yc1, hw1, hh1).attr({fill: 'none', stroke: '#000'}));
-                            group.add(paper.circle(xc1+hw1*hw1/Math.sqrt(hw1*hw1+hh1*hh1), yc1+hh1*hh1/Math.sqrt(hw1*hw1+hh1*hh1), 5).attr({fill: 'red'}));
-                            group.add(paper.circle(xc1+d1, yc1, hw1-d1).attr({fill: 'none', stroke: '#000'}));
-                            group.add(paper.circle(xc1, yc1-d1, hh1+d1).attr({fill: 'none', stroke: '#000'}));
-                            console.log(hw1, hh1, Math.sqrt(hw1*hw1+hh1*hh1), hw1*hw1/Math.sqrt(hw1*hw1+hh1*hh1), hh1*hh1/Math.sqrt(hw1*hw1+hh1*hh1), d1);
-                            if (Math.abs(yc2-yc1)/Math.abs(xc2+d2-xc1-d1) < 1) {
-                                xc1 += d1*sdx;
-                                xc2 += -d2*sdx;
-                            } else {
-                                yc1 += -d1*sdy;
-                                yc2 += d2*sdy;
-                            }
+                            d = Math.abs((yc2+dy2-yc1-dy1)/(xc2+dx2-xc1-dx1));
 
-                            /*d = Math.abs((yc2-yc1)/(xc2-xc1));
-                            angle = Math.atan(d);
+                            dx1 = Math.abs(dx1);
+                            dy1 = Math.abs(dy1);
+                            dx2 = Math.abs(dx2);
+                            dy2 = Math.abs(dy2);
 
-                            xc1 += (circle1 ? hw1*Math.cos(angle) : Math.min(hw1, hh1/d))*(xc1 < xc2 ? 1 : -1);
-                            yc1 += (circle1 ? hw1*Math.sin(angle) : Math.min(hh1, hw1*d))*(yc1 < yc2 ? 1 : -1);
-                            xc2 += ((circle2 ? hw2*Math.cos(angle) : Math.min(hw2, hh2/d))+dt*Math.cos(angle))*(xc1 < xc2 ? -1 : 1);
-                            yc2 += ((circle2 ? hw2*Math.sin(angle) : Math.min(hh2, hw2*d))+dt*Math.sin(angle))*(yc1 < yc2 ? -1 : 1);*/
+                            var crct = true;
+                            xc1 += (circle1 ? hw1*Math.cos(angle) : Math.min(hw1, dx1+crct*(hh1-dy1)/d)+dtf*Math.cos(angle))*(xc1 < xc2 ? 1 : -1);
+                            yc1 += (circle1 ? hh1*Math.sin(angle) : Math.min(hh1, dy1+crct*(hw1-dx1)*d)+dtf*Math.sin(angle))*(yc1 < yc2 ? 1 : -1);
+                            xc2 += (circle2 ? hw2*Math.cos(angle) : Math.min(hw2, dx2+crct*(hh2-dy2)/d)+dtt*Math.cos(angle))*(xc1 < xc2 ? -1 : 1);
+                            yc2 += (circle2 ? hh2*Math.sin(angle) : Math.min(hh2, dy2+crct*(hw2-dx2)*d)+dtt*Math.sin(angle))*(yc1 < yc2 ? -1 : 1);
                         }
+
                         if (params.text) {
                             var text = paper.text(0, 0, params.text).attr({'font-size': 10*factor*tf}),
                                 bbox = text.getBBox();
