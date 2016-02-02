@@ -165,7 +165,7 @@
                             hw2 = bbox2.width/2, hh2 = bbox2.height/2,
                             xc2 = bbox2.left+hw2, yc2 = bbox2.top+hh2,
                             line,
-                            sw = Math.max(1, factor*1.5),
+                            sw = Math.max(1, factor*1.5)*(params.width == 'double' ? 2 : 1),
                             dtf = 2.5*sw*(params.from_marker == 'arrow'), // stroke width * distance to center of marker
                             dtt = 2.5*sw*(params.to_marker == 'arrow'), // stroke width * distance to center of marker
                             angle,
