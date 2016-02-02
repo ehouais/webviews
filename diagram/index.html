@@ -184,10 +184,10 @@
                             xc2 += -sdx*(hw2+dtt);
                         } else {
                             var coords = closestPoint(xc1, yc1, hw1, hh1, xc2, yc2, hw2, hh2);
-                            dx1 = coords[0][0]-xc1;
-                            dy1 = coords[0][1]-yc1;
-                            dx2 = coords[1][0]-xc2;
-                            dy2 = coords[1][1]-yc2;
+                            dx1 = node1.type == 'text' ? 0 : coords[0][0]-xc1;
+                            dy1 = node1.type == 'text' ? 0 : coords[0][1]-yc1;
+                            dx2 = node2.type == 'text' ? 0 : coords[1][0]-xc2;
+                            dy2 = node2.type == 'text' ? 0 : coords[1][1]-yc2;
 
                             d = Math.abs((yc2+dy2-yc1-dy1)/(xc2+dx2-xc1-dx1));
                             angle = Math.atan(d);
