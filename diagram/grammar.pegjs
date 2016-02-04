@@ -46,6 +46,6 @@ link_stroke    = l:link_plain                   { return extend(l, {stroke: 'pla
 link_plain     = l:[\-=]+                       { return {width: l[0] == '-' ? 'normal' : 'double'}; }
 link_dashed    = l:[\.°]+                       { return {width: l[0] == '.' ? 'normal' : 'double'}; }
 link_text      = "\"" chars:[^"]* "\""          { return chars.join(''); }
-               / chars:[^-.>,]+                 { return chars.join(''); }
+               / chars:[^-.>,=°]+               { return chars.join(''); }
 link_start     = m:[<]                          { return 'arrow'; }
 link_end       = m:[>]                          { return 'arrow'; }

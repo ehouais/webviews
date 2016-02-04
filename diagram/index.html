@@ -165,7 +165,7 @@
                             hw2 = bbox2.width/2, hh2 = bbox2.height/2,
                             xc2 = bbox2.left+hw2, yc2 = bbox2.top+hh2,
                             line,
-                            sw = Math.max(1, factor*1.5)*(params.width == 'double' ? 2 : 1),
+                            sw = Math.max(1, factor*1.5)*(params.width == 'double' ? 3 : 1),
                             dtf = 2.5*sw*(params.from_marker == 'arrow'), // stroke width * distance to center of marker
                             dtt = 2.5*sw*(params.to_marker == 'arrow'), // stroke width * distance to center of marker
                             angle,
@@ -209,8 +209,8 @@
                                 bbox = text.getBBox();
 
                             text.transform('t'+((xc1+xc2)/2-bbox.width/2)+','+((yc1+yc2)/2-bbox.height/2-bbox.y));
-                            linkNodes(node1, text, {stroke: params.stroke, from_marker: params.from_marker}, tf*0.9);
-                            linkNodes(text, node2, {stroke: params.stroke, to_marker: params.to_marker}, tf*0.9);
+                            linkNodes(node1, text, {stroke: params.stroke, width: params.width, from_marker: params.from_marker}, tf*0.9);
+                            linkNodes(text, node2, {stroke: params.stroke, width: params.width, to_marker: params.to_marker}, tf*0.9);
                             links.add(text);
                         } else {
                             line = paper.line(xc1, yc1, xc2, yc2).attr({stroke: '#555', 'stroke-width': sw});
