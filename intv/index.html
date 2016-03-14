@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <style>
+            html, body {
+                margin: 0;
+                border: 0;
+                overflow: hidden;
+                width:100%;
+                height:100%;
+            }
+            canvas {
+                display:block;
+            }
+        </style>
+    </head>
+    <body>
+        <canvas></canvas>
+        <script>
+            //var bitmap = Webviews.data();
+
+            var
+                palette = [
+                    '000000',
+                    '002DFF',
+                    'FF3D10',
+                    'C9CFAB',
+                    '386B3F',
+                    '00A756',
+                    'FAEA50',
+                    'FFFCFF',
+                    'BDACC8',
+                    '24B8FF',
+                    'FFB41F',
+                    '546E00',
+                    'FF4E57',
+                    'A496FF',
+                    '75CC80',
+                    'B51A58'
+                ],
+                bitmap = {
+                    width: 8,
+                    height: 8,
+                    pixels: [
+                        ['00', '00', '77', '07', '20', '02', '0', '0'],
+                        ['00', '00', '07', '77', '07', '07', '07', '0'],
+                        ['00', '22', '22', '77', '77', '70', '77', '0'],
+                        ['20', '22', '22', '27', '27', '77', '20', '0'],
+                        ['07', '27', '27', '77', '77', '0', '0', '0'],
+                        ['77', '72', '72', '72', '77', '77', '0', '0'],
+                        ['0', '77', '22', '22', '20', '77', '77', '07'],
+                        ['0', '70', '0', '0', '0', '0', '0', '77']
+                    ]
+                },
+                psize,
+                canvas = document.getElementsByTagName('canvas')[0],
+                ctx = canvas.getContext('2d'),
+                rect = function(x, y, w, h, color) {
+                    ctx.fillStyle = '#'+palette[parseInt(color, 16)];
+                    ctx.fillRect(x*psize, y*psize, w*psize+1, h*psize+1);
+                },
+                render = function() {
+                    var i, j,
+                        pixels = bitmap.pixels,
+                        color;
+
+                    for (j = 0; j < bitmap.height; j++) {
+                        pixels[j] = pixels[j] || [];
+                        for (i = 0; i < bitmap.width; i++) {
+                            color = pixels[j][i] || '0';
+                            if (color.length == 1) {
+                                rect(i, j, 1, 1, color);
+                            } else {
+                                rect(i, j, 1, 0.5, color[0]);
+                                rect(i, j+0.5, 1, 0.5, color[1]);
+                            }
+                        }
+                    }
+                },
+                resize = function() {
+                    var w = window.innerWidth,
+                        h = window.innerHeight;
+
+                    psize = Math.min(w/bitmap.width, h/bitmap.height);
+                    canvas.width = w;
+                    canvas.height = h;
+                    render();
+                };
+
+            window.addEventListener('resize', resize, false);
+
+            /*document.addEventListener('mousedown', function(e) {
+                var i = 0|e.clientX/psize,
+                    j = 0|e.clientY/psize;
+
+                document.addEventListener('mousewheel', function wheel(e) {
+
+                });
+                console.log(e.clientX, e.clientY);
+            });*/
+            /*dataSource.bind(function(str) {
+                try {
+                    bitmap = ;
+                } catch(e) {
+                    diagram = parser.parse('{A:[Oh_no]--B:[something]||C:[went_wrong]},A->B,B.C');
+                }
+                resize();
+            });*/
+            resize();
+        </script>
+    </body>
+</html>
