@@ -58,7 +58,7 @@
                 ctx = canvas.getContext('2d'),
                 rect = function(x, y, w, h, color) {
                     ctx.fillStyle = '#'+palette[parseInt(color, 16)];
-                    ctx.fillRect(x*psize, y*psize, w*psize+1, h*psize+1);
+                    ctx.fillRect(x*psize, y*psize, w*psize, h*psize);
                 },
                 render = function() {
                     var i, j,
@@ -82,7 +82,7 @@
                     var w = window.innerWidth,
                         h = window.innerHeight;
 
-                    psize = Math.min(w/bitmap.width, h/bitmap.height);
+                    psize = Math.min(0|w/bitmap.width, 0|h/bitmap.height)&~1;
                     canvas.width = w;
                     canvas.height = h;
                     render();
@@ -90,15 +90,27 @@
 
             window.addEventListener('resize', resize, false);
 
-            /*document.addEventListener('mousedown', function(e) {
-                var i = 0|e.clientX/psize,
-                    j = 0|e.clientY/psize;
+            document.addEventListener('mousedown', function(e) {
+                var x = e.clientX,
+                    y = e.clientY,
+                    i = 0|x/psize,
+                    j = 0|y/psize,
+                    pixel = bitmap.pixels[j][i],
+                    move = function(e) {
+                        var delta = 0|(e.clientY - y)/5;
 
-                document.addEventListener('mousewheel', function wheel(e) {
+                        if (pixel.length == 1) {
+                            rect(i, j, 1, 1, bitmap.pixels[j][i] = ((parseInt(pixel, 16)+16+delta)%16).toString(16));
+                        }
+                    },
+                    mouseup = function(e) {
+                        document.removeEventListener('mousemove', move);
+                        document.removeEventListener('mouseup', mouseup);
+                    };
 
-                });
-                console.log(e.clientX, e.clientY);
-            });*/
+                document.addEventListener('mousemove', move);
+                document.addEventListener('mouseup', mouseup);
+            });
             /*dataSource.bind(function(str) {
                 try {
                     bitmap = ;
