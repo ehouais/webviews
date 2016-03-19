@@ -1,5 +1,6 @@
 (function() {
-    var uriParams = function(uri) {
+    var
+        uriParams = function(uri) {
             var a = document.createElement('a');
             a.href = uri;
             return a.search.replace(/^\?/, '').split('&').reduce(function(obj, pair) {
@@ -39,7 +40,8 @@
                                     var obj = JSON.parse(data);
                                     if (obj.iv && obj.v && obj.iter && obj.ks && obj.ts && obj.mode && obj.cipher && obj.salt && obj.ct) {
                                         $(function() {
-                                            var lock = function() {
+                                            var
+                                                lock = function() {
                                                     password = null;
                                                     $overlay.css({
                                                         width: '100%',
@@ -75,8 +77,9 @@
                                                 top: 0,
                                                 right: 0,
                                                 cursor: 'pointer'
-                                            }).appendTo(document.body),
-                                            lock();
+                                            }).appendTo(document.body);
+                                            if (password) cb(sjcl.decrypt(password, data));
+                                            else lock();
                                         });
                                         return;
                                     }
