@@ -96,11 +96,22 @@
                     i = 0|x/psize,
                     j = 0|y/psize,
                     pixel = bitmap.pixels[j][i],
+                    newColor = function(color, delta) {
+                        return ((parseInt(pixel, 16)+16+delta)%16).toString(16);
+                    },
                     move = function(e) {
-                        var delta = 0|(e.clientY - y)/5;
+                        var delta = 0|(e.clientY - y)/5,
+                            s,
+                            colors;
 
-                        if (pixel.length == 1) {
-                            rect(i, j, 1, 1, bitmap.pixels[j][i] = ((parseInt(pixel, 16)+16+delta)%16).toString(16));
+                        if (e.shiftKey) {
+                            if (pixel.length == 1) pixel = pixel+pixel;
+                            s = (y/psize - j >= 0.5);
+                            colors = pixel.split('');
+                            colors[+s] = newColor(pixel[+s], delta);
+                            rect(i, j+s*0.5, 1, 0.5, (bitmap.pixels[j][i] = colors.join(''))[+s]);
+                        } else {
+                            rect(i, j, 1, 1, bitmap.pixels[j][i] = newColor(pixel[0], delta));
                         }
                     },
                     mouseup = function(e) {
