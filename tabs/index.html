@@ -10,6 +10,9 @@
             body {
                 overflow: hidden;
             }
+            .template {
+                display: none;
+            }
             .tab-pane >iframe {
                 border: none;
                 width: 100%;
@@ -23,48 +26,62 @@
                 margin-left: 2px;
             }
         </style>
-        <script>
-            var Tabs = Webviews.data();
-
-            $(function() {
-                var $tlst = $('body >.nav-pills'),
-                    $ttpl = $('li', $tlst).detach().removeClass('template'),
-                    $tplst = $('body >.tab-content'),
-                    $tptpl = $('>.tab-pane', $tplst).detach().removeClass('template');
-
-                Tabs.bind(function(data) {
-                    var tabs = JSON.parse(data);
-
-                    tabs.favicon && $('<link>').attr({rel: 'icon', type: 'image/png', href: tabs.favicon}).appendTo($('head'));
-
-                    $tlst.empty();
-                    $tplst.empty();
-                    tabs.tabs.forEach(function(tab, i) {
-                        var id = 'tabpane_'+i;
-
-                        $ttpl.clone().appendTo($tlst).find('a').attr('href', '#'+id).text(tab.label).on('shown.bs.tab', function() {
-                            var $iframe = $('#'+id).find('>iframe');
-                            if (!$iframe.attr('src')) $iframe.attr('src', tab.uri);
-                        });
-                        $tptpl.clone().appendTo($tplst).attr('id', id);
-                    });
-
-                    (window.onresize = function() {
-                        $('iframe').height($(window).height()-$tlst.outerHeight());
-                    })();
-                    $('>li a', $tlst).eq(0).tab('show');
-                });
-            });
-        </script>
     </head>
     <body>
         <ul class="nav nav-pills" role="tablist">
-            <li role="presentation"><a aria-controls="home" role="tab" data-toggle="tab"></a></li>
+            <li class="template" role="presentation"><a aria-controls="home" role="tab" data-toggle="tab"></a></li>
         </ul>
         <div class="tab-content">
-            <div role="tabpanel" class="tab-pane">
-                <iframe/>
+            <div class="tab-pane template" role="tabpanel">
+                <iframe></iframe>
             </div>
         </div>
+        <script>
+            var Tabs = Webviews.data(),
+                $tlst = $('body >.nav-pills'),
+                $ttpl = $('li', $tlst).detach().removeClass('template'),
+                $tplst = $('body >.tab-content'),
+                $tptpl = $('>.tab-pane', $tplst).detach().removeClass('template');
+
+            Tabs.bind(function(data) {
+                // data = {favicon: URI, tabs: [{label: string, uri: URI}, ...]}
+                var tabs = JSON.parse(data);
+
+                // Set eventual favicon
+                tabs.favicon && $('<link>').attr({rel: 'icon', type: 'image/png', href: tabs.favicon}).appendTo($('head'));
+
+                // reset DOM on reload
+                $tlst.empty();
+                $tplst.empty();
+
+                // create tabs and tabpanes
+                tabs.tabs.forEach(function(tab, i) {
+                    var id = 'tabpane_'+i,
+                        $tab = $ttpl.clone().appendTo($tlst),
+                        $link = $('a', $tab),
+                        $tabpane = $tptpl.clone().appendTo($tplst),
+                        $iframe = $('>iframe', $tabpane);
+
+                    // init tab link
+                    $link.attr('href', '#'+id)
+                    $link.text(tab.label);
+                    // init tabpane
+                    $tabpane.attr('id', id);
+                    // lazy load tabpane iframe content on link click
+                    $link.on('shown.bs.tab', function() {
+                        if (!$iframe.attr('src')) $iframe.attr('src', tab.uri);
+                    });
+
+                });
+
+                // resize iframe taking tabs height into account
+                (window.onresize = function() {
+                    $('iframe').height($(window).height()-$tlst.outerHeight());
+                })();
+
+                // Show first tab
+                $('>li a', $tlst).eq(0).tab('show');
+            });
+        </script>
     </body>
 </html>
