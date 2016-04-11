@@ -18,9 +18,8 @@
     <body>
         <canvas></canvas>
         <script>
-            //var bitmap = Webviews.data();
-
             var
+                dataSource = Webviews.data(),
                 palette = [
                     '000000',
                     '002DFF',
@@ -39,20 +38,7 @@
                     '75CC80',
                     'B51A58'
                 ],
-                bitmap = {
-                    width: 8,
-                    height: 8,
-                    pixels: [
-                        ['00', '00', '77', '07', '20', '02', '0', '0'],
-                        ['00', '00', '07', '77', '07', '07', '07', '0'],
-                        ['00', '22', '22', '77', '77', '70', '77', '0'],
-                        ['20', '22', '22', '27', '27', '77', '20', '0'],
-                        ['07', '27', '27', '77', '77', '0', '0', '0'],
-                        ['77', '72', '72', '72', '77', '77', '0', '0'],
-                        ['0', '77', '22', '22', '20', '77', '77', '07'],
-                        ['0', '70', '0', '0', '0', '0', '0', '77']
-                    ]
-                },
+                bitmap,
                 psize,
                 canvas = document.getElementsByTagName('canvas')[0],
                 ctx = canvas.getContext('2d'),
@@ -122,15 +108,28 @@
                 document.addEventListener('mousemove', move);
                 document.addEventListener('mouseup', mouseup);
             });
-            /*dataSource.bind(function(str) {
-                try {
-                    bitmap = ;
-                } catch(e) {
-                    diagram = parser.parse('{A:[Oh_no]--B:[something]||C:[went_wrong]},A->B,B.C');
+            dataSource.bind(function(str) { // (w,h)AFA-D-
+                var match = (new RegExp(/\(\d+,\d+\)[A-F0-9]/, 'i').exec(str);
+
+                if (match) {
+
                 }
+                bitmap = {
+                    width: 8,
+                    height: 8,
+                    pixels: [
+                        ['00', '00', '77', '07', '20', '02', '0', '0'],
+                        ['00', '00', '07', '77', '07', '07', '07', '0'],
+                        ['00', '22', '22', '77', '77', '70', '77', '0'],
+                        ['20', '22', '22', '27', '27', '77', '20', '0'],
+                        ['07', '27', '27', '77', '77', '0', '0', '0'],
+                        ['77', '72', '72', '72', '77', '77', '0', '0'],
+                        ['0', '77', '22', '22', '20', '77', '77', '07'],
+                        ['0', '70', '0', '0', '0', '0', '0', '77']
+                    ]
+                };
                 resize();
-            });*/
-            resize();
+            });
         </script>
     </body>
 </html>
