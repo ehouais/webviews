@@ -13,6 +13,7 @@
             }
             body {
                 overflow: hidden;
+                background-color: #222;
             }
             html, body {
                 margin: 0;
@@ -40,19 +41,19 @@
                 text-decoration: none;
                 margin: 2px;
                 border-radius: 4px;
-                color: #00f;
+                color: #aaa;
             }
             .tab.loaded a {
                 margin-right: 0;
                 border-top-right-radius: 0;
                 border-bottom-right-radius: 0;
-                background-color: #9CF;
+                background-color: #555;
             }
             .tab.loaded a, .tab a:hover {
                 color: #fff;
             }
             .tab.active a, .tab a:hover {
-                background-color: #74A9D8;
+                background-color: #aaa;
             }
             .tabpanes {
                 margin-left: 150px;
@@ -123,9 +124,6 @@
                     });
 
                 });
-
-                // Show first tab
-                //$('>li a', $tlst).eq(0).trigger('click');
             });
         </script>
     </body>
