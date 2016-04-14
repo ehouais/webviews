@@ -14,6 +14,7 @@
                 margin: 0;
                 border: 0;
                 overflow: hidden;
+                background-color: #fff;
             }
         </style>
     </head>
@@ -90,7 +91,7 @@
                             bg = paper.rect(bbox.x-margin, bbox.y-margin, bbox.width+2*margin, bbox.height+2*margin).attr({'stroke-width': '0.05em', stroke: '#000', fill: '#fff'});
                             break;
                         case 'rrect':
-                            bg = paper.rect(bbox.x-margin, bbox.y-margin, bbox.width+2*margin, bbox.height+2*margin).attr({rx: '0.4em', ry: '0.4em', stroke: 'none', fill: 'hsl(200,80,'+(85-10*depth)+')'});
+                            bg = paper.rect(bbox.x-margin, bbox.y-margin, bbox.width+2*margin, bbox.height+2*margin).attr({rx: '0.4em', ry: '0.4em', stroke: 'none', fill: 'hsl(210,60,'+(80-10*depth)+')'});
                             break;
                         case 'circle':
                             bg = paper.circle(bbox.x+bbox.width/2, bbox.y+bbox.height/2, (Math.max(bbox.width, bbox.height)+2*margin)/2).attr({'stroke-width': '0.05em', stroke: '#000', fill: '#fff'});
