@@ -18,7 +18,7 @@
             }
             body {
                 font-family: gotham;
-                background-color: #999;
+                background-color: #444;
                 font-size: 13px;
                 margin: 0;
             }
@@ -26,8 +26,9 @@
                 display: none;
             }
             .todo {
-                background-color: #fff;
-                padding: 4px 6px 3px;
+                background-color: #666;
+                color: #fff;
+                padding: 4px;
                 margin: 2px;
                 border-radius: 4px;
                 overflow: hidden;
@@ -65,10 +66,7 @@
                 display: none;
             }
             .project .mylabel {
-                cursor: pointer;
-            }
-            #form .col-lg-7 {
-                padding: 0;
+                cursor: default;
             }
             .page-header img {
                 height: 42px;
@@ -83,107 +81,138 @@
                 padding-left: 4px;
                 padding-right: 4px;
             }
-            #display {
-                display: none;
-                margin-bottom: 2px;
-                line-height: 21px;
-            }
-            #display label {
-                margin-left: 10px;
-            }
-            #form {
+            #creation_popup {
                 border: none;
-                margin-bottom: 5px;
+                position: absolute;
+                top: 0;
+                width: 100%;
+                height: 100%;
                 display: none;
             }
-            #list {
+            #container {
                 height: 100%;
                 position: relative;
             }
         </style>
         <script>
-            var colorFromString = function(str) {
+            var todos,
+                Todos = Webviews.data();
+                colorFromString = function(str) {
                     return '#'+md5(str).substr(-7, 6);
                 };
 
-            var Todos = Webviews.data();
-
             $(function() {
-                $('#display input[value="project"]').on('click', function() { $('#projects').show(); $('#weeks').hide(); });
-                $('#list').perfectScrollbar();
+                var $cont = $('#container'),
+                    $projects = $('#projects'),
+                    $creation_popup = $('#creation_popup'),
+                    update = function() {
+                        Todos.save(JSON.stringify(todos));
+                        Todos.trigger();
+                    },
+                    popup = function(description, tags, onsubmit) {
+                        var onMessage = function(e) {
+                                var event = e.originalEvent,
+                                    msg = event.data;
+
+                                if (event.origin == 'http://dev.ehouais.net' && msg.type != 'resize') {
+                                    if (msg.type == 'submit' && msg.data.description) {
+                                        onsubmit(
+                                            msg.data.description,
+                                            msg.data.tags ? msg.data.tags.split(',').map(function(tag) { return tag.trim(); }) : []
+                                        );
+                                    }
+                                    $creation_popup.hide();
+                                    $(window).off('message', onMessage);
+                                }
+                            };
+
+                        $creation_popup[0].contentWindow.postMessage({
+                            type: 'set',
+                            values: {description: description, tags: tags.join('')}
+                        }, 'http://dev.ehouais.net');
+                        $creation_popup.show();
+                        $(window).on('message', onMessage);
+                    },
+                    creationPopup = function(description, tags) {
+                        popup(description, tags, function(description, tags) {
+                            todos.push({description: description, tags: tags});
+                            update();
+                        });
+                    };
+
+                $cont.perfectScrollbar();
+
+                $cont.on('dblclick', function() {
+                    creationPopup('', []);
+                });
+                $projects.on('selectstart', '.mylabel, .project', function (event) {
+                    event.preventDefault();
+                });
+                $projects.on('dblclick', '.mylabel', function(e) {
+                    creationPopup('', [$(e.currentTarget).text()]);
+                    e.stopPropagation();
+                });
+                $projects.on('dblclick', '.todo', function(e) {
+                    var todo = todos[$(e.currentTarget).data('index')];
+                    popup(todo.description, todo.tags, function(description, tags) {
+                        todo.description = description;
+                        todo.tags = tags;
+                        update();
+                    });
+                    e.stopPropagation();
+                });
+                /*$projects.on('dblclick', '.todo', function(e) {
+                    if (window.confirm('Do you really want to delete this todo ?')) {
+                        delete todos[$(e.currentTarget).data('index')];
+                        update();
+                    }
+                });*/
 
                 Todos.bind((function() {
-                    var $plst = $('#projects'), $ptpl = $plst.find('.template').removeClass('template').remove(),
-                        $ttpl = $ptpl.find('.todo').remove(),
-                        update = function() {
-                            Todos.save(JSON.stringify(todos));
-                            Todos.trigger();
-                        },
-                        todos,
+                    var $ptpl = $('.template', $projects).removeClass('template').remove(),
+                        $ttpl = $('.todo', $ptpl).remove(),
                         $todo = function(todo, index, project) {
-                            var done = todo.done !== undefined && todo.done,
-                                $t = $ttpl.clone().data('index', index);
+                            var $t = $ttpl.clone().data('index', index);
 
-                            $t.toggleClass('done', done);
                             $t.attr('title', todo.description);
                             $t.find('.titre').text(todo.description.substr(0, 75)+(todo.description.length > 75 ? '...' : ''));
                             $t.find('.mylabel').text(project.title).css('background-color', colorFromString(project.title));
 
                             return $t;
                         },
-                        projects, pindex,
-                        $form = $('#form');
-
-                    $(window).on('message', function(e) {
-                        var event = e.originalEvent,
-                            msg = event.data;
-
-                        if (event.origin == 'http://dev.ehouais.net') {
-                            if (msg.type == 'submit') {
-                                todos.unshift(msg.data);
-                                $form[0].contentWindow.postMessage({type: 'set', values: {project: '', description: ''}}, 'http://dev.ehouais.net');
-                                update();
-                            } else if (msg.type == 'resize') {
-                                $form.height(msg.data.height);
-                            }
-                        }
-                    });
+                        projects,
+                        pindex;
 
                     return function(data) {
                         todos = JSON.parse(data);
                         projects = [];
                         pindex = {};
-                        $plst.empty();
+                        $projects.empty();
 
-                        $('#projects').off('click', '.delete').on('click', '.delete', function(e) {
+                        /*$projects.off('click', '.delete').on('click', '.delete', function(e) {
                             todos.splice($(e.currentTarget).parent().parent().data('index'), 1);
                             update();
-                        });
+                        });*/
                         todos.forEach(function(todo, i) {
-                            todo.tags.forEach(function(tag) {
-                                var project = pindex[tag];
-                                if (!project) {
-                                    var $dom = $ptpl.clone();
-                                    project = {title: tag, id: projects.length, nb: 0, dom: $dom};
-                                    $dom.find('.mylabel')
-                                    .text(project.title)
-                                    .css('background-color', colorFromString(project.title))
-                                    .on('click', function() {
-                                        $form[0].contentWindow.postMessage({type: 'set', values: {project: project.title}}, 'http://dev.ehouais.net');
-                                    });
-                                    projects.push(project);
-                                    pindex[tag] = project;
-                                }
-                                project.nb++;
-                                $todo(todo, i, project).appendTo(project.dom.find('ul'));
-                            });
+                            tag = todo.tags && todo.tags.length > 0 ? todo.tags[0] : '-';
+                            var project = pindex[tag];
+                            if (!project) {
+                                var $dom = $ptpl.clone();
+                                project = {title: tag, id: projects.length, nb: 0, dom: $dom};
+                                $dom.find('.mylabel')
+                                .text(project.title)
+                                .css('background-color', colorFromString(project.title));
+                                projects.push(project);
+                                pindex[tag] = project;
+                            }
+                            project.nb++;
+                            $todo(todo, i, project).appendTo(project.dom.find('ul'));
                         });
                         projects.sort(function(p1, p2) {
                             return p2.nb-p1.nb;
                         }).forEach(function(project) {
-                            project.dom.appendTo($plst);
+                            project.dom.appendTo($projects);
                         });
-                        console.log(projects);
                         $('#project, #description').val('');
                     };
                 })());
@@ -191,19 +220,7 @@
         </script>
     </head>
     <body>
-        <iframe src="http://dev.ehouais.net/webviews/forms?datauri=data:text/plain,project:Project,description:Description" id="form"></iframe>
-        <form id="display">
-            <label class="radio-inline">
-                <input type="radio" name="groupby" value="project" checked> Group by project
-            </label>
-            <label class="radio-inline">
-                <input type="radio" name="groupby" value="week"> Group by week
-            </label>
-            <label class="checkbox-inline">
-                <input type="checkbox" name="showall" value="showall"> Show all
-            </label>
-        </form>
-        <div id="list">
+        <div id="container">
             <ul id="projects" class="list-group">
                 <li class="list-group-item project template">
                     <span class="mylabel"></span>
@@ -216,5 +233,6 @@
                 </li>
             </ul>
         </div>
+        <iframe id="creation_popup" src="http://dev.ehouais.net/webviews/forms?datauri=data:text/plain,description:Description,tags:Tags,[cancel]:Cancel"></iframe>
     </body>
 </html>
