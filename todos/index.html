@@ -164,8 +164,7 @@
                                 var project = pindex[tag];
                                 if (!project) {
                                     var $dom = $ptpl.clone();
-                                    project = {title: tag, id: projects.length, dom: $dom};
-                                    $dom.appendTo($plst);
+                                    project = {title: tag, id: projects.length, nb: 0, dom: $dom};
                                     $dom.find('.mylabel')
                                     .text(project.title)
                                     .css('background-color', colorFromString(project.title))
@@ -175,9 +174,16 @@
                                     projects.push(project);
                                     pindex[tag] = project;
                                 }
+                                project.nb++;
                                 $todo(todo, i, project).appendTo(project.dom.find('ul'));
                             });
                         });
+                        projects.sort(function(p1, p2) {
+                            return p2.nb-p1.nb;
+                        }).forEach(function(project) {
+                            project.dom.appendTo($plst);
+                        });
+                        console.log(projects);
                         $('#project, #description').val('');
                     };
                 })());
