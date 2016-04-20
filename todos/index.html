@@ -4,7 +4,6 @@
         <link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAMhSURBVFhHtZc/aBNxFMcPO4igoIO2uogQETGl+d+kiB0cHTrUotBJAg6im2uJm4PZFHQQiuBYHCTgIog4iODgpLZ1cNCllGJqKYIm8fM93oXL9Xq5wN0XHr+7997vfb+/9/vlLucEUSqVbmKfi8ViL8oKhUKoP8I61P2AzRvVIKampi4QfIt1y+VyLw2jtoT8ZXzB/YRRO04+nz9PYLNarfYqlYpW18bWsFUbQ405oX5ZIKY669ju9PR0TzzEv+ZyueOegPdySiFJS6buQKPRSMRUa2FhYYzFnYH4kbohPrieOTjqIraVN1xFKUPE6gRjWzffbG9+cQ6OWk6qgC+LdeDsqQPuAUHIqsUTA1vbZKUf4ZgzlwvtPXy/tfABAbZfiQDyebVZWyuD7Mns7OxhxfCPw7cdFLCWlACtkLobqqv6spmZmR6ibiieugBqrWj1HrmIGEV4TvFUBVBn0U8u0z1dqVtKegJo8SnqbflbL3L8LUtxkZoAarT8q7fWb0mYpbhIRQB16n5yme6pu2gpfSQugBWepo5bUPWo5ZGvWMoABgQoeYiAMRv3BXNf+1dvZ2Cj/7IJIHYH8N0neZUVXjPXHhC77SeX6R5/+HsfxBKA/4EK6SmmOAWvW6gPVniWvF2v9T7y55YSiqEC8NVrtVq/qBLDRDDnnQR6ecph/Dk5OXnMUkIRR8BVrcS/sqAI8u8qx4vL7JV+RfEoDBUgQHTHXiKK9UVw3SF2zyvgkUsMvqc2PRKxBAjE+iI8Ipm/7TJr/XdeOEdsaiRiCxCIh4rwm23NZZsyFCMJEPzbESS31j+01FgYWYBA3h4RthVr/ME8ZGmxsJ+Aof+I/J2QaR7zL1o4NviJn4CvHRSwbvFIkHeLiX/Ueh5ES+YeCXpEU2fHFcDFJ10gZCebzY5bTiT0BKQbJbsdGXBVWHQX7q6KzakLdpgeW06qgO+V8W16jpfeZxnXywSKOihJmTpLzZN07RJjSzz2ZdR0BdCOCbbhi5xMcA8Ywe0ETd+a7neA6hv5m4Ffjw4GCcvYBl3oKjlpo+4/xh+QNzOZzEHHcZz/Yu4UxPJ023QAAAAASUVORK5CYII=">
         <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
         <script src="//cdnjs.cloudflare.com/ajax/libs/sjcl/1.0.0/sjcl.min.js"></script>
-        <link href="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.4/css/bootstrap.min.css" rel="stylesheet">
         <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.3/moment.min.js"></script>
         <script src="//cdnjs.cloudflare.com/ajax/libs/blueimp-md5/1.1.0/js/md5.min.js"></script>
         <script src="//cdnjs.cloudflare.com/ajax/libs/jquery.perfect-scrollbar/0.6.7/js/min/perfect-scrollbar.jquery.min.js"></script>
@@ -20,10 +19,8 @@
             body {
                 font-family: gotham;
                 background-color: #999;
-                display: flex;
-                flex-direction: column;
-                height: 100%;
                 font-size: 13px;
+                margin: 0;
             }
             .template {
                 display: none;
@@ -35,7 +32,6 @@
                 border-radius: 4px;
                 overflow: hidden;
                 box-shadow: 1px 1px 2px rgba(0,0,0,0.5);
-                display: inline-block;
             }
             .list-group-item-info .todo {
                 background-color: #fff;
@@ -50,15 +46,23 @@
                 white-space: nowrap;
             }
             .project ul {
+                list-style-type: none;
                 padding-left: 0px;
+                margin-top: 4px;
+            }
+            #projects {
+                list-style-type: none;
+                padding: 0;
+                margin: 0;
+                display: flex;
+                flex-wrap: wrap;
+            }
+            #projects > li {
+                margin: 4px;
+                width: 250px;
             }
             #projects .todo > .mylabel {
                 display: none;
-            }
-            #projects > li {
-                background-color: transparent;
-                border: none;
-                padding: 10px 0 0 0;
             }
             .project .mylabel {
                 cursor: pointer;
@@ -90,9 +94,7 @@
             #form {
                 border: none;
                 margin-bottom: 5px;
-            }
-            #projects {
-                margin-bottom: 0;
+                display: none;
             }
             #list {
                 height: 100%;
