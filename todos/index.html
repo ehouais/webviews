@@ -19,7 +19,7 @@
             }
             body {
                 font-family: gotham;
-                background-color: transparent;
+                background-color: #999;
                 display: flex;
                 flex-direction: column;
                 height: 100%;
@@ -29,13 +29,13 @@
                 display: none;
             }
             .todo {
-                background-color: #f3f3f3;
-                height: 24px;
-                padding: 1px 3px;
-                margin: 1px 0;
+                background-color: #fff;
+                padding: 4px 6px 3px;
+                margin: 2px;
                 border-radius: 4px;
-                position: relative;
                 overflow: hidden;
+                box-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+                display: inline-block;
             }
             .list-group-item-info .todo {
                 background-color: #fff;
@@ -47,97 +47,10 @@
                 margin-top: 2px;
             }
             .todo .titre {
-                line-height: 22px;
-                padding-left: 4px;
-                position: absolute;
                 white-space: nowrap;
             }
-            .todo .buttons {
-                display: none;
-            }
-            .todo .buttons, .todo .md {
-                position: relative;
-            }
-            .todo .buttons .btn {
-                width: 18px;
-                height: 18px;
-                font-size: 10px;
-                padding: 0;
-            }
-            .todo:hover .buttons {
-                display: block;
-            }
-            .todo .md.md5, .todo .md.md10, .todo .md.md15, .todo .md.md20, .todo .md.md25, .todo .md.md30, .todo .md.md35, .todo .md.md40, .todo .md.md45, .todo .md.md50 {
-                display: block;
-            }
-            .todo .md {
-                display: none;
-            }
-            .todo:hover .md {
-                display: block;
-            }
-            .md {
-                margin: 3px 1px 3px 4px;
-            }
-            .md .btn {
-                width: 8px;
-                padding: 1px;
-                font-size: 8px;
-                opacity: 1;
-            }
-            .md.md5 .btn.md5 {
-                background-color: #ddd;
-            }
-            .md.md10 .btn.md5, .md.md10 .btn.md10 {
-                background-color: #ddd;
-            }
-            .md.md15 .btn.md5, .md.md15 .btn.md10, .md.md15 .btn.md15 {
-                background-color: #ddd;
-            }
-            .md.md20 .btn.md5, .md.md20 .btn.md10, .md.md20 .btn.md15, .md.md20 .btn.md20 {
-                background-color: #ddd;
-            }
-            .md.md25 .btn.md5, .md.md25 .btn.md10, .md.md25 .btn.md15, .md.md25 .btn.md20, .md.md25 .btn.md25 {
-                background-color: #ddd;
-            }
-            .md.md30 .btn.md5, .md.md30 .btn.md10, .md.md30 .btn.md15, .md.md30 .btn.md20, .md.md30 .btn.md25, .md.md30 .btn.md30 {
-                background-color: #ddd;
-            }
-            .md.md35 .btn.md5, .md.md35 .btn.md10, .md.md35 .btn.md15, .md.md35 .btn.md20, .md.md35 .btn.md25, .md.md35 .btn.md30, .md.md35 .btn.md35 {
-                background-color: #ddd;
-            }
-            .md.md40 .btn.md5, .md.md40 .btn.md10, .md.md40 .btn.md15, .md.md40 .btn.md20, .md.md40 .btn.md25, .md.md40 .btn.md30, .md.md40 .btn.md35, .md.md40 .btn.md40 {
-                background-color: #ddd;
-            }
-            .md.md45 .btn.md5, .md.md45 .btn.md10, .md.md45 .btn.md15, .md.md45 .btn.md20, .md.md45 .btn.md25, .md.md45 .btn.md30, .md.md45 .btn.md35, .md.md45 .btn.md40, .md.md45 .btn.md45 {
-                background-color: #ddd;
-            }
-            .md.md50 .btn.md5, .md.md50 .btn.md10, .md.md50 .btn.md15, .md.md50 .btn.md20, .md.md50 .btn.md25, .md.md50 .btn.md30, .md.md50 .btn.md35, .md.md50 .btn.md40, .md.md50 .btn.md45, .md.md50 .btn.md50 {
-                background-color: #ddd;
-            }
-            .weeknb {
-                font-size: 2em;
-            }
-            .weekrng {
-                font-size: 70%;
-            }
-            li {
-                list-style-type: none;
-            }
-            .week ul, .project ul {
+            .project ul {
                 padding-left: 0px;
-            }
-            #weeks {
-                display: none;
-            }
-            #weeks .weekn {
-                display: none;
-            }
-            #projects .prevweek, #projects .nextweek, #projects .noweek, #projects .todook {
-                display: none;
-            }
-            .todo.done .prevweek, .todo.done .nextweek, .todo.done .noweek, .todo.done .delete {
-                display: none;
             }
             #projects .todo > .mylabel {
                 display: none;
@@ -150,10 +63,6 @@
             .project .mylabel {
                 cursor: pointer;
             }
-            .weekcol {
-                width: 60px;
-                float: left;
-            }
             #form .col-lg-7 {
                 padding: 0;
             }
@@ -162,9 +71,6 @@
                 float: left;
                 margin-right: 10px;
             }
-            .todo .btn .glyphicon {
-                top: 0;
-            }
             .mylabel {
                 color: #fff;
                 border-radius: 3px;
@@ -172,13 +78,6 @@
                 display: inline-block;
                 padding-left: 4px;
                 padding-right: 4px;
-            }
-            .week {
-                min-height: 90px;
-                padding-left: 0;
-            }
-            .week .todos {
-                margin-left: 55px;
             }
             #display {
                 display: none;
@@ -192,7 +91,7 @@
                 border: none;
                 margin-bottom: 5px;
             }
-            #projects, #weeks {
+            #projects {
                 margin-bottom: 0;
             }
             #list {
@@ -201,14 +100,7 @@
             }
         </style>
         <script>
-            var cweek = {
-                    iso: moment().isoWeek(),
-                    year: moment().year()
-                },
-                compareWeeks = function(w1, w2) {
-                    return w1.year != w2.year ? w1.year - w2.year : w1.iso - w2.iso;
-                },
-                colorFromString = function(str) {
+            var colorFromString = function(str) {
                     return '#'+md5(str).substr(-7, 6);
                 };
 
@@ -216,12 +108,10 @@
 
             $(function() {
                 $('#display input[value="project"]').on('click', function() { $('#projects').show(); $('#weeks').hide(); });
-                $('#display input[value="week"]').on('click', function() { $('#projects').hide(); $('#weeks').show(); });
                 $('#list').perfectScrollbar();
 
                 Todos.bind((function() {
-                    var $wlst = $('#weeks'), $wtpl = $wlst.find('.template').removeClass('template').remove(),
-                        $plst = $('#projects'), $ptpl = $plst.find('.template').removeClass('template').remove(),
+                    var $plst = $('#projects'), $ptpl = $plst.find('.template').removeClass('template').remove(),
                         $ttpl = $ptpl.find('.todo').remove(),
                         update = function() {
                             Todos.save(JSON.stringify(todos));
@@ -236,30 +126,10 @@
                             $t.attr('title', todo.description);
                             $t.find('.titre').text(todo.description.substr(0, 75)+(todo.description.length > 75 ? '...' : ''));
                             $t.find('.mylabel').text(project.title).css('background-color', colorFromString(project.title));
-                            $t.find('.todook').toggleClass('active', done).on('click', function() { todo.done = !done; update(); });
-                            $t.find('.weekn').on('click', function() { todo.week = cweek.iso; todo.year = cweek.year; update(); });
-                            $t.find('.prevweek').on('click', function() { todo.week = todo.week+1; update(); });
-                            $t.find('.nextweek').on('click', function() { todo.week = todo.week-1; update(); });
-                            $t.find('.noweek').on('click', function() { delete todo.week; update(); });
-
-                            var $md = $t.find('.btn-group.md').addClass('md'+todo.workload);
-                            if (todo.done) {
-                                $md.find('button').prop('disabled', true);
-                            } else {
-                                $md.on('mouseenter mouseleave', '.btn', function(e) {
-                                    var md = $(this).data('md');
-                                    $(this).parent().toggleClass('md'+md, e.type == 'mouseenter' || todo.workload == md);
-                                })
-                                .on('click', '.btn', function(e) {
-                                    var md = $(this).data('md');
-                                    todo.workload = (todo.workload == md ? 0 : md);
-                                    update();
-                                });
-                            }
 
                             return $t;
                         },
-                        weeks, windex, projects, pindex,
+                        projects, pindex,
                         $form = $('#form');
 
                     $(window).on('message', function(e) {
@@ -279,14 +149,11 @@
 
                     return function(data) {
                         todos = JSON.parse(data);
-                        weeks = [];
-                        windex = {};
                         projects = [];
                         pindex = {};
-                        $wlst.empty();
                         $plst.empty();
 
-                        $('#projects, #weeks').off('click', '.delete').on('click', '.delete', function(e) {
+                        $('#projects').off('click', '.delete').on('click', '.delete', function(e) {
                             todos.splice($(e.currentTarget).parent().parent().data('index'), 1);
                             update();
                         });
@@ -305,27 +172,7 @@
                                 projects.push(project);
                                 pindex[todo.project] = project;
                             }
-                            if (todo.week) {
-                                var key = todo.year+'-'+todo.week,
-                                    week = windex[key];
-                                if (!week) {
-                                    var date = moment().year(todo.year).isoWeek(todo.week),
-                                        $dom = $wtpl.clone();
-                                    week = {year: todo.year, iso: todo.week, dom: $dom};
-                                    $dom.toggleClass('list-group-item-info', compareWeeks(week, cweek) < 0);
-                                    $dom.find('.weeknb').text(todo.week);
-                                    $dom.find('.weekrng').html(date.day("Monday").format('DD/MM')+'<br/>'+date.day("Friday").format('DD/MM'));
-                                    weeks.push(week);
-                                    windex[key] = week;
-                                }
-                                $todo(todo, i, project).appendTo(week.dom.find('ul'));
-                            } else {
-                                $todo(todo, i, project).appendTo(project.dom.find('ul'));
-                            }
-                        });
-                        weeks.sort(compareWeeks);
-                        weeks.forEach(function(week) {
-                            week.dom.prependTo($wlst);
+                            $todo(todo, i, project).appendTo(project.dom.find('ul'));
                         });
                         $('#project, #description').val('');
                     };
@@ -354,52 +201,8 @@
                         <li class="todo">
                             <span class="mylabel"></span>
                             <span class="titre"></span>
-                            <div class="md btn-group btn-group-xs pull-right">
-                                <button type="button" class="btn btn-default md5" data-md="5" title="0,5 hj">&nbsp;</button>
-                                <button type="button" class="btn btn-default md10" data-md="10" title="1 hj">&nbsp;</button>
-                                <button type="button" class="btn btn-default md15" data-md="15" title="1,5 hj">&nbsp;</button>
-                                <button type="button" class="btn btn-default md20" data-md="20" title="2 hj">&nbsp;</button>
-                                <button type="button" class="btn btn-default md25" data-md="25" title="2,5 hj">&nbsp;</button>
-                                <button type="button" class="btn btn-default md30" data-md="30" title="3 hj">&nbsp;</button>
-                                <button type="button" class="btn btn-default md35" data-md="35" title="3,5 hj">&nbsp;</button>
-                                <button type="button" class="btn btn-default md40" data-md="40" title="4 hj">&nbsp;</button>
-                                <button type="button" class="btn btn-default md45" data-md="45" title="4,5 hj">&nbsp;</button>
-                                <button type="button" class="btn btn-default md50" data-md="50" title="5 hj">&nbsp;</button>
-                            </div>
-                            <span class="buttons pull-right">
-                                <button type="button" class="btn btn-default btn-xs todook" title="Toggle todo as done/to do">
-                                    <span class="glyphicon glyphicon-ok"></span>
-                                </button>
-                                <button type="button" class="btn btn-default btn-xs weekn" title="Add todo to current week">
-                                    <span class="glyphicon glyphicon-chevron-right"></span>
-                                </button>
-                                <button type="button" class="btn btn-default btn-xs prevweek" title="Move todo to previous week">
-                                    <span class="glyphicon glyphicon-chevron-up"></span>
-                                </button>
-                                <button type="button" class="btn btn-default btn-xs nextweek" title="Move todo to next week">
-                                    <span class="glyphicon glyphicon-chevron-down"></span>
-                                </button>
-                                <button type="button" class="btn btn-default btn-xs noweek" title="Remove todo from planning">
-                                    <span class="glyphicon glyphicon-chevron-left"></span>
-                                </button>
-                                <button type="button" class="btn btn-default btn-xs delete" title="Delete todo">
-                                    <span class="glyphicon glyphicon-remove"></span>
-                                </button>
-                            </span>
                         </li>
                     </ul>
-                </li>
-            </ul>
-            <ul id="weeks" class="list-group">
-                <li class="list-group-item week template">
-                    <div class="text-center weekcol">
-                        <div class="weeknb"></div>
-                        <div class="weekrng"></div>
-                    </div>
-                    <div class="todos">
-                        <ul>
-                        </ul>
-                    </div>
                 </li>
             </ul>
         </div>
