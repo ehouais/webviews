@@ -158,21 +158,23 @@
                             update();
                         });
                         todos.forEach(function(todo, i) {
-                            var project = pindex[todo.project];
-                            if (!project) {
-                                var $dom = $ptpl.clone();
-                                project = {title: todo.project, id: projects.length, dom: $dom};
-                                $dom.appendTo($plst);
-                                $dom.find('.mylabel')
-                                .text(project.title)
-                                .css('background-color', colorFromString(project.title))
-                                .on('click', function() {
-                                    $form[0].contentWindow.postMessage({type: 'set', values: {project: project.title}}, 'http://dev.ehouais.net');
-                                });
-                                projects.push(project);
-                                pindex[todo.project] = project;
-                            }
-                            $todo(todo, i, project).appendTo(project.dom.find('ul'));
+                            todo.tags.forEach(function(tag) {
+                                var project = pindex[tag];
+                                if (!project) {
+                                    var $dom = $ptpl.clone();
+                                    project = {title: tag, id: projects.length, dom: $dom};
+                                    $dom.appendTo($plst);
+                                    $dom.find('.mylabel')
+                                    .text(project.title)
+                                    .css('background-color', colorFromString(project.title))
+                                    .on('click', function() {
+                                        $form[0].contentWindow.postMessage({type: 'set', values: {project: project.title}}, 'http://dev.ehouais.net');
+                                    });
+                                    projects.push(project);
+                                    pindex[tag] = project;
+                                }
+                                $todo(todo, i, project).appendTo(project.dom.find('ul'));
+                            });
                         });
                         $('#project, #description').val('');
                     };
