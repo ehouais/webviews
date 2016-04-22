@@ -25,32 +25,6 @@
             .template {
                 display: none;
             }
-            .todo {
-                background-color: #666;
-                color: #fff;
-                padding: 4px;
-                margin: 2px;
-                border-radius: 4px;
-                overflow: hidden;
-                box-shadow: 1px 1px 2px rgba(0,0,0,0.5);
-            }
-            .list-group-item-info .todo {
-                background-color: #fff;
-            }
-            .todo.done {
-                background-color: transparent;
-            }
-            .todo .btn.active {
-                margin-top: 2px;
-            }
-            .todo .titre {
-                white-space: nowrap;
-            }
-            .project ul {
-                list-style-type: none;
-                padding-left: 0px;
-                margin-top: 4px;
-            }
             #projects {
                 list-style-type: none;
                 padding: 0;
@@ -58,20 +32,38 @@
                 display: flex;
                 flex-wrap: wrap;
             }
-            #projects > li {
+            .project {
                 margin: 4px;
                 width: 250px;
+                text-align: center;
             }
-            #projects .todo > .mylabel {
+            .project ul {
+                list-style-type: none;
+                padding-left: 0px;
+            }
+            .todo {
+                background-color: #666;
+                color: #fff;
+                padding: 4px;
+                margin: 2px;
+                border-radius: 4px;
+                overflow: hidden;
+                /*box-shadow: 1px 1px 2px rgba(0,0,0,0.5);*/
+                cursor: pointer;
+                text-align: left;
+                position: relative;
+            }
+            .todo:hover {
+                background-color: #888;
+            }
+            .todo:hover .delete {
+                display: block;
+            }
+            .todo .titre {
+                white-space: nowrap;
+            }
+            .todo > .mylabel {
                 display: none;
-            }
-            .project .mylabel {
-                cursor: default;
-            }
-            .page-header img {
-                height: 42px;
-                float: left;
-                margin-right: 10px;
             }
             .mylabel {
                 color: #fff;
@@ -80,6 +72,24 @@
                 display: inline-block;
                 padding-left: 4px;
                 padding-right: 4px;
+                cursor: default;
+            }
+            .delete {
+                position: absolute;
+                right: 0;
+                color: #fff;
+                top: 0;
+                display: none;
+                width: 23px;
+                height: 23px;
+                line-height: 23px;
+                text-align: center;
+            }
+            .delete:after {
+                content: 'X';
+            }
+            .delete:hover {
+                color: #f00;
             }
             #creation_popup {
                 border: none;
@@ -152,7 +162,7 @@
                     creationPopup('', [$(e.currentTarget).text()]);
                     e.stopPropagation();
                 });
-                $projects.on('dblclick', '.todo', function(e) {
+                $projects.on('click', '.todo', function(e) {
                     var todo = todos[$(e.currentTarget).data('index')];
                     popup(todo.description, todo.tags, function(description, tags) {
                         todo.description = description;
@@ -161,11 +171,14 @@
                     });
                     e.stopPropagation();
                 });
-                /*$projects.on('dblclick', '.todo', function(e) {
+                $projects.on('click', '.todo .delete', function(e) {
                     if (window.confirm('Do you really want to delete this todo ?')) {
-                        delete todos[$(e.currentTarget).data('index')];
+                        todos.splice($(e.currentTarget).parent().data('index'), 1);
                         update();
                     }
+                    e.stopPropagation();
+                });
+                /*$projects.on('dblclick', '.todo', function(e) {
                 });*/
 
                 Todos.bind((function() {
@@ -221,13 +234,14 @@
     </head>
     <body>
         <div id="container">
-            <ul id="projects" class="list-group">
-                <li class="list-group-item project template">
+            <ul id="projects">
+                <li class="project template">
                     <span class="mylabel"></span>
                     <ul>
                         <li class="todo">
                             <span class="mylabel"></span>
                             <span class="titre"></span>
+                            <span class="delete"></span>
                         </li>
                     </ul>
                 </li>
