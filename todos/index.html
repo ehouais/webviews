@@ -34,7 +34,7 @@
             }
             .project {
                 margin: 4px;
-                width: 250px;
+                width: 200px;
                 text-align: center;
             }
             .project ul {
@@ -65,6 +65,9 @@
             .todo > .mylabel {
                 display: none;
             }
+            .todo.asap { background-color: #800; }
+            .todo.ongoing { background-color: #080; }
+            .todo.idea { background-color: inherit; }
             .mylabel {
                 color: #fff;
                 border-radius: 3px;
@@ -138,7 +141,7 @@
 
                         $creation_popup[0].contentWindow.postMessage({
                             type: 'set',
-                            values: {description: description, tags: tags.join('')}
+                            values: {description: description, tags: tags.join(',')}
                         }, 'http://dev.ehouais.net');
                         $creation_popup.show();
                         $(window).on('message', onMessage);
@@ -178,19 +181,21 @@
                     }
                     e.stopPropagation();
                 });
-                /*$projects.on('dblclick', '.todo', function(e) {
-                });*/
 
                 Todos.bind((function() {
                     var $ptpl = $('.template', $projects).removeClass('template').remove(),
                         $ttpl = $('.todo', $ptpl).remove(),
                         $todo = function(todo, index, project) {
-                            var $t = $ttpl.clone().data('index', index);
+                            var $t = $ttpl.clone().data('index', index),
+                                classTags = ['asap', 'ongoing', 'idea'];
 
                             $t.attr('title', todo.description);
                             $t.find('.titre').text(todo.description.substr(0, 75)+(todo.description.length > 75 ? '...' : ''));
-                            $t.find('.mylabel').text(project.title).css('background-color', colorFromString(project.title));
-
+                            todo.tags.forEach(function(tag) {
+                                if (classTags.indexOf(tag) != -1) {
+                                    $t.addClass(tag);
+                                }
+                            });
                             return $t;
                         },
                         projects,
@@ -202,10 +207,6 @@
                         pindex = {};
                         $projects.empty();
 
-                        /*$projects.off('click', '.delete').on('click', '.delete', function(e) {
-                            todos.splice($(e.currentTarget).parent().parent().data('index'), 1);
-                            update();
-                        });*/
                         todos.forEach(function(todo, i) {
                             tag = todo.tags && todo.tags.length > 0 ? todo.tags[0] : '-';
                             var project = pindex[tag];
