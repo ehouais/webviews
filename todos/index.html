@@ -66,8 +66,11 @@
                 display: none;
             }
             .todo.asap { background-color: #800; }
+            .todo.asap:hover { background-color: #a00; }
             .todo.ongoing { background-color: #080; }
+            .todo.ongoing:hover { background-color: #0a0; }
             .todo.idea { background-color: inherit; }
+            .todo.idea:hover { background-color: #555; }
             .mylabel {
                 color: #fff;
                 border-radius: 3px;
@@ -83,13 +86,13 @@
                 color: #fff;
                 top: 0;
                 display: none;
-                width: 23px;
-                height: 23px;
+                width: 20px;
                 line-height: 23px;
                 text-align: center;
+                background-color: inherit;
             }
             .delete:after {
-                content: 'X';
+                content: '\2716';
             }
             .delete:hover {
                 color: #f00;
