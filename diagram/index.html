@@ -83,7 +83,7 @@
                         group.add(bg = paper.text(0, 0, node.text.replace(/_/g, ' ')).attr('text-anchor', 'middle'));
                         break;
                     case 'shape':
-                        var ne = renderNode(node.subnode, group, factor*0.9, node.shape == 'rrect' ? depth+1 : depth);
+                        var ne = renderNode(node.subnode, group, factor*0.9, node.shape == 'rrect' ? depth+1 : depth),
                             bbox = ne.getBBox();
 
                         switch (node.shape) {
