@@ -83,18 +83,23 @@
                         group.add(bg = paper.text(0, 0, node.text.replace(/_/g, ' ')).attr('text-anchor', 'middle'));
                         break;
                     case 'shape':
-                        var ne = renderNode(node.subnode, group, factor*0.9, node.shape == 'rrect' ? depth+1 : depth);
-                            bbox = ne.getBBox();
+                        var ne = renderNode(node.subnode, group, factor*0.9, node.shape == 'rrect' ? depth+1 : depth),
+                            bbox = ne.getBBox(),
+                            width = bbox.width+2*margin,
+                            height = bbox.height+2*margin,
+                            attrs = {'stroke-width': '0.05em', stroke: '#000', fill: '#fff'},
+                            radius;
 
                         switch (node.shape) {
                         case 'rect':
-                            bg = paper.rect(bbox.x-margin, bbox.y-margin, bbox.width+2*margin, bbox.height+2*margin).attr({'stroke-width': '0.05em', stroke: '#000', fill: '#fff'});
+                            bg = paper.rect(bbox.x-margin, bbox.y-margin, width, height).attr(attrs);
                             break;
                         case 'rrect':
-                            bg = paper.rect(bbox.x-margin, bbox.y-margin, bbox.width+2*margin, bbox.height+2*margin).attr({rx: '0.4em', ry: '0.4em', stroke: 'none', fill: 'hsl(210,60,'+(80-10*depth)+')'});
+                            bg = paper.rect(bbox.x-margin, bbox.y-margin, width, height).attr({rx: '0.4em', ry: '0.4em', stroke: 'none', fill: 'hsl(210,60,'+(80-10*depth)+')'});
                             break;
                         case 'circle':
-                            bg = paper.circle(bbox.x+bbox.width/2, bbox.y+bbox.height/2, (Math.max(bbox.width, bbox.height)+2*margin)/2).attr({'stroke-width': '0.05em', stroke: '#000', fill: '#fff'});
+                            radius = height/2+'px';
+                            bg = paper.rect(bbox.x-margin, bbox.y-margin, width, height).attr(attrs).attr({rx: radius, ry: radius});
                             break;
                         }
                         ne.prepend(bg);
