@@ -84,17 +84,19 @@
                         break;
                     case 'shape':
                         var ne = renderNode(node.subnode, group, factor*0.9, node.shape == 'rrect' ? depth+1 : depth),
-                            bbox = ne.getBBox();
+                            bbox = ne.getBBox(),
+                            width = bbox.width+2*margin,
+                            height = bbox.height+2*margin;
 
                         switch (node.shape) {
                         case 'rect':
-                            bg = paper.rect(bbox.x-margin, bbox.y-margin, bbox.width+2*margin, bbox.height+2*margin).attr({'stroke-width': '0.05em', stroke: '#000', fill: '#fff'});
+                            bg = paper.rect(bbox.x-margin, bbox.y-margin, width, height).attr({'stroke-width': '0.05em', stroke: '#000', fill: '#fff'});
                             break;
                         case 'rrect':
-                            bg = paper.rect(bbox.x-margin, bbox.y-margin, bbox.width+2*margin, bbox.height+2*margin).attr({rx: '0.4em', ry: '0.4em', stroke: 'none', fill: 'hsl(210,60,'+(80-10*depth)+')'});
+                            bg = paper.rect(bbox.x-margin, bbox.y-margin, width, height).attr({rx: '0.4em', ry: '0.4em', stroke: 'none', fill: 'hsl(210,60,'+(80-10*depth)+')'});
                             break;
                         case 'circle':
-                            bg = paper.circle(bbox.x+bbox.width/2, bbox.y+bbox.height/2, (Math.max(bbox.width, bbox.height)+2*margin)/2).attr({'stroke-width': '0.05em', stroke: '#000', fill: '#fff'});
+                            bg = paper.circle(bbox.x+bbox.width/2, bbox.y+bbox.height/2, Math.max(width, height)/2).attr({'stroke-width': '0.05em', stroke: '#000', fill: '#fff'});
                             break;
                         }
                         ne.prepend(bg);
