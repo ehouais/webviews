@@ -185,7 +185,7 @@
 
                   var svg = doctype + outer.innerHTML;
                   // encode then decode to handle `btoa` on Unicode; see MDN for `btoa`.
-                  var uri = 'data:image/svg+xml;base64,' + window.btoa(decodeURIComponent(encodeURIComponent(svg)));
+                  var uri = 'data:image/svg+xml,' + svg;
                   if (cb) {
                     cb(uri);
                   }
@@ -196,7 +196,6 @@
                 options = options || {};
                 out$.svgAsDataUri(el, options, function(uri) {
                   var image = new Image();
-                  //$(image).appendTo(document.body);
                   image.onload = function() {
                     var canvas = document.createElement('canvas');
                     canvas.width = image.width;
