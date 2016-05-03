@@ -1,4 +1,5 @@
 {
+    var offset = new Date().getTimezoneOffset()*60000;
     var extend = function(obj, add) {
        for (var i in add) {
           if (add.hasOwnProperty(i) && add[i] !== null) {
@@ -15,7 +16,7 @@ timelines       = t:timeline ts:("|" timeline)*             { return [t].concat(
 global_interval = "<" interval:interval ">"                 { return interval; }
 
 interval        = start:datetime "-" end:datetime           { return {start: start, end: end}; }
-datetime        = date:date time:(" " time)?                { return Date.parse(date+(time ? 'T'+time[1] : '')); }
+datetime        = date:date time:(" " time)?                { return Date.parse(date+(time ? 'T'+time[1] : ''))+offset; }
 
 date            = dm:((day "/")? month "/")? year:year      { return year+'-'+(dm[1] || '01')+'-'+(dm[0][0] || '01'); }
 day             = day:([0-3]? digit)                        { return day[0]+day[1]; }
@@ -23,7 +24,7 @@ month           = month:([0-1]? digit)                      { return month[0]+mo
 year            = "'" + year:(digit digit)                  { return +year.join('')+2000; }
                 / sign:"-"? digits:digit+                   { return (sign ? -1 : 1)*digits.join(''); }
 
-time            = hours (":" minutes)?
+time            = hours:hours minutes:(":" minutes)?        { return hours+':'+(minutes ? minutes[1] : '00'); }
 hours           = hours:([0-2] digit)                       { return hours[0]+hours[1]; }
 minutes         = minutes:([0-5] digit)                     { return minutes[0]+minutes[1]; }
 
