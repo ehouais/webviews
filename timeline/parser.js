@@ -51,7 +51,7 @@ parser = (function() {
           function(start, end) { return {start: start, end: end}; },
           " ",
           { type: "literal", value: " ", description: "\" \"" },
-          function(date, time) { return Date.parse(date+(time ? 'T'+time[1] : '')); },
+          function(date, time) { return Date.parse(date+(time ? 'T'+time[1] : ''))+offset; },
           "/",
           { type: "literal", value: "/", description: "\"/\"" },
           function(dm, year) { return year+'-'+(dm[1] || '01')+'-'+(dm[0][0] || '01'); },
@@ -67,6 +67,7 @@ parser = (function() {
           function(sign, digits) { return (sign ? -1 : 1)*digits.join(''); },
           ":",
           { type: "literal", value: ":", description: "\":\"" },
+          function(hours, minutes) { return hours+':'+(minutes ? minutes[1] : '00'); },
           /^[0-2]/,
           { type: "class", value: "[0-2]", description: "[0-2]" },
           function(hours) { return hours[0]+hours[1]; },
@@ -101,14 +102,14 @@ parser = (function() {
           peg$decode("%%42\"\"5!73.\" &\"/,#;0/#$+\")(\"'#&'#/' 8!:4!! )"),
           peg$decode("%%45\"\"5!76.\" &\"/,#;0/#$+\")(\"'#&'#/' 8!:7!! )"),
           peg$decode("%$28\"\"6879/,#0)*28\"\"6879&&&#/D#%;0/,#;0/#$+\")(\"'#&'#/($8\"::\"! )(\"'#&'#.T &%2)\"\"6)7*.\" &\"/?#$;0/&#0#*;0&&&#/)$8\":;\"\"! )(\"'#&'#"),
-          peg$decode("%;*/J#%2<\"\"6<7=/,#;+/#$+\")(\"'#&'#.\" &\"/#$+\")(\"'#&'#"),
-          peg$decode("%%4>\"\"5!7?/,#;0/#$+\")(\"'#&'#/' 8!:@!! )"),
-          peg$decode("%%4A\"\"5!7B/,#;0/#$+\")(\"'#&'#/' 8!:C!! )"),
-          peg$decode("%;..\" &\"/?#$;-/&#0#*;-&&&#/)$8\":D\"\"! )(\"'#&'#"),
-          peg$decode("%2E\"\"6E7F/Y#;#/P$2G\"\"6G7H/A$2I\"\"6I7J/2$;//)$8%:K%\"# )(%'#($'#(#'#(\"'#&'#.\xA1 &%2E\"\"6E7F/O#;#/F$2G\"\"6G7H/7$;..\" &\"/)$8$:L$\"\" )($'#(#'#(\"'#&'#._ &%2E\"\"6E7F/O#;$/F$2G\"\"6G7H/7$;..\" &\"/)$8$:M$\"\" )($'#(#'#(\"'#&'#"),
-          peg$decode("%$4N\"\"5!7O/,#0)*4N\"\"5!7O&&&#/' 8!:P!! )"),
-          peg$decode("%$;0/&#0#*;0&&&#/' 8!:Q!! )"),
-          peg$decode("4R\"\"5!7S")
+          peg$decode("%;*/P#%2<\"\"6<7=/,#;+/#$+\")(\"'#&'#.\" &\"/)$8\":>\"\"! )(\"'#&'#"),
+          peg$decode("%%4?\"\"5!7@/,#;0/#$+\")(\"'#&'#/' 8!:A!! )"),
+          peg$decode("%%4B\"\"5!7C/,#;0/#$+\")(\"'#&'#/' 8!:D!! )"),
+          peg$decode("%;..\" &\"/?#$;-/&#0#*;-&&&#/)$8\":E\"\"! )(\"'#&'#"),
+          peg$decode("%2F\"\"6F7G/Y#;#/P$2H\"\"6H7I/A$2J\"\"6J7K/2$;//)$8%:L%\"# )(%'#($'#(#'#(\"'#&'#.\xA1 &%2F\"\"6F7G/O#;#/F$2H\"\"6H7I/7$;..\" &\"/)$8$:M$\"\" )($'#(#'#(\"'#&'#._ &%2F\"\"6F7G/O#;$/F$2H\"\"6H7I/7$;..\" &\"/)$8$:N$\"\" )($'#(#'#(\"'#&'#"),
+          peg$decode("%$4O\"\"5!7P/,#0)*4O\"\"5!7P&&&#/' 8!:Q!! )"),
+          peg$decode("%$;0/&#0#*;0&&&#/' 8!:R!! )"),
+          peg$decode("4S\"\"5!7T")
         ],
 
         peg$currPos          = 0,
@@ -571,6 +572,7 @@ parser = (function() {
     }
 
 
+        var offset = new Date().getTimezoneOffset()*60000;
         var extend = function(obj, add) {
            for (var i in add) {
               if (add.hasOwnProperty(i) && add[i] !== null) {
