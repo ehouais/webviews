@@ -102,7 +102,7 @@
                             while (bounds[index] && val < bounds[index]) index++;
                             return index;
                         },
-                        mode = findInterval((end-start)/(24*60*60*1000)*fs/12/cwidth, [30, 14, 5, 2, 0.6, 0.3, 0.06, 0.04, 0.02]),
+                        mode = findInterval((end-start)/(24*60*60*1000)*fs/12/cwidth, [30, 14, 5, 2, 0.6, 0.3, 0.06, 0.04, 0.02, 0.01, 0.002]),
                         ticks = [ // major interval, major format, minor interval, nb. intervals, minor format
                             [  'year', 100,       '%Y',   'year', 10,     '\'%y'],
                             [    null,   1,       null,   'year',  1,     '\'%y'],
@@ -113,7 +113,9 @@
                             [ 'month',   1,    '%B %Y', 'monday',  1,       '%d'],
                             ['monday',   1, '%d/%m/%Y',    'day',  1,         ''],
                             ['monday',   1, '%d/%m/%Y',    'day',  1,       '%a'],
-                            ['monday',   1,         '',    'day',  1, '%a %d/%m']
+                            ['monday',   1,         '',    'day',  1, '%a %d/%m'],
+                            [   'day',   1, '%a %d/%m',   'hour',  6,      '%Hh'],
+                            [   'day',   1, '%a %d/%m',   'hour',  1,      '%Hh'],
                         ][mode];
 
                     svg
