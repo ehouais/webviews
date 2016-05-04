@@ -102,7 +102,10 @@
                             while (bounds[index] && val < bounds[index]) index++;
                             return index;
                         },
-                        mode = findInterval((end-start)/(24*60*60*1000)*fs/12/cwidth, [30, 14, 5, 2, 0.6, 0.3, 0.06, 0.04, 0.02, 0.01, 0.002]),
+                        mode = findInterval(
+                            (end-start)/(24*60*60*1000)*fs/12/cwidth,
+                            [30, 14, 5, 2, 0.6, 0.3, 0.06, 0.04, 0.02, 0.01, 0.002, 0.001, 0.0004, 0.00024]
+                        ),
                         ticks = [ // major interval, major format, minor interval, nb. intervals, minor format
                             [  'year', 100,       '%Y',   'year', 10,     '\'%y'],
                             [    null,   1,       null,   'year',  1,     '\'%y'],
@@ -116,6 +119,9 @@
                             ['monday',   1,         '',    'day',  1, '%a %d/%m'],
                             [   'day',   1, '%a %d/%m',   'hour',  6,      '%Hh'],
                             [   'day',   1, '%a %d/%m',   'hour',  1,      '%Hh'],
+                            [  'hour',   1,      '%Hh', 'minute', 30,       '%M'],
+                            [  'hour',   1,      '%Hh', 'minute', 10,       '%M'],
+                            [  'hour',   1,      '%Hh', 'minute',  5,       '%M'],
                         ][mode];
 
                     svg
@@ -247,9 +253,6 @@
                         var max = 0;
 
                         timeline.events.forEach(function(event, i) {
-                            if (event.end) {
-                                event.end = d3.time.day.offset(event.end, 1);
-                            }
                             if (timelines.viewbox) {
                                 if (event.datetime) {
                                     if (event.datetime < start || event.datetime > end) {
