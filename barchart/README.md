@@ -2,7 +2,7 @@ Simple barchart webservice
 ==========================
 
 #### Description
-`http://dev.ehouais.net/webviews/barchart?datauri=...` returns a web page with javascript that generates a barchart on the client, based on the data fetched using the "datauri" query parameter. This parameter must be a URI that either uses the "data:" scheme (data is contained within the URI) or points to a [CORS](https://en.wikipedia.org/wiki/Cross-origin_resource_sharing)-enabled resource.
+`?datauri=...` returns a web page with javascript that generates a barchart on the client, based on the data fetched using the "datauri" query parameter. This parameter must be a URI that either uses the "data:" scheme (data is contained within the URI) or points to a [CORS](https://en.wikipedia.org/wiki/Cross-origin_resource_sharing)-enabled resource.
   * vector graphics (using [D3.js](http://d3js.org/) javascript library to generate SVG)
   * responsive (the barchart dimensions adapts to the room available)
   * automatic y-axis graduation
@@ -13,11 +13,11 @@ Simple barchart webservice
 
 #### Examples
 
-[Simplest barchart](http://dev.ehouais.net/webviews/barchart?datauri=data:text/plain,1) /
-[Simple barchart](http://dev.ehouais.net/webviews/barchart?datauri=data:text/plain,1|1|2|3|5|8|13|21|34) /
-[Simple barchart with unit](http://dev.ehouais.net/webviews/barchart?datauri=data:text/plain,1(camels)|1|2|3|5|8|13|21) /
-[Barchart with named series](http://dev.ehouais.net/webviews/barchart?datauri=data:text/plain,{Fibonacci_numbers}1|1|2|3|5|8|13|21|34) /
-[Barchart with named series and value labels](http://dev.ehouais.net/webviews/barchart?datauri=data:text/plain,{World_cup_wins_per_country}Brazil:5|Germany:4|Italy:4|Argentina:2|Uruguay:2|France:1|England:1|Spain:1) /
-[Multiseries (grouped bars)](http://dev.ehouais.net/webviews/barchart?datauri=data:text/plain,{series_A,series_B,series_C}1,4,7|2,4,6|3,4,5|4,4,4|5,4,3|6,4,2|7,4,1) /
-[Multiseries (stacked bars)](http://dev.ehouais.net/webviews/barchart?datauri=data:text/plain,{series_A+series_B+series_C}1,4,7|2,4,6|3,4,5|4,4,4|5,4,3|6,4,2|7,4,1) /
-[Multiseries (grouped/stacked bars)](http://dev.ehouais.net/webviews/barchart?datauri=data:text/plain,{series_A,series_B+series_C}1,4,7|2,4,6|3,4,5|4,4,4|5,4,3|6,4,2|7,4,1)
+[Simplest barchart](?datauri=data:text/plain,1) /
+[Simple barchart](?datauri=data:text/plain,1|1|2|3|5|8|13|21|34) /
+[Simple barchart with unit](?datauri=data:text/plain,1(camels)|1|2|3|5|8|13|21) /
+[Barchart with named series](?datauri=data:text/plain,{Fibonacci_numbers}1|1|2|3|5|8|13|21|34) /
+[Barchart with named series and value labels](?datauri=data:text/plain,{World_cup_wins_per_country}Brazil:5|Germany:4|Italy:4|Argentina:2|Uruguay:2|France:1|England:1|Spain:1) /
+[Multiseries (grouped bars)](?datauri=data:text/plain,{series_A,series_B,series_C}1,4,7|2,4,6|3,4,5|4,4,4|5,4,3|6,4,2|7,4,1) /
+[Multiseries (stacked bars)](?datauri=data:text/plain,{series_A+series_B+series_C}1,4,7|2,4,6|3,4,5|4,4,4|5,4,3|6,4,2|7,4,1) /
+[Multiseries (grouped/stacked bars)](?datauri=data:text/plain,{series_A,series_B+series_C}1,4,7|2,4,6|3,4,5|4,4,4|5,4,3|6,4,2|7,4,1)

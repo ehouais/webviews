@@ -2,7 +2,7 @@ Simple diagram webservice
 ==========================
 
 #### Description
-`http://dev.ehouais.net/webviews/diagram?datauri=...` returns a web page with javascript that generates a diagram on the client, based on the data fetched using the "datauri" query parameter. This parameter must be a URI that either uses the "data:" scheme (data is contained within the URI) or points to a [CORS](https://en.wikipedia.org/wiki/Cross-origin_resource_sharing)-enabled resource.
+`?datauri=...` returns a web page with javascript that generates a diagram on the client, based on the data fetched using the "datauri" query parameter. This parameter must be a URI that either uses the "data:" scheme (data is contained within the URI) or points to a [CORS](https://en.wikipedia.org/wiki/Cross-origin_resource_sharing)-enabled resource.
   * vector graphics (using [Snap.svg](http://snapsvg.io/) javascript library to generate SVG)
   * responsive (the diagram dimensions adapts to the room available)
 
@@ -12,14 +12,14 @@ Simple diagram webservice
 
 #### Examples (using data: URIs)
 
-[Simple node](http://dev.ehouais.net/webviews/diagram?datauri=data:text/plain;charset%3Dutf-8,node) /
-[Horizontal distribution](http://dev.ehouais.net/webviews/diagram?datauri=data:text/plain;charset%3Dutf-8,A|B|C) /
-[Vertical distribution](http://dev.ehouais.net/webviews/diagram?datauri=data:text/plain;charset%3Dutf-8,A-B-C) /
-[Shapes](http://dev.ehouais.net/webviews/diagram?datauri=data:text/plain;charset%3Dutf-8,[(A)]|[B]|(C)) /
-[Inclusion](<http://dev.ehouais.net/webviews/diagram?datauri=data:text/plain;charset%3Dutf-8,[(A|[B-(C|[D]|E)])]>) /
-[Explicit grouping](http://dev.ehouais.net/webviews/diagram?datauri=data:text/plain;charset%3Dutf-8,[(A-B|C)]|[({A-B}|C)]) /
-[Explicit spacing](<http://dev.ehouais.net/webviews/diagram?datauri=data:text/plain;charset%3Dutf-8,[({(A)|(B)}-{(C)|(D)|(E)}-{(F)|(G)})]|[({(A)||||(B)}--{(C)||(--D--)||(E)}--{(F)||||(G)})]>) /
-[Horizontal alignment](http://dev.ehouais.net/webviews/diagram?datauri=data:text/plain;charset%3Dutf-8,[one_two_three]-<[four]-[five]>) /
-[Vertical alignment](http://dev.ehouais.net/webviews/diagram?datauri=data:text/plain;charset%3Dutf-8,[one-two-three]|<[four]|[five]>) /
-[Linking](http://dev.ehouais.net/webviews/diagram?datauri=data:text/plain;charset%3Dutf-8,A:(A)-_-B:[node_1]|C:node_2|D:node_3|[(E:node_4)],A-B,A.C,A->D,A.>E) /
-[Clickable](http://dev.ehouais.net/webviews/diagram?datauri=data:text/plain;charset%3Dutf-8,@A:(A)--@B:[node_1]|@C:node_2|@D:node_3|@F:[(E:node_4)],A-B,A.C,A->D,A.>E)
+[Simple node](?datauri=data:text/plain;charset%3Dutf-8,node) /
+[Horizontal distribution](?datauri=data:text/plain;charset%3Dutf-8,A|B|C) /
+[Vertical distribution](?datauri=data:text/plain;charset%3Dutf-8,A-B-C) /
+[Shapes](?datauri=data:text/plain;charset%3Dutf-8,[(A)]|[B]|(C)) /
+[Inclusion](<?datauri=data:text/plain;charset%3Dutf-8,[(A|[B-(C|[D]|E)])]>) /
+[Explicit grouping](?datauri=data:text/plain;charset%3Dutf-8,[(A-B|C)]|[({A-B}|C)]) /
+[Explicit spacing](<?datauri=data:text/plain;charset%3Dutf-8,[({(A)|(B)}-{(C)|(D)|(E)}-{(F)|(G)})]|[({(A)||||(B)}--{(C)||(--D--)||(E)}--{(F)||||(G)})]>) /
+[Horizontal alignment](?datauri=data:text/plain;charset%3Dutf-8,[one_two_three]-<[four]-[five]>) /
+[Vertical alignment](?datauri=data:text/plain;charset%3Dutf-8,[one-two-three]|<[four]|[five]>) /
+[Linking](?datauri=data:text/plain;charset%3Dutf-8,A:(A)-_-B:[node_1]|C:node_2|D:node_3|[(E:node_4)],A-B,A.C,A->D,A.>E) /
+[Clickable](?datauri=data:text/plain;charset%3Dutf-8,@A:(A)--@B:[node_1]|@C:node_2|@D:node_3|@F:[(E:node_4)],A-B,A.C,A->D,A.>E)

@@ -2,7 +2,7 @@ Simple timeline webservice
 ==========================
 
 #### Description
-`http://dev.ehouais.net/webviews/timeline?datauri=...` returns a web page with javascript that generates a timeline on the client, based on the data fetched using the "datauri" query parameter. This parameter must be a URI that either uses the "data:" scheme (data is contained within the URI) or points to a [CORS](https://en.wikipedia.org/wiki/Cross-origin_resource_sharing)-enabled resource.
+`?datauri=...` returns a web page with javascript that generates a timeline on the client, based on the data fetched using the "datauri" query parameter. This parameter must be a URI that either uses the "data:" scheme (data is contained within the URI) or points to a [CORS](https://en.wikipedia.org/wiki/Cross-origin_resource_sharing)-enabled resource.
   * vector graphics (using [D3.js](http://d3js.org/) javascript library to generate SVG)
   * responsive (the timeline dimensions adapts to the room available)
 
@@ -11,9 +11,9 @@ Simple timeline webservice
 
 #### Examples
 
-[Simplest timeline](http://dev.ehouais.net/webviews/barchart?datauri=data:text/plain,[30/04/1337-17/07/1453]) /
-[Event label](http://dev.ehouais.net/webviews/barchart?datauri=data:text/plain,[30/04/1337-17/07/1453]Hundred_Years'_War) /
-[Named timeline](http://dev.ehouais.net/webviews/barchart?datauri=data:text/plain,Hundred_Years'_War[30/04/1337-08/08/1360][01/05/1369-18/06/1389][13/08/1415-17/07/1453]) /
-[Punctual events](http://dev.ehouais.net/webviews/barchart?datauri=data:text/plain,Moonwalks[31/07/1969]Apollo_11[19/11/1969]Apollo_12[20/11/1969][05/02/1971]Apollo_14[06/02/1971][31/07/1971]Apollo_15[01/08/1971][02/08/1971][21/04/1972]Apollo_16[22/04/1972][23/04/1972][11/12/1972]Apollo_17[12/12/1972][13/12/1972]) /
-[User-defined global span](http://dev.ehouais.net/webviews/barchart?datauri=data:text/plain,<01/01/1965-01/01/1975>Moonwalks[31/07/1969]Apollo_11[19/11/1969]Apollo_12[20/11/1969][05/02/1971]Apollo_14[06/02/1971][31/07/1971]Apollo_15[01/08/1971][02/08/1971][21/04/1972]Apollo_16[22/04/1972][23/04/1972][11/12/1972]Apollo_17[12/12/1972][13/12/1972]) /
-[Multiple timelines](http://dev.ehouais.net/webviews/barchart?datauri=data:text/plain,Jules_Verne[08/02/1828-24/03/1905]|H.G._Wells[21/09/1866-13/08/1946]|Robert_A._Heinlein[07/07/1907-08/05/1988]|Alfred_E._van_Vogt[26/04/1912-26/01/2000]|Arthur_C._Clarke[16/12/1917-19/03/2008]|Isaac_Asimov[02/01/1920-06/04/1992]|Ray_Bradbury[22/08/1920-05/06/2012]|Frank_Herbert[08/10/1920-11/02/1986]|Philip_K._Dick[16/12/1928-02/03/1982])
+[Simplest timeline](?datauri=data:text/plain,[30/04/1337-17/07/1453]) /
+[Event label](?datauri=data:text/plain,[30/04/1337-17/07/1453]Hundred_Years'_War) /
+[Named timeline](?datauri=data:text/plain,Hundred_Years'_War[30/04/1337-08/08/1360][01/05/1369-18/06/1389][13/08/1415-17/07/1453]) /
+[Punctual events](?datauri=data:text/plain,Moonwalks[31/07/1969]Apollo_11[19/11/1969]Apollo_12[20/11/1969][05/02/1971]Apollo_14[06/02/1971][31/07/1971]Apollo_15[01/08/1971][02/08/1971][21/04/1972]Apollo_16[22/04/1972][23/04/1972][11/12/1972]Apollo_17[12/12/1972][13/12/1972]) /
+[User-defined global span](?datauri=data:text/plain,<01/01/1965-01/01/1975>Moonwalks[31/07/1969]Apollo_11[19/11/1969]Apollo_12[20/11/1969][05/02/1971]Apollo_14[06/02/1971][31/07/1971]Apollo_15[01/08/1971][02/08/1971][21/04/1972]Apollo_16[22/04/1972][23/04/1972][11/12/1972]Apollo_17[12/12/1972][13/12/1972]) /
+[Multiple timelines](?datauri=data:text/plain,Jules_Verne[08/02/1828-24/03/1905]|H.G._Wells[21/09/1866-13/08/1946]|Robert_A._Heinlein[07/07/1907-08/05/1988]|Alfred_E._van_Vogt[26/04/1912-26/01/2000]|Arthur_C._Clarke[16/12/1917-19/03/2008]|Isaac_Asimov[02/01/1920-06/04/1992]|Ray_Bradbury[22/08/1920-05/06/2012]|Frank_Herbert[08/10/1920-11/02/1986]|Philip_K._Dick[16/12/1928-02/03/1982])

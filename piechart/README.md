@@ -2,7 +2,7 @@ Simple piechart webservice
 ==========================
 
 #### Description
-`http://dev.ehouais.net/webviews/piechart?datauri=...` returns a web page with javascript that generates a piechart on the client, based on the data fetched using the "datauri" query parameter. This parameter must be a URI that either uses the "data:" scheme (data is contained within the URI) or points to a [CORS](https://en.wikipedia.org/wiki/Cross-origin_resource_sharing)-enabled resource.
+`?datauri=...` returns a web page with javascript that generates a piechart on the client, based on the data fetched using the "datauri" query parameter. This parameter must be a URI that either uses the "data:" scheme (data is contained within the URI) or points to a [CORS](https://en.wikipedia.org/wiki/Cross-origin_resource_sharing)-enabled resource.
   * vector graphics (using [D3.js](http://d3js.org/) javascript library to generate SVG)
   * responsive (the piechart dimensions adapts to the room available)
   * automatic legend generation
@@ -12,4 +12,4 @@ Simple piechart webservice
 
 #### Examples (using data: URIs)
 
-  * [Simple piechart](http://dev.ehouais.net/webviews/piechart/?datauri=data:text/plain;charset%3Dutf-8,A:2|B:58|C:60|D:30)
+  * [Simple piechart](?datauri=data:text/plain;charset%3Dutf-8,A:2|B:58|C:60|D:30)

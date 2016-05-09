@@ -3,7 +3,7 @@
         <meta charset="utf-8">
         <script src="//cdnjs.cloudflare.com/ajax/libs/sjcl/1.0.0/sjcl.min.js"></script>
         <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
-        <script src="http://dev.ehouais.net/webviews/webviews.js"></script>
+        <script src="../webviews.js"></script>
         <style>
             * {
                 -moz-box-sizing: border-box;
@@ -89,7 +89,7 @@
             var dataSource = Webviews.data(),
                 maxId = 0,
                 dashboard,
-                formDomain = 'http://dev.ehouais.net',
+                formDomain = document.location.hostname,
                 refresh = function() {
                     dataSource.save(JSON.stringify(dashboard));
                     dataSource.trigger();
@@ -341,7 +341,7 @@
         <div id="dom"></div>
         <div id="overlay"></div>
         <div id="popup_overlay"></div>
-        <iframe id="creation_popup" src="http://dev.ehouais.net/webviews/forms?datauri=data:text/plain,uri:URI,[cancel]:Cancel"></iframe>
-        <iframe id="edition_popup" src="http://dev.ehouais.net/webviews/forms?datauri=data:text/plain,uri:URI,[cancel]:Cancel,[refresh]:Refresh,[newpage]:New page,[delete]:Delete"></iframe>
+        <iframe id="creation_popup" src="../forms/?datauri=data:text/plain,uri:URI,[cancel]:Cancel"></iframe>
+        <iframe id="edition_popup" src="../forms/?datauri=data:text/plain,uri:URI,[cancel]:Cancel,[refresh]:Refresh,[newpage]:New page,[delete]:Delete"></iframe>
     </body>
 </html>

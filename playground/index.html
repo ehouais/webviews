@@ -2,7 +2,7 @@
     <head>
         <meta charset="utf-8">
         <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
-        <script src="http://dev.ehouais.net/webviews/webviews.js"></script>
+        <script src="../webviews.js"></script>
         <link href="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.0/css/bootstrap.min.css" rel="stylesheet">
         <script src="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.0/js/bootstrap.min.js"></script>
         <script src="//cdnjs.cloudflare.com/ajax/libs/markdown-it/4.2.2/markdown-it.js"></script>
@@ -221,7 +221,7 @@
             $(function() {
                 var parts = window.location.href.split('?');
                 if (parts[1]) {
-                    var appUri = parts[0].replace(/playground\/?/, parts[1]),
+                    var appUri = parts[0].replace(/playground\/?/, parts[1])+'/',
                         $source = $('#source'),
                         iframeWindow = $('#render')[0].contentWindow,
                         $doc = $('#doc'),
@@ -266,7 +266,7 @@
 
                             // Fetch documentation and insert it into page
                             $.get(docUri).done(function(data) {
-                                $doc.html(md.render(data.replace(new RegExp('http://dev.ehouais.net/webviews/[^\? `]*', 'g'), appUri)));
+                                $doc.html(md.render(data.replace(new RegExp('\\?datauri=', 'g'), appUri+'?datauri=')));
                             });
                         }
                     }, 'html');

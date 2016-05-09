@@ -8,7 +8,7 @@
         <script src="//cdnjs.cloudflare.com/ajax/libs/blueimp-md5/1.1.0/js/md5.min.js"></script>
         <script src="//cdnjs.cloudflare.com/ajax/libs/jquery.perfect-scrollbar/0.6.7/js/min/perfect-scrollbar.jquery.min.js"></script>
         <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/jquery.perfect-scrollbar/0.6.7/css/perfect-scrollbar.min.css"/>
-        <script src="http://dev.ehouais.net/webviews/webviews.js"></script>
+        <script src="../webviews.js"></script>
         <style>
             @font-face {
                 font-family: 'gotham';
@@ -113,6 +113,7 @@
         <script>
             var todos,
                 Todos = Webviews.data();
+                domain = document.location.hostname,
                 colorFromString = function(str) {
                     return '#'+md5(str).substr(-7, 6);
                 };
@@ -130,7 +131,7 @@
                                 var event = e.originalEvent,
                                     msg = event.data;
 
-                                if (event.origin == 'http://dev.ehouais.net' && msg.type != 'resize') {
+                                if (event.origin == domain && msg.type != 'resize') {
                                     if (msg.type == 'submit' && msg.data.description) {
                                         onsubmit(
                                             msg.data.description,
@@ -145,7 +146,7 @@
                         $creation_popup[0].contentWindow.postMessage({
                             type: 'set',
                             values: {description: description, tags: tags.join(',')}
-                        }, 'http://dev.ehouais.net');
+                        }, domain);
                         $creation_popup.show();
                         $(window).on('message', onMessage);
                     },
@@ -251,6 +252,6 @@
                 </li>
             </ul>
         </div>
-        <iframe id="creation_popup" src="http://dev.ehouais.net/webviews/forms?datauri=data:text/plain,description:Description,tags:Tags,[cancel]:Cancel"></iframe>
+        <iframe id="creation_popup" src="../forms/?datauri=data:text/plain,description:Description,tags:Tags,[cancel]:Cancel"></iframe>
     </body>
 </html>
