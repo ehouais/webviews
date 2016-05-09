@@ -113,7 +113,7 @@
         <script>
             var todos,
                 Todos = Webviews.data();
-                domain = document.location.hostname,
+                domain = document.location.origin,
                 colorFromString = function(str) {
                     return '#'+md5(str).substr(-7, 6);
                 };

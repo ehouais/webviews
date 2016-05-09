@@ -89,7 +89,7 @@
             var dataSource = Webviews.data(),
                 maxId = 0,
                 dashboard,
-                formDomain = document.location.hostname,
+                formDomain = document.location.origin,
                 refresh = function() {
                     dataSource.save(JSON.stringify(dashboard));
                     dataSource.trigger();
