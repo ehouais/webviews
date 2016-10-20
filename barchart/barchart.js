@@ -44,7 +44,7 @@ define(['d3'], function(d3) {
                     .each(function(d, i) {
                         var text = d3.select(this).text(null);
                         data.values[i].label.forEach(function(line, l) {
-                            text.append('tspan').text(line).attr({x: 0, dy: fs});
+                            text.append('tspan').text(line).attr('x', 0).attr('dy', fs);
                         });
                     });
 
