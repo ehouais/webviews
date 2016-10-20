@@ -5,6 +5,13 @@
         <script src="//cdnjs.cloudflare.com/ajax/libs/require.js/2.3.2/require.min.js"></script>
         <link href="README.md" rel="doc">
         <link rel="stylesheet" href="barchart.css">
+        <style>
+            html, body {
+                height: 100%;
+                margin: 0;
+                overflow: hidden;
+            }
+        </style>
     </head>
     <body>
         <script>
@@ -14,118 +21,24 @@
                     'd3': '//cdnjs.cloudflare.com/ajax/libs/d3/4.2.7/d3.min',
                 },
                 shim: {
-                    'd3': {
-                        exports: 'd3'
-                    }
-                },
-                /*config: {
-                    text: {
-                        useXhr: function (url, protocol, hostname, port) {
-                            return true; // allow cross-domain requests when remote server allows CORS
-                        }
-                    }
-                }*/
+                    'd3': {exports: 'd3'},
+                    'parser': {exports: 'parser'}
+                }
             });
 
-            require(['barchart'], function(Barchart) {
-                var barchart = Barchart(document.body);
-                barchart.update({
-                    "values": [
-                        {
-                            "values": [1, 2, 3],
-                            "label": "First"
-                        },
-                        {
-                            "values": [3, 4, 5],
-                            "label": "Second"
-                        }
-                    ],
-                    "labels": ["test1", "test2", "test3"],
-                    "grouping": [1,1,1],
-                    "unit": "m/s"
+            require(['barchart', 'parser', '../utils'], function(Barchart, parser, Utils) {
+                var barchart = Barchart(document.body, 0.05),
+                    dataUri = Utils.uriParams(window.location.href).datauri;
+
+                window.addEventListener('resize', barchart.resize);
+                Utils.fetch(dataUri, function(body) {
+                    try {
+                        barchart.update(parser.parse(body));
+                    } catch(e) {
+                        console.log('Parser error: '+e.message);
+                    }
                 });
             });
         </script>
-        <!--<script>
-            var svg = d3.select('body').append('svg'),
-                chart = svg.append('g').attr('font-family', 'gotham'),
-                yScale = d3.scale.linear(),
-                yAxis = d3.svg.axis()
-                    .scale(yScale)
-                    .orient('left'),
-                yy = chart.append('g')
-                    .attr('class', 'y axis'),
-                groups = chart.append('g'),
-                group,
-                xScale = d3.scale.ordinal(),
-                xAxis = d3.svg.axis()
-                    .outerTickSize(0)
-                    .scale(xScale),
-                xx = chart.append('g')
-                    .attr('class', 'x axis'),
-                cScale = d3.scale.category10(),
-                nb,
-                indexes,
-                values,
-                unit,
-                unitl,
-                labels,
-                legend,
-                bars,
-                rects,
-                text,
-                lrects,
-                ltexts,
-                dataSource = Webviews.data();
-                resize = Webviews.resize(function(width, height, margins) {
-                });
-
-            dataSource.bind(function(data) {
-                var str = data.replace(new RegExp('_', 'g'), ' '),
-                    res,
-                    tokens,
-                    index = 0,
-                    max = [];
-
-                values = [];
-                indexes = [];
-
-                // get serie labels
-                if (res = str.match(/^\{([^\}]+)\}(.*)/)) {
-                    labels = [];
-                    tokens = res[1].split(',');
-                    nb = tokens.length;
-                    tokens.forEach(function(token, i) {
-                        token.split('+').forEach(function(label) {
-                            labels.push(label);
-                            indexes[index++] = i;
-                        });
-                    });
-                    str = res[2];
-                }
-
-                // get serie values
-                str.split('|').forEach(function(value, i) {
-                    var tokens = value.split(':');
-                    if (tokens.length == 1) {
-                        tokens.unshift('');
-                    }
-                    values[i] = {
-                        index: i,
-                        label: tokens[0], // group label
-                        values: tokens[1].split(',').map(function(val) {
-                            if (res = val.match(/([^(]+)\(([^)]+)\)$/)) {
-                                val = res[1];
-                                unit = res[2];
-                            }
-                            return val.split('+').reduce(function(sum, item) {
-                                return +item+sum;
-                            }, 0);
-                        })
-                    };
-                });
-
-            });
-        </script>-->
     </body>
 </html>

@@ -4,10 +4,8 @@
     font-weight: 400;
     font-style: normal;
 }
-body {
-    margin: 0;
-    border: 0;
-    overflow: hidden;
+svg {
+    font-family: 'gotham';
 }
 .y.axis path {
     display: none;
