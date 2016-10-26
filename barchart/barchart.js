@@ -1,6 +1,11 @@
 define(['d3'], function(d3) {
-    return function(container, margin) {
-        var data,
+    return function(container, params) {
+        var dgroups,
+            slabels,
+            lcol,
+            nb_series,
+            nb_rows,
+            grouping,
             svg = d3.select(container).append('svg'),
             chart = svg.append('g'),
             yScale = d3.scaleLinear(),
@@ -16,8 +21,7 @@ define(['d3'], function(d3) {
             cScale = d3.scaleOrdinal(d3.schemeCategory10),
             legend,
             lrects,
-            ltexts,
-            unitl;
+            ltexts;
 
         var resize = function(left, top, width, height) {
                 var fs = Math.max(Math.min(Math.min(width, height)/20, 20), 11),
@@ -32,9 +36,9 @@ define(['d3'], function(d3) {
 
                 xScale
                     .range([0, width])
-                    .padding(data.nb > 1 ? 0.2 : 0.1);
+                    .padding(nb_series > 1 ? 0.2 : 0.1);
 
-                var colwidth = xScale.bandwidth()/data.grouping.length;
+                var colwidth = xScale.bandwidth()/grouping.length;
 
                 xx
                     .attr('transform', 'translate(0,' + height + ')')
@@ -43,7 +47,7 @@ define(['d3'], function(d3) {
                     .style('font-size', fs+'px')
                     .each(function(d, i) {
                         var text = d3.select(this).text(null);
-                        data.values[i].label.forEach(function(line, l) {
+                        dgroups[i].label.split('-').forEach(function(line) {
                             text.append('tspan').text(line).attr('x', 0).attr('dy', fs);
                         });
                     });
@@ -69,12 +73,12 @@ define(['d3'], function(d3) {
                     .attr('transform', function(d, i) { return 'translate('+xScale(i)+',0)'; });
 
                 rects
-                    .attr('x', function(d, i) { return d.index*colwidth; })
+                    .attr('x', function(d, i) { return d.col*colwidth; })
                     .attr('y', function(d) { return yScale(d.top); })
                     .attr('width', colwidth)
                     .attr('height', function(d) { return height-yScale(d.height); });
 
-                if (data.labels) {
+                if (slabels) {
                     legend
                         .attr('transform', function(d, i) { return 'translate(0,'+(-(i+2)*fs)+')'; });
 
@@ -88,55 +92,58 @@ define(['d3'], function(d3) {
                         .style('font-size', fs+'px');
                 }
 
-                if (unitl) {
-                    unitl
-                        .style('font-size', fs+'px');
-                }
-
                 return svg._groups[0][0].getBBox();
             };
 
         return {
-            //  data = {
-            //      values: [{
-            //          values: [{{float}}, ...]
-            //          label: {{string}}        : optional
-            //      }, ...]
-            //      labels: [{{string}}, ...]    : optional
-            //      grouping: []                 : optional
-            //      unit: {{string}}             : optional
-            //  }
-            update: function(newdata) {
-                data = newdata;
+            //  data = [
+            //      [val, val, ...]
+            //      , ...
+            //  ]
+            update: function(rows) {
+                lcol = params.labels || 0;
+                nb_series = rows[0].length-1;
+                grouping = params.grouping || d3.range(nb_series).map(function(index) {
+                    return [index+1];
+                });
 
-                data.nb = (data.labels || data.values[0].values).length; // nb. of series
-                data.grouping = data.grouping || d3.range(data.nb); // grouping layout
-
-                // Pre-transform data according to grouping
-                var max = 0;
-                data.values.forEach(function(group) {
-                    var index = 0;
-                    data.grouping.forEach(function(stack, i) {
-                        for (var height = 0, value; stack--; index++) {
-                            group.values[index] = {
-                                index: i,
-                                height: value = group.values[index],
-                                top: height += value
-                            };
-                        }
-                        max = Math.max(max, height);
+                slabels = [];
+                grouping.forEach(function(stack) {
+                    stack.forEach(function(col_index) {
+                        slabels.push(rows[0][col_index]);
                     });
                 });
 
+                rows.shift();
+                nb_rows = rows.length;
+
+                // Pre-compute bar dimensions according to values and grouping
+                var max = 0;
+                dgroups = rows.map(function(row) {
+                    var group = {label: row[lcol], values: []};
+                    grouping.forEach(function(stack, i) {
+                        var height = 0;
+                        stack.forEach(function(col_index) {
+                            group.values.push({
+                                col: i,
+                                height: value = +row[col_index],
+                                top: height += value
+                            });
+                        });
+                        max = Math.max(max, height);
+                    });
+                    return group;
+                });
+
                 // Nb of ticks on x-axis
-                xScale.domain(d3.range(data.values.length)),
+                xScale.domain(d3.range(nb_rows)),
 
                 // Compute max bar height to set y-axis range, taking grouping into account
                 yScale.domain([0, max]);
 
                 group = groups
                     .selectAll('.group')
-                    .data(data.values)
+                    .data(dgroups)
                     .enter()
                     .append('g')
                     .attr('class', 'group');
@@ -152,9 +159,9 @@ define(['d3'], function(d3) {
                 rects.append('title')
                     .text(function(d) { return d.height; });
 
-                if (data.labels) {
+                if (slabels) {
                     legend = chart.append('g').selectAll('.legend')
-                        .data(data.labels)
+                        .data(slabels)
                         .enter()
                         .append('g')
                         .attr('class', 'legend');
@@ -169,20 +176,13 @@ define(['d3'], function(d3) {
                         .text(function(d) { return d; });
                 }
 
-                if (data.unit) {
-                    unitl = chart.append('text')
-                        .attr('dy', '-1em')
-                        .style('text-anchor', 'end')
-                        .text(data.unit);
-                }
-
                 this.resize();
             },
             resize: function() {
                 var width = container.clientWidth,
                     height = container.clientHeight,
                     bbox = resize(0, 0, width, height),
-                    absmargin = margin*Math.min(width, height);
+                    absmargin = params.margin*Math.min(width, height);
 
                 resize(
                     -bbox.x+absmargin,
