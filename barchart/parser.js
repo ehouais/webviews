@@ -13,6 +13,6 @@ parser = {
         }
     },
     parseData: function(str) {
-        return str.replace(/\|/g, '\n').split('\n').map(function(row) { return row.split(','); });
+        return str.replace(/;/g, '\n').split('\n').map(function(row) { return row.split(','); });
     }
 };
