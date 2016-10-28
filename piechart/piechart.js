@@ -11,8 +11,8 @@ define(['d3'], function(d3) {
             labels;
 
         var resize = function(left, top, width, height) {
-                var radius = Math.min(width/2, height/2),
-                    fs = Math.max(Math.min(Math.min(width, height)/20, 20), 11),
+                var radius = Math.min(width, height)/2,
+                    fs = Math.max(Math.min(radius/10, 20), 11),
                     heights = [];
 
                 svg
@@ -20,7 +20,7 @@ define(['d3'], function(d3) {
                     .attr('height', container.clientHeight);
 
                 chart
-                    .attr('transform', 'translate('+left+','+top+')');
+                    .attr('transform', 'translate('+(left+width/2)+','+(top+height/2)+')');
 
                 arc
                     .outerRadius(radius);
