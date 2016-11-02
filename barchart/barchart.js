@@ -110,7 +110,7 @@ define(['d3'], function(d3) {
                 slabels = [];
                 grouping.forEach(function(stack) {
                     stack.forEach(function(col_index) {
-                        slabels.push(rows[0][col_index]);
+                        slabels.push(rows[0][col_index].replace(/_/g, ' '));
                     });
                 });
 
