@@ -21,11 +21,11 @@ define(['d3'], function(d3) {
             cScale = d3.scaleOrdinal(d3.schemeCategory10),
             legend,
             lrects,
-            ltexts;
+            ltexts,
+            unitl;
 
-        var resize = function(left, top, width, height) {
-                var fs = Math.max(Math.min(Math.min(width, height)/20, 20), 11),
-                    heights = [];
+        var resize = function(left, top, width, height, fontsize) {
+                var heights = [];
 
                 svg
                     .attr('width', container.clientWidth)
@@ -44,11 +44,11 @@ define(['d3'], function(d3) {
                     .attr('transform', 'translate(0,' + height + ')')
                     .call(xAxis)
                     .selectAll('text')
-                    .style('font-size', fs+'px')
+                    .style('font-size', fontsize+'px')
                     .each(function(d, i) {
                         var text = d3.select(this).text(null);
                         dgroups[i].label.split('-').forEach(function(line) {
-                            text.append('tspan').text(line).attr('x', 0).attr('dy', fs);
+                            text.append('tspan').text(line).attr('x', 0).attr('dy', fontsize);
                         });
                     });
 
@@ -62,7 +62,7 @@ define(['d3'], function(d3) {
                 yy
                     .call(yAxis)
                     .selectAll('text')
-                    .style('font-size', fs+'px');
+                    .style('font-size', fontsize+'px');
 
                 yy
                     .selectAll('g')
@@ -80,16 +80,22 @@ define(['d3'], function(d3) {
 
                 if (slabels) {
                     legend
-                        .attr('transform', function(d, i) { return 'translate(0,'+(-(i+2)*fs)+')'; });
+                        .attr('transform', function(d, i) { return 'translate(0,'+(-(i+2)*fontsize)+')'; });
 
                     lrects
                         .attr('x', width-18)
-                        .attr('height', fs*0.9);
+                        .attr('height', fontsize*0.9);
 
                     ltexts
                         .attr('x', width-24)
-                        .attr('y', fs/2)
-                        .style('font-size', fs+'px');
+                        .attr('y', fontsize/2)
+                        .style('font-size', fontsize+'px');
+                }
+
+                if (unitl) {
+                    unitl
+                        .attr('dy', '-'+fontsize+'px')
+                        .style('font-size', fontsize+'px');
                 }
 
                 return svg._groups[0][0].getBBox();
@@ -110,9 +116,15 @@ define(['d3'], function(d3) {
                 slabels = [];
                 grouping.forEach(function(stack) {
                     stack.forEach(function(col_index) {
-                        slabels.push(rows[0][col_index]);
+                        slabels.push(rows[0][col_index].replace(/_/g, ' '));
                     });
                 });
+
+                if (rows[0][0]) {
+                    unitl = chart.append('text')
+                        .style('text-anchor', 'end')
+                        .text(rows[0][0]);
+                }
 
                 rows.shift();
                 nb_rows = rows.length;
@@ -124,9 +136,12 @@ define(['d3'], function(d3) {
                     grouping.forEach(function(stack, i) {
                         var height = 0;
                         stack.forEach(function(col_index) {
+                            var value = (row[col_index] || '').split('+').reduce(function(sum, term) {
+                                return +term+sum;
+                            }, 0);
                             group.values.push({
                                 col: i,
-                                height: value = +row[col_index],
+                                height: value,
                                 top: height += value
                             });
                         });
@@ -181,14 +196,16 @@ define(['d3'], function(d3) {
             resize: function() {
                 var width = container.clientWidth,
                     height = container.clientHeight,
-                    bbox = resize(0, 0, width, height),
+                    fontsize = Math.max(Math.min(Math.min(width, height)/25, 20), 11),
+                    bbox = resize(0, 0, width, height, fontsize),
                     absmargin = params.margin*Math.min(width, height);
 
                 resize(
                     -bbox.x+absmargin,
                     -bbox.y+absmargin,
                     2*width-bbox.width-2*absmargin,
-                    2*height-bbox.height-2*absmargin
+                    2*height-bbox.height-2*absmargin,
+                    fontsize
                 );
             }
         };
