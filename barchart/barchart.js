@@ -21,7 +21,8 @@ define(['d3'], function(d3) {
             cScale = d3.scaleOrdinal(d3.schemeCategory10),
             legend,
             lrects,
-            ltexts;
+            ltexts,
+            unitl;
 
         var resize = function(left, top, width, height) {
                 var fs = Math.max(Math.min(Math.min(width, height)/20, 20), 11),
@@ -92,6 +93,12 @@ define(['d3'], function(d3) {
                         .style('font-size', fs+'px');
                 }
 
+                if (unitl) {
+                    unitl
+                        .attr('dy', '-'+fs+'px')
+                        .style('font-size', fs+'px');
+                }
+
                 return svg._groups[0][0].getBBox();
             };
 
@@ -113,6 +120,12 @@ define(['d3'], function(d3) {
                         slabels.push(rows[0][col_index].replace(/_/g, ' '));
                     });
                 });
+
+                if (rows[0][0]) {
+                    unitl = chart.append('text')
+                        .style('text-anchor', 'end')
+                        .text(rows[0][0]);
+                }
 
                 rows.shift();
                 nb_rows = rows.length;
