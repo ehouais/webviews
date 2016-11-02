@@ -124,9 +124,12 @@ define(['d3'], function(d3) {
                     grouping.forEach(function(stack, i) {
                         var height = 0;
                         stack.forEach(function(col_index) {
+                            var value = row[col_index].split('+').reduce(function(sum, term) {
+                                return +term+sum;
+                            }, 0);
                             group.values.push({
                                 col: i,
-                                height: value = +row[col_index],
+                                height: value,
                                 top: height += value
                             });
                         });
