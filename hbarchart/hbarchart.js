@@ -24,7 +24,8 @@ define(['d3'], function(d3) {
             cScale = d3.scaleOrdinal(d3.schemeCategory10),
             legend,
             lrects,
-            ltexts;
+            ltexts,
+            unitl;
 
         var resize = function(left, top, width, height, fontsize) {
                 var heights = [];
@@ -97,6 +98,12 @@ define(['d3'], function(d3) {
                         .style('font-size', fontsize+'px');
                 }
 
+                if (unitl) {
+                    unitl
+                        .attr('dy', '-'+fontsize+'px')
+                        .style('font-size', fontsize+'px');
+                }
+
                 return svg._groups[0][0].getBBox();
             };
 
@@ -111,9 +118,15 @@ define(['d3'], function(d3) {
                 slabels = [];
                 grouping.forEach(function(stack) {
                     stack.forEach(function(col_index) {
-                        slabels.push(rows[0][col_index]);
+                        slabels.push(rows[0][col_index].replace(/_/g, ' '));
                     });
                 });
+
+                if (rows[0][0]) {
+                    unitl = chart.append('text')
+                        .style('text-anchor', 'end')
+                        .text(rows[0][0]);
+                }
 
                 rows.shift();
                 nb_rows = rows.length;
@@ -125,10 +138,13 @@ define(['d3'], function(d3) {
                     grouping.forEach(function(stack, i) {
                         var width = 0;
                         stack.forEach(function(col_index) {
+                            var value = (row[col_index] || '').split('+').reduce(function(sum, term) {
+                                return +term+sum;
+                            }, 0);
                             group.values.push({
                                 row: i,
                                 left: width,
-                                width: value = +row[col_index]
+                                width: value
                             });
                             width += value;
                         });
