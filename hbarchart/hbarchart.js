@@ -8,16 +8,19 @@ define(['d3'], function(d3) {
             grouping,
             svg = d3.select(container).append('svg'),
             chart = svg.append('g'),
-            yScale = d3.scaleLinear(),
-            yAxis = d3.axisLeft(yScale),
+            vScale = d3.scaleLinear(),
+            bScale = d3.scaleBand(),
+
+            xAxis = d3.axisBottom(vScale),
+            yAxis = d3.axisLeft(bScale)
+                .tickSizeOuter(0),
+
+            xx = chart.append('g')
+                .attr('class', 'x axis'),
             yy = chart.append('g')
                 .attr('class', 'y axis'),
             groups = chart.append('g'),
-            xScale = d3.scaleBand(),
-            xAxis = d3.axisBottom(xScale)
-                .tickSizeOuter(0),
-            xx = chart.append('g')
-                .attr('class', 'x axis'),
+
             cScale = d3.scaleOrdinal(d3.schemeCategory10),
             legend,
             lrects,
@@ -34,49 +37,55 @@ define(['d3'], function(d3) {
                 chart
                     .attr('transform', 'translate('+left+','+top+')');
 
-                xScale
-                    .range([0, width])
+                bScale
+                    .range([0, height])
                     .padding(nb_series > 1 ? 0.2 : 0.1);
 
-                var colwidth = xScale.bandwidth()/grouping.length;
+                var rowheight = bScale.bandwidth()/grouping.length;
+
+                vScale
+                    .range([0, width]);
+
+                xAxis
+                    .ticks(Math.min(11, width/25))
+                    .tickSize(-height);
 
                 xx
                     .attr('transform', 'translate(0,' + height + ')')
                     .call(xAxis)
-                    .selectAll('text')
                     .style('font-size', fontsize+'px')
-                    .each(function(d, i) {
-                        var text = d3.select(this).text(null);
-                        dgroups[i].label.split('-').forEach(function(line) {
-                            text.append('tspan').text(line).attr('x', 0).attr('dy', fontsize);
-                        });
-                    });
-
-                yScale
-                    .range([height, 0]);
-
-                yAxis
-                    .ticks(Math.min(11, height/25))
-                    .tickSize(-width);
-
-                yy
-                    .call(yAxis)
                     .selectAll('text')
-                    .style('font-size', fontsize+'px');
+                    .attr('dy', fontsize);
 
-                yy
+                xx
                     .selectAll('g')
                     .filter(function(d) { return d; })
                     .classed('minor', true);
 
+                yy
+                    .call(yAxis)
+                    .style('font-size', fontsize+'px')
+                    .selectAll('text')
+                    .each(function(d, i) {
+                        var text = d3.select(this).text(null);
+                        dgroups[i].label.split('-').forEach(function(line) {
+                            text.append('tspan')
+                                .text(line)
+                                .attr('y', 0)
+                                .attr('dx', -fontsize/3);
+                        });
+                    });
+
                 group
-                    .attr('transform', function(d, i) { return 'translate('+xScale(i)+',0)'; });
+                    .attr('transform', function(d, i) {
+                        return 'translate(0,'+(bScale(i))+')';
+                    });
 
                 rects
-                    .attr('x', function(d, i) { return d.col*colwidth; })
-                    .attr('y', function(d) { return yScale(d.top); })
-                    .attr('width', colwidth)
-                    .attr('height', function(d) { return height-yScale(d.height); });
+                    .attr('x', function(d, i) { return vScale(d.left); })
+                    .attr('y', function(d) { return d.row*rowheight; })
+                    .attr('width', function(d) { return vScale(d.width); })
+                    .attr('height', rowheight);
 
                 if (slabels) {
                     legend
@@ -94,18 +103,14 @@ define(['d3'], function(d3) {
 
                 if (unitl) {
                     unitl
-                        .attr('dy', '-'+fontsize+'px')
-                        .style('font-size', fontsize+'px');
+                        .attr('x', width+fontsize)
+                        .attr('dy', fontsize);
                 }
 
                 return svg._groups[0][0].getBBox();
             };
 
         return {
-            //  data = [
-            //      [val, val, ...]
-            //      , ...
-            //  ]
             update: function(rows) {
                 lcol = params.labels || 0;
                 nb_series = rows[0].length-1;
@@ -121,8 +126,9 @@ define(['d3'], function(d3) {
                 });
 
                 if (rows[0][0]) {
-                    unitl = chart.append('text')
-                        .style('text-anchor', 'end')
+                    unitl = xx.append('text')
+                        .style('text-anchor', 'start')
+                        .attr('y', 3)
                         .text(rows[0][0]);
                 }
 
@@ -134,27 +140,28 @@ define(['d3'], function(d3) {
                 dgroups = rows.map(function(row) {
                     var group = {label: row[lcol], values: []};
                     grouping.forEach(function(stack, i) {
-                        var height = 0;
+                        var width = 0;
                         stack.forEach(function(col_index) {
                             var value = (row[col_index] || '').split('+').reduce(function(sum, term) {
                                 return +term+sum;
                             }, 0);
                             group.values.push({
-                                col: i,
-                                height: value,
-                                top: height += value
+                                row: i,
+                                left: width,
+                                width: value
                             });
+                            width += value;
                         });
-                        max = Math.max(max, height);
+                        max = Math.max(max, width);
                     });
                     return group;
                 });
 
                 // Nb of ticks on x-axis
-                xScale.domain(d3.range(nb_rows)),
+                bScale.domain(d3.range(nb_rows)),
 
                 // Compute max bar height to set y-axis range, taking grouping into account
-                yScale.domain([0, max]);
+                vScale.domain([0, max]);
 
                 group = groups
                     .selectAll('.group')
