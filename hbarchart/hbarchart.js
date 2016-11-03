@@ -53,8 +53,8 @@ define(['d3'], function(d3) {
                 xx
                     .attr('transform', 'translate(0,' + height + ')')
                     .call(xAxis)
-                    .selectAll('text')
                     .style('font-size', fontsize+'px')
+                    .selectAll('text')
                     .attr('dy', fontsize);
 
                 xx
@@ -64,12 +64,15 @@ define(['d3'], function(d3) {
 
                 yy
                     .call(yAxis)
-                    .selectAll('text')
                     .style('font-size', fontsize+'px')
+                    .selectAll('text')
                     .each(function(d, i) {
                         var text = d3.select(this).text(null);
                         dgroups[i].label.split('-').forEach(function(line) {
-                            text.append('tspan').text(line).attr('y', 0).attr('dx', -fontsize/3);
+                            text.append('tspan')
+                                .text(line)
+                                .attr('y', 0)
+                                .attr('dx', -fontsize/3);
                         });
                     });
 
@@ -100,8 +103,8 @@ define(['d3'], function(d3) {
 
                 if (unitl) {
                     unitl
-                        .attr('dy', '-'+fontsize+'px')
-                        .style('font-size', fontsize+'px');
+                        .attr('x', width+fontsize)
+                        .attr('dy', fontsize);
                 }
 
                 return svg._groups[0][0].getBBox();
@@ -123,8 +126,9 @@ define(['d3'], function(d3) {
                 });
 
                 if (rows[0][0]) {
-                    unitl = chart.append('text')
-                        .style('text-anchor', 'end')
+                    unitl = xx.append('text')
+                        .style('text-anchor', 'start')
+                        .attr('y', 3)
                         .text(rows[0][0]);
                 }
 
