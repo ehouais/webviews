@@ -8,13 +8,13 @@ define(['d3'], function(d3) {
             grouping,
             svg = d3.select(container).append('svg'),
             chart = svg.append('g'),
-            yScale = d3.scaleLinear(),
-            yAxis = d3.axisLeft(yScale),
+            vScale = d3.scaleLinear(),
+            yAxis = d3.axisLeft(vScale),
             yy = chart.append('g')
                 .attr('class', 'y axis'),
             groups = chart.append('g'),
-            xScale = d3.scaleBand(),
-            xAxis = d3.axisBottom(xScale)
+            bScale = d3.scaleBand(),
+            xAxis = d3.axisBottom(bScale)
                 .tickSizeOuter(0),
             xx = chart.append('g')
                 .attr('class', 'x axis'),
@@ -34,11 +34,11 @@ define(['d3'], function(d3) {
                 chart
                     .attr('transform', 'translate('+left+','+top+')');
 
-                xScale
+                bScale
                     .range([0, width])
                     .padding(nb_series > 1 ? 0.2 : 0.1);
 
-                var colwidth = xScale.bandwidth()/grouping.length;
+                var colwidth = bScale.bandwidth()/grouping.length;
 
                 xx
                     .attr('transform', 'translate(0,' + height + ')')
@@ -52,7 +52,7 @@ define(['d3'], function(d3) {
                         });
                     });
 
-                yScale
+                vScale
                     .range([height, 0]);
 
                 yAxis
@@ -70,13 +70,13 @@ define(['d3'], function(d3) {
                     .classed('minor', true);
 
                 group
-                    .attr('transform', function(d, i) { return 'translate('+xScale(i)+',0)'; });
+                    .attr('transform', function(d, i) { return 'translate('+bScale(i)+',0)'; });
 
                 rects
                     .attr('x', function(d, i) { return d.col*colwidth; })
-                    .attr('y', function(d) { return yScale(d.top); })
+                    .attr('y', function(d) { return vScale(d.top); })
                     .attr('width', colwidth)
-                    .attr('height', function(d) { return height-yScale(d.height); });
+                    .attr('height', function(d) { return height-vScale(d.height); });
 
                 if (slabels) {
                     legend
@@ -151,10 +151,10 @@ define(['d3'], function(d3) {
                 });
 
                 // Nb of ticks on x-axis
-                xScale.domain(d3.range(nb_rows)),
+                bScale.domain(d3.range(nb_rows)),
 
                 // Compute max bar height to set y-axis range, taking grouping into account
-                yScale.domain([0, max]);
+                vScale.domain([0, max]);
 
                 group = groups
                     .selectAll('.group')
