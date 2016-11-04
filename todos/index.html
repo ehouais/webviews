@@ -2,13 +2,7 @@
     <head>
         <meta charset="utf-8">
         <link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAMhSURBVFhHtZc/aBNxFMcPO4igoIO2uogQETGl+d+kiB0cHTrUotBJAg6im2uJm4PZFHQQiuBYHCTgIog4iODgpLZ1cNCllGJqKYIm8fM93oXL9Xq5wN0XHr+7997vfb+/9/vlLucEUSqVbmKfi8ViL8oKhUKoP8I61P2AzRvVIKampi4QfIt1y+VyLw2jtoT8ZXzB/YRRO04+nz9PYLNarfYqlYpW18bWsFUbQ405oX5ZIKY669ju9PR0TzzEv+ZyueOegPdySiFJS6buQKPRSMRUa2FhYYzFnYH4kbohPrieOTjqIraVN1xFKUPE6gRjWzffbG9+cQ6OWk6qgC+LdeDsqQPuAUHIqsUTA1vbZKUf4ZgzlwvtPXy/tfABAbZfiQDyebVZWyuD7Mns7OxhxfCPw7cdFLCWlACtkLobqqv6spmZmR6ibiieugBqrWj1HrmIGEV4TvFUBVBn0U8u0z1dqVtKegJo8SnqbflbL3L8LUtxkZoAarT8q7fWb0mYpbhIRQB16n5yme6pu2gpfSQugBWepo5bUPWo5ZGvWMoABgQoeYiAMRv3BXNf+1dvZ2Cj/7IJIHYH8N0neZUVXjPXHhC77SeX6R5/+HsfxBKA/4EK6SmmOAWvW6gPVniWvF2v9T7y55YSiqEC8NVrtVq/qBLDRDDnnQR6ecph/Dk5OXnMUkIRR8BVrcS/sqAI8u8qx4vL7JV+RfEoDBUgQHTHXiKK9UVw3SF2zyvgkUsMvqc2PRKxBAjE+iI8Ipm/7TJr/XdeOEdsaiRiCxCIh4rwm23NZZsyFCMJEPzbESS31j+01FgYWYBA3h4RthVr/ME8ZGmxsJ+Aof+I/J2QaR7zL1o4NviJn4CvHRSwbvFIkHeLiX/Ueh5ES+YeCXpEU2fHFcDFJ10gZCebzY5bTiT0BKQbJbsdGXBVWHQX7q6KzakLdpgeW06qgO+V8W16jpfeZxnXywSKOihJmTpLzZN07RJjSzz2ZdR0BdCOCbbhi5xMcA8Ywe0ETd+a7neA6hv5m4Ffjw4GCcvYBl3oKjlpo+4/xh+QNzOZzEHHcZz/Yu4UxPJ023QAAAAASUVORK5CYII=">
-        <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
-        <script src="//cdnjs.cloudflare.com/ajax/libs/sjcl/1.0.0/sjcl.min.js"></script>
-        <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.3/moment.min.js"></script>
-        <script src="//cdnjs.cloudflare.com/ajax/libs/blueimp-md5/1.1.0/js/md5.min.js"></script>
-        <script src="//cdnjs.cloudflare.com/ajax/libs/jquery.perfect-scrollbar/0.6.7/js/min/perfect-scrollbar.jquery.min.js"></script>
-        <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/jquery.perfect-scrollbar/0.6.7/css/perfect-scrollbar.min.css"/>
-        <script src="../webviews.js"></script>
+        <script src="/cdn/require.js/2.3.2/require.min.js"></script>
         <style>
             @font-face {
                 font-family: 'gotham';
@@ -25,64 +19,38 @@
             .template {
                 display: none;
             }
-            #projects {
+            #todos {
                 list-style-type: none;
                 padding: 0;
                 margin: 0;
-                display: flex;
-                flex-wrap: wrap;
-            }
-            .project {
-                margin: 4px;
-                width: 200px;
-                text-align: center;
-            }
-            .project ul {
-                list-style-type: none;
-                padding-left: 0px;
             }
             .todo {
+                display: inline-block;
+                margin: 4px;
+                height: 15px;
+                width: 200px;
                 background-color: #666;
                 color: #fff;
                 padding: 4px;
                 margin: 2px;
                 border-radius: 4px;
                 overflow: hidden;
-                /*box-shadow: 1px 1px 2px rgba(0,0,0,0.5);*/
                 cursor: pointer;
                 text-align: left;
                 position: relative;
+                white-space: nowrap;
             }
             .todo:hover {
                 background-color: #888;
             }
-            .todo:hover .delete {
-                display: block;
-            }
             .todo .titre {
                 white-space: nowrap;
             }
-            .todo > .mylabel {
-                display: none;
+            .todo.active {
+                background-color: #A00;
             }
-            .todo.asap { background-color: #800; }
-            .todo.asap:hover { background-color: #a00; }
-            .todo.ongoing { background-color: #080; }
-            .todo.ongoing:hover { background-color: #0a0; }
-            .todo.idea { background-color: inherit; }
-            .todo.idea:hover { background-color: #555; }
-            .mylabel {
-                color: #fff;
-                border-radius: 3px;
-                line-height: 18px;
-                display: inline-block;
-                padding-left: 4px;
-                padding-right: 4px;
-                cursor: default;
-            }
-            .delete {
+            .status, .delete {
                 position: absolute;
-                right: 0;
                 color: #fff;
                 top: 0;
                 display: none;
@@ -91,13 +59,34 @@
                 text-align: center;
                 background-color: inherit;
             }
+            .todo:hover .status, .todo:hover .delete {
+                display: block;
+            }
+            .status:hover, .delete:hover {
+                color: #f22;
+            }
+            .status {
+                right: 16px;
+                font-size: 20px;
+                line-height: 28px;
+                top: -2px;
+            }
+            .active .status {
+                top: -5px;
+            }
+            .delete {
+                right: 0;
+            }
+            .todo .status:after {
+                content: '\25B6';
+            }
+            .todo.active .status:after {
+                content: '\25A0';
+            }
             .delete:after {
                 content: '\2716';
             }
-            .delete:hover {
-                color: #f00;
-            }
-            #creation_popup {
+            #popup {
                 border: none;
                 position: absolute;
                 top: 0;
@@ -110,148 +99,97 @@
                 position: relative;
             }
         </style>
+    </head>
+    <body>
+        <div id="container">
+            <ul id="todos">
+                <li class="todo" template-id="todo">
+                    <div class="status"></div>
+                    <div class="delete"></div>
+                </li>
+            </ul>
+        </div>
+        <iframe id="popup" src="../forms/?datauri=data:text/plain,description:Description,[cancel]:Cancel"></iframe>
         <script>
-            var todos,
-                Todos = Webviews.data();
-                domain = document.location.origin,
-                colorFromString = function(str) {
-                    return '#'+md5(str).substr(-7, 6);
-                };
-
-            $(function() {
-                var $cont = $('#container'),
-                    $projects = $('#projects'),
-                    $creation_popup = $('#creation_popup'),
-                    update = function() {
-                        Todos.save(JSON.stringify(todos));
-                        Todos.trigger();
-                    },
-                    popup = function(description, tags, onsubmit) {
+            require(['/cdn/js-data-libs/0.1/http.js', '/cdn/js-ui-utils/0.1/ui-utils.js'], function(Http, UI) {
+                var todos = [],
+                    domain = document.location.origin,
+                    listDom = UI.select('#todos', document.body);
+                    dataUri = UI.uri(window.location.href).params.datauri,
+                    popupDom = UI.select('#popup', document.body),
+                    popup = function(description, onsubmit) {
                         var onMessage = function(e) {
-                                var event = e.originalEvent,
-                                    msg = event.data;
+                                var msg = e.data;
 
-                                if (event.origin == domain && msg.type != 'resize') {
+                                if (e.origin == domain && msg.type != 'resize') {
                                     if (msg.type == 'submit' && msg.data.description) {
-                                        onsubmit(
-                                            msg.data.description,
-                                            msg.data.tags ? msg.data.tags.split(',').map(function(tag) { return tag.trim(); }) : []
-                                        );
+                                        onsubmit(msg.data.description);
                                     }
-                                    $creation_popup.hide();
-                                    $(window).off('message', onMessage);
+                                    popupDom.style.display = 'none';
+                                    window.removeEventListener('message', onMessage, false);
                                 }
                             };
 
-                        $creation_popup[0].contentWindow.postMessage({
+                        popupDom.contentWindow.postMessage({
                             type: 'set',
-                            values: {description: description, tags: tags.join(',')}
+                            values: {description: description}
                         }, domain);
-                        $creation_popup.show();
-                        $(window).on('message', onMessage);
+                        popupDom.style.display = 'block';
+                        window.addEventListener('message', onMessage, false);
+                    }
+                    templates = UI.extract('template-id'),
+                    todoTpl = UI.template2(templates['todo'], function(todo) {
+                        delete todo.tags; // temporary for data migration
+                        this.appendChild(document.createTextNode(todo.description));
+                        todo.active && this.classList.add("active");
+                        this.todo = todo;
+                    }),
+                    update = function() {
+                        UI.toNodes(listDom, todoTpl)(todos);
                     },
-                    creationPopup = function(description, tags) {
-                        popup(description, tags, function(description, tags) {
-                            todos.push({description: description, tags: tags});
+                    load = function() {
+                        Http.get(dataUri, {}, function(json) {
+                            todos = JSON.parse(json);
+                            update();
+                        });
+                    },
+                    save = function(cb) {
+                        Http.put(dataUri, {}, JSON.stringify(todos), function() {
                             update();
                         });
                     };
 
-                $cont.perfectScrollbar();
+                listDom.addEventListener('click', UI.delegate('.status', function(e) {
+                    var todo = e.target.parentElement.todo;
+                    todo.active = !todo.active;
+                    save();
+                }));
 
-                $cont.on('dblclick', function() {
-                    creationPopup('', []);
-                });
-                $projects.on('selectstart', '.mylabel, .project', function (event) {
-                    event.preventDefault();
-                });
-                $projects.on('dblclick', '.mylabel', function(e) {
-                    creationPopup('', [$(e.currentTarget).text()]);
-                    e.stopPropagation();
-                });
-                $projects.on('click', '.todo', function(e) {
-                    var todo = todos[$(e.currentTarget).data('index')];
-                    popup(todo.description, todo.tags, function(description, tags) {
-                        todo.description = description;
-                        todo.tags = tags;
-                        update();
-                    });
-                    e.stopPropagation();
-                });
-                $projects.on('click', '.todo .delete', function(e) {
+                listDom.addEventListener('click', UI.delegate('.delete', function(e) {
                     if (window.confirm('Do you really want to delete this todo ?')) {
-                        todos.splice($(e.currentTarget).parent().data('index'), 1);
-                        update();
+                        var todo = e.target.parentElement.todo;
+                        todos = todos.filter(function(el) { return el !== todo });
+                        save();
                     }
-                    e.stopPropagation();
+                }));
+
+                listDom.addEventListener('click', UI.delegate('.todo', function(e) {
+                    var dom = e.target;
+                    popup(dom.textContent.trim(), function(description) {
+                        dom.todo.description = description;
+                        save();
+                    });
+                }));
+
+                listDom.addEventListener('dblclick', function(e) {
+                    popup('', function(description) {
+                        todos.push({description: description});
+                        save();
+                    });
                 });
 
-                Todos.bind((function() {
-                    var $ptpl = $('.template', $projects).removeClass('template').remove(),
-                        $ttpl = $('.todo', $ptpl).remove(),
-                        $todo = function(todo, index, project) {
-                            var $t = $ttpl.clone().data('index', index),
-                                classTags = ['asap', 'ongoing', 'idea'];
-
-                            $t.attr('title', todo.description);
-                            $t.find('.titre').text(todo.description.substr(0, 75)+(todo.description.length > 75 ? '...' : ''));
-                            todo.tags.forEach(function(tag) {
-                                if (classTags.indexOf(tag) != -1) {
-                                    $t.addClass(tag);
-                                }
-                            });
-                            return $t;
-                        },
-                        projects,
-                        pindex;
-
-                    return function(data) {
-                        todos = JSON.parse(data);
-                        projects = [];
-                        pindex = {};
-                        $projects.empty();
-
-                        todos.forEach(function(todo, i) {
-                            tag = todo.tags && todo.tags.length > 0 ? todo.tags[0] : '-';
-                            var project = pindex[tag];
-                            if (!project) {
-                                var $dom = $ptpl.clone();
-                                project = {title: tag, id: projects.length, nb: 0, dom: $dom};
-                                $dom.find('.mylabel')
-                                .text(project.title)
-                                .css('background-color', colorFromString(project.title));
-                                projects.push(project);
-                                pindex[tag] = project;
-                            }
-                            project.nb++;
-                            $todo(todo, i, project).appendTo(project.dom.find('ul'));
-                        });
-                        projects.sort(function(p1, p2) {
-                            return p2.nb-p1.nb;
-                        }).forEach(function(project) {
-                            project.dom.appendTo($projects);
-                        });
-                        $('#project, #description').val('');
-                    };
-                })());
+                load();
             });
         </script>
-    </head>
-    <body>
-        <div id="container">
-            <ul id="projects">
-                <li class="project template">
-                    <span class="mylabel"></span>
-                    <ul>
-                        <li class="todo">
-                            <span class="mylabel"></span>
-                            <span class="titre"></span>
-                            <span class="delete"></span>
-                        </li>
-                    </ul>
-                </li>
-            </ul>
-        </div>
-        <iframe id="creation_popup" src="../forms/?datauri=data:text/plain,description:Description,tags:Tags,[cancel]:Cancel"></iframe>
     </body>
 </html>
