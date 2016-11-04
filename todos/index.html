@@ -182,6 +182,10 @@
                     });
                 }));
 
+                listDom.addEventListener('selectstart', function(e) {
+                    e.preventDefault();
+                });
+
                 listDom.addEventListener('dblclick', function(e) {
                     popup('', function(description) {
                         todos.push({description: description});
