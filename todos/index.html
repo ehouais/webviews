@@ -10,6 +10,12 @@
                 font-weight: 400;
                 font-style: normal;
             }
+            @font-face {
+                font-family: 'icons';
+                src: url(data:application/font-woff;base64,d09GRgABAAAAAARkAAoAAAAABwAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAABPUy8yAAAA9AAAAEAAAABWVrljO2NtYXAAAAE0AAAAQAAAAUoCmgV3Z2x5ZgAAAXQAAAEHAAABcBiILAtoZWFkAAACfAAAADEAAAA2C6SFgmhoZWEAAAKwAAAAHAAAACQIYAQEaG10eAAAAswAAAAOAAAAFBQAAABsb2NhAAAC3AAAAAwAAAAMAKAA+m1heHAAAALoAAAAHwAAACABEAA0bmFtZQAAAwgAAAE7AAACbdWMZSRwb3N0AAAERAAAAB0AAAAyAhcCCHicY2BkYWCcwMDKwMHUyXSGgYGhH0IzvmYwYuRgYGBiYGVmwAoC0lxTGBwYHBlcWEDcGBZWBhCDEcQBAJhTB6h4nGNgYGBmgGAZBkYGEHAB8hjBfBYGDSDNBqQZGZhAMv//g1U4guj/B6DqgYCRjYFywMjEzEIFYwYKAAC9swcTeJx1j7FOwzAQhu/HwW2GYCWkiT0Y1FSksiqVqpRUAlVMdOABeAM21j4AO0/CW7AhMVGpb8HYsXGxA2GCO+mXfp/+830Eov2OfQSHdEQEHoGXl3FZ5cjSDnud2yd7J3rIBHsUAp8nm203itl7HHWtCvPQRfauAgSgY2dShZQP+oXbMasu+tOsNwlIJbv7RKmEvSSKba7sgx21ViXkCl6aHSXRGRfgxTk6XsrZDYZequkp5l6yVCDP8kkAyJW8lbV1spKyrmXjbf3r8Vb8M2mTg/Zv1zT09+vm/jjlI3gIR7KAJ3E413A48Q+T0XZt9LM2dq2N0Rg3BmNtDpbhYvnH+3fiC3kQTZ0AeJxjYGRgYADi/YZlDvH8Nl8ZuFkYQOCK0wInGP3///8/LIwsrEAuBwMTSBQAMcgLWAAAAHicY2BkYGBhAIIYEPn/HwsTAyMDKmAFADYvAm94nGNhYGBgQcMAAQQAFQAAAAAAAAAgAEIAgAC4eJxjYGRgYGBl0GAA0QwMTEDMBYQMDP/BfAYADNABRQB4nHWPS07DMBCGf/cFtBKqqGCH5AViASh9iFU37Jp9F92nrdOH0jhy3Eo9AOfhCJyAI9AbcAd+0gGhUmJ5/M03k3EC4AI7KOyfS+49K5wy23MJJ7gWLtPfCFfID8JVNPAoXKN/Eq7jHqFwAy04TlCVM2Z3eBZWaOJFuIRzvAqX6d+EK+R34Squ8CFcQ1OVhesYqZZwA7dqEZrUuMibqR5vdZhss7k37vscmtk6idyhHhmXL2yqu0Hnp/R7TL6Z9byPdezsSg9s6k2SWJ05uzQTH8y9z/rtdiw+mNgVf98g5XaI4HlOoTHGljFEwjPDvPDuTz5knGFNGx2pHuajIuZYwPI+jS4CdI689d/X5Njwth6tR8w8Zo/FijQoJn51J1yWJitqS5oJfVBM97R9tLnig/6AXZz0CTRjb6QAeJxjYGKAAC4G7ICVgYGRiZGZkYWRFSIAAAMxACQAAAA=);
+                font-weight: normal;
+                font-style: normal;
+            }
             body {
                 font-family: gotham;
                 background-color: #444;
@@ -53,10 +59,9 @@
             .status, .delete {
                 position: absolute;
                 color: #fff;
-                top: 0;
                 display: none;
                 width: 20px;
-                line-height: 23px;
+                line-height: 16px;
                 text-align: center;
                 background-color: inherit;
             }
@@ -68,29 +73,29 @@
             }
             .status {
                 right: 16px;
-                font-size: 20px;
-                line-height: 28px;
-                top: -2px;
-            }
-            .active .status {
-                top: -5px;
             }
             .delete {
                 right: 0;
             }
+            .status:after, .delete:after, .new:after {
+                font-family: 'icons';
+                font-size: 9px;
+                line-height: 16px;
+            }
             .todo .status:after {
-                content: '\25B6';
+                content: 'A';
             }
             .todo.active .status:after {
-                content: '\25A0';
+                content: 'B';
             }
             .delete:after {
-                content: '\2716';
+                content: 'C';
+            }
             .new {
                 background-color: #555;
             }
             .new:after {
-                content: 'New...';
+                content: 'D';
             }
             #popup {
                 border: none;
