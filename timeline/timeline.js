@@ -1,7 +1,7 @@
 define(['d3', 'timescale'], function(d3, Timescale) {
     return function(container, params) {
         var svg = d3.select('body').append('svg'),
-            chart = svg.append('g').attr('font-family', 'gotham'),
+            chart = svg.append('g'),
             tScale = d3.scaleTime(),
             yScale = d3.scaleBand(),
             cScale = d3.scaleOrdinal(d3.schemeCategory10),
