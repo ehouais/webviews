@@ -20,9 +20,20 @@ body {
     stroke: #000;
     shape-rendering: crispEdges;
 }
-.axis .minor line {
+.y.axis .tick line {
     stroke: #999;
     stroke-dasharray: 1,2;
+}
+.axis.major path {
+    display: none;
+}
+.axis.major .line line {
+    stroke: #999;
+    stroke-dasharray: 2,2,1,0;
+}
+.axis.minor .line line {
+    stroke: #999;
+    stroke-dasharray: 1,4;
 }
 .line {
     fill: none;
