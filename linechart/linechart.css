@@ -4,6 +4,9 @@
     font-weight: 400;
     font-style: normal;
 }
+svg, g {
+    font-family: 'gotham';
+}
 body {
     margin: 0;
     border: 0;

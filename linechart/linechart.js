@@ -1,7 +1,7 @@
 define(['d3', '../timeline/timescale'], function(d3, Timescale) {
     return function(container, params) {
         var svg = d3.select('body').append('svg'),
-            chart = svg.append('g').attr('font-family', 'gotham'),
+            chart = svg.append('g'),
             vScale = d3.scaleLinear(),
             yAxis = d3.axisLeft(vScale),
             yy = chart.append('g')
@@ -81,9 +81,9 @@ define(['d3', '../timeline/timescale'], function(d3, Timescale) {
 
         return {
             update: function(series) {
-                var start,
-                    end,
-                    max;
+                var start = +Infinity,
+                    end = -Infinity,
+                    max = 0;
 
                 series.forEach(function(serie) {
                     serie.values.forEach(function(pair, i) {
@@ -93,7 +93,7 @@ define(['d3', '../timeline/timescale'], function(d3, Timescale) {
                     });
                 });
 
-                tScale.domain(d3.range(start, end));
+                tScale.domain([start, end]);
                 vScale.domain([0, max]);
 
                 svgline = d3.line()
