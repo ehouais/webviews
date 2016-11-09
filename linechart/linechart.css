@@ -12,32 +12,38 @@ body {
     border: 0;
     overflow: hidden;
 }
-.axis path {
-    display: none;
-}
-.axis line {
-    fill: none;
-    stroke: #000;
-    shape-rendering: crispEdges;
-}
-.y.axis .tick line {
-    stroke: #999;
-    stroke-dasharray: 1,2;
-}
-.axis.major path {
-    display: none;
-}
-.axis.major .line line {
-    stroke: #999;
-    stroke-dasharray: 2,2,1,0;
-}
-.axis.minor .line line {
-    stroke: #999;
-    stroke-dasharray: 1,4;
-}
+
 .line {
     fill: none;
 }
+.axis.y path {
+    display:none;
+}
+.axis.y line {
+    stroke: #999;
+    stroke-dasharray: 1,2;
+    shape-rendering: crispEdges;
+}
 .circleMarker {
     stroke: none;
+}
+
+/* timescale rules */
+.axis.x .lines line {
+    stroke: #999;
+}
+.axis.x path, .axis.x line {
+    shape-rendering: crispEdges;
+}
+.axis.x.minor path {
+    display: none;
+}
+.axis.x.major .lines line {
+    stroke-dasharray: 2,2,1,0;
+}
+.axis.x.minor .lines line {
+    stroke-dasharray: 1,4;
+}
+.lines path {
+    display: none;
 }

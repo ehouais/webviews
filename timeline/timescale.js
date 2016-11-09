@@ -3,26 +3,25 @@ define(['d3'], function(d3) {
         var minor = container.append('g')
                 .attr('class', 'x axis minor'),
             mtAxis = d3.axisBottom()
-                .scale(scale)
-                .tickSizeOuter(0),
+                .scale(scale),
             mticks = minor.append('g'),
             mlAxis = d3.axisBottom()
                 .scale(scale)
                 .tickFormat(''),
             mlines = minor.append('g')
-                .attr('class', 'line'),
+                .attr('class', 'lines'),
             major = container.append('g')
                 .attr('class', 'x axis major'),
             MtAxis = d3.axisBottom()
                 .scale(scale)
-                .tickSize(20),
+                .tickSize(20)
+                .tickSizeOuter(0),
             Mticks = major.append('g'),
             MlAxis = d3.axisBottom()
                 .scale(scale)
-                .tickSizeOuter(0)
                 .tickFormat(''),
             Mlines = major.append('g')
-                .attr('class', 'line'),
+                .attr('class', 'lines'),
             nline = container.append('line')
                 .attr('class', 'now'),
             findInterval = function (val, bounds) {
