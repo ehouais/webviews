@@ -2,8 +2,7 @@
 <html>
     <head>
         <meta charset="utf-8">
-        <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
-        <script src="../webviews.js"></script>
+        <script src="/cdn/require.js/2.3.2/require.min.js"></script>
         <style>
             @font-face {
                 font-family: 'gotham';
@@ -34,24 +33,25 @@
             }
             .tab {
                 text-align: right;
-                line-height: 22px;
-            }
-            .tab a {
                 padding: 2px 4px;
                 font-size: 14px;
                 font-family: gotham;
                 text-decoration: none;
-                margin: 2px;
+                margin: 1px 2px;
                 border-radius: 4px;
                 color: #fff;
+                cursor: pointer;
+                display: inline;
+                float: right;
+                clear: right;
             }
-            .tab.loaded a {
+            .tab.loaded {
                 margin-right: 0;
                 border-top-right-radius: 0;
                 border-bottom-right-radius: 0;
                 background-color: #777;
             }
-            .tab.active a, .tab a:hover {
+            .tab.active, .tab:hover {
                 background-color: #444;
             }
             .tabpanes {
@@ -75,54 +75,50 @@
     </head>
     <body>
         <ul class="tabs">
-            <li class="tab template"><a></a></li>
+            <li class="tab" template-id="tab"></li>
         </ul>
         <div class="tabpanes">
-            <div class="tabpane template">
+            <div class="tabpane" template-id="tabpane">
                 <iframe></iframe>
             </div>
         </div>
         <script>
-            var Tabs = Webviews.data(),
-                $tlst = $('body >.tabs'),
-                $ttpl = $('li', $tlst).detach().removeClass('template'),
-                $tplst = $('body >.tabpanes'),
-                $tptpl = $('>.tabpane', $tplst).detach().removeClass('template');
+            require(['/cdn/js-data-libs/0.1/http.js', '/cdn/js-ui-utils/0.1/ui-utils.js'], function(Http, UI) {
+                // tabs = {tabs: [{label: '', uri: ''}]}
+                var templates = UI.extract('template-id'),
+                    tabTpl = UI.template2(templates['tab'], function(tab) {
+                        this.setAttribute('uri', tab.uri);
+                        this.textContent = tab.label;
+                    }),
+                    tabs = UI.select('.tabs', document.body),
+                    tabpaneTpl = UI.template2(templates['tabpane'], function(tab) {
+                        this.setAttribute('uri', tab.uri);
+                    }),
+                    tabpanes = UI.select('.tabpanes', document.body),
+                    dataUri = UI.uri(window.location.href).params.datauri;
 
-            Tabs.bind(function(data) {
-                // data = {favicon: URI, tabs: [{label: string, uri: URI}, ...]}
-                var tabs = JSON.parse(data);
+                tabs.addEventListener('click', UI.delegate('.tab', function(e) {
+                    var tab = e.target,
+                        tabpane = UI.select('[uri="'+tab.getAttribute('uri')+'"]', tabpanes)
+                        iframe = UI.select('iframe', tabpane),
+                        activeTab = UI.select('.active', tabs),
+                        activeTabpane = UI.select('.active', tabpanes);
 
-                // Set eventual favicon
-                tabs.favicon && $('<link>').attr({rel: 'icon', type: 'image/png', href: tabs.favicon}).appendTo($('head'));
+                    if (!iframe.hasAttribute('src')) iframe.setAttribute('src', tab.getAttribute('uri'));
+                    activeTab && activeTab.classList.remove('active');
+                    tab.classList.add('active');
+                    tab.classList.add('loaded');
+                    activeTabpane && activeTabpane.classList.remove('active');
+                    tabpane.classList.add('active');
 
-                // reset DOM on reload
-                $tlst.empty();
-                $tplst.empty();
+                    e.preventDefault();
+                }));
 
-                // create tabs and tabpanes
-                tabs.tabs.forEach(function(tab, i) {
-                    var id = 'tabpane_'+i,
-                        $tab = $ttpl.clone().appendTo($tlst),
-                        $link = $('a', $tab),
-                        $tabpane = $tptpl.clone().appendTo($tplst),
-                        $iframe = $('>iframe', $tabpane);
+                Http.get(dataUri, {}, function(json) {
+                    var data = JSON.parse(json);
 
-                    // init tab link
-                    $link.attr('href', '#'+id)
-                    $link.text(tab.label);
-                    // init tabpane
-                    $tabpane.attr('id', id);
-                    // lazy load tabpane iframe content on link click
-                    $link.on('click', function(e) {
-                        if (!$iframe.attr('src')) $iframe.attr('src', tab.uri);
-                        $('.tab').removeClass('active');
-                        $tab.addClass('loaded active');
-                        $('.tabpane').removeClass('active');
-                        $tabpane.addClass('active');
-                        e.preventDefault();
-                    });
-
+                    UI.toNodes(tabs, tabTpl)(data.tabs);
+                    UI.toNodes(tabpanes, tabpaneTpl)(data.tabs);
                 });
             });
         </script>
