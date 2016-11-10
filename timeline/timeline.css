@@ -13,28 +13,7 @@ html, body {
 svg, g {
     font-family: 'gotham';
 }
-.axis text {
-    font-size: 10px;
-}
-.axis path, .axis line {
-    fill: none;
-    stroke: #000;
-    shape-rendering: crispEdges;
-}
-.line path {
-    display: none;
-}
-.axis.major path {
-    display: none;
-}
-.axis.major .line line {
-    stroke: #999;
-    stroke-dasharray: 2,2,1,0;
-}
-.axis.minor .line line {
-    stroke: #999;
-    stroke-dasharray: 1,4;
-}
+
 .hline {
     stroke: #999;
     stroke-dasharray: 1,2;
@@ -45,4 +24,24 @@ line.now {
     stroke-width: 2px;
     shape-rendering: crispEdges;
     stroke-dasharray: 2,2;
+}
+
+/* timescale rules */
+.axis.x .lines line {
+    stroke: #999;
+}
+.axis.x path, .axis.x line {
+    shape-rendering: crispEdges;
+}
+.axis.x.minor path {
+    display: none;
+}
+.axis.x.major .lines line {
+    stroke-dasharray: 2,2,1,0;
+}
+.axis.x.minor .lines line {
+    stroke-dasharray: 1,4;
+}
+.lines path {
+    display: none;
 }
