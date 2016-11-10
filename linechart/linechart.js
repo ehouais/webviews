@@ -12,15 +12,9 @@ define(['d3', '../timeline/timescale'], function(d3, Timescale) {
             line,
             marker,
             svgline = d3.line()
-                .x(function(d) {
-                    return tScale(d.date);
-                })
-                .y(function(d) {
-                    return vScale(d.value);
-                }),
-            labels,
+                .x(function(d) { return tScale(d.date); })
+                .y(function(d) { return vScale(d.value); }),
             legend,
-            text,
             lrects,
             ltexts,
             timescale = Timescale(chart, tScale),
@@ -96,9 +90,7 @@ define(['d3', '../timeline/timescale'], function(d3, Timescale) {
                     .data(series)
                     .enter()
                     .append('path')
-                    .datum(function(d) {
-                        return d.values;
-                    })
+                    .datum(function(d) { return d.values; })
                     .attr('class', 'line')
                     .attr('stroke', function(d, i) { return cScale(i); })
                     .attr('marker-start', function(d, i) { return 'url(#marker_'+i+')'; })
