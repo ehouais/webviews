@@ -1,4 +1,4 @@
-define(['d3'], function(d3) {
+define(['d3', '../twopassresize'], function(d3, Twopassresize) {
     return function(container, params) {
         var dgroups,
             slabels,
@@ -200,21 +200,7 @@ define(['d3'], function(d3) {
 
                 this.resize();
             },
-            resize: function() {
-                var width = container.clientWidth,
-                    height = container.clientHeight,
-                    fontsize = Math.max(Math.min(Math.min(width, height)/25, 20), 11),
-                    bbox = resize(0, 0, width, height, fontsize),
-                    absmargin = params.margin*Math.min(width, height);
-
-                resize(
-                    -bbox.x+absmargin,
-                    -bbox.y+absmargin,
-                    2*width-bbox.width-2*absmargin,
-                    2*height-bbox.height-2*absmargin,
-                    fontsize
-                );
-            }
+            resize: Twopassresize(container, resize, params.margin)
         };
     };
 })
