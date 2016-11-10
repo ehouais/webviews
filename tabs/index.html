@@ -94,7 +94,8 @@
                     tabpaneTpl = UI.template2(templates['tabpane'], function(tab) {
                         this.setAttribute('uri', tab.uri);
                     }),
-                    tabpanes = UI.select('.tabpanes', document.body);
+                    tabpanes = UI.select('.tabpanes', document.body),
+                    dataUri = UI.uri(window.location.href).params.datauri;
 
                 tabs.addEventListener('click', UI.delegate('.tab', function(e) {
                     var tab = e.target,
@@ -111,8 +112,7 @@
                     tabpane.classList.add('active');
 
                     e.preventDefault();
-                })),
-                dataUri = UI.uri(window.location.href).params.datauri;
+                }));
 
                 Http.get(dataUri, {}, function(json) {
                     var data = JSON.parse(json);
