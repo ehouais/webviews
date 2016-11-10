@@ -111,7 +111,7 @@ define(['d3', '../timeline/timescale'], function(d3, Timescale) {
                     .attr('cy', 5)
                     .attr('r', 1.2)
                     .attr('fill', function(d, i) { return cScale(i); })
-                    .classed('circleMarker');
+                    .attr('class', 'circleMarker');
 
                 legend = chart.append('g').selectAll('.legend')
                     .data(series)
