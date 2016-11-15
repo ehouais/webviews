@@ -115,11 +115,19 @@
                 }));
 
                 Http.get(dataUri, {}, function(json) {
-                    var data = JSON.parse(json);
+                    var data = JSON.parse(json),
+                        link;
 
+                    if (data.favicon) {
+                        link = document.createElement('link');
+                        link.type = 'image/png';
+                        link.rel = 'icon';
+                        link.href = data.favicon;
+                        document.head.appendChild(link);
+                    }
                     UI.toNodes(tabs, tabTpl)(data.tabs);
                     UI.toNodes(tabpanes, tabpaneTpl)(data.tabs);
-                });
+                }, true);
             });
         </script>
     </body>
