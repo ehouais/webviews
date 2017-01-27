@@ -87,7 +87,7 @@
         </div>
         <script>
             require(['/cdn/js-data-libs/0.1/http.js', '/cdn/js-ui-utils/0.1/ui-utils.js'], function(Http, UI) {
-                // tabs = {tabs: [{label: '', uri: ''}]}
+                // tabs = {tabs: [{label: '', uri: ''}], favicon: '', deftab: id}
                 var templates = UI.extract('template-id'),
                     tabTpl = UI.template2(templates['tab'], function(tab) {
                         this.setAttribute('uri', tab.uri);
@@ -98,22 +98,24 @@
                         this.setAttribute('uri', tab.uri);
                     }),
                     tabpanes = UI.select('.tabpanes', document.body),
-                    dataUri = UI.uri(window.location.href).params.datauri;
+                    dataUri = UI.uri(window.location.href).params.datauri,
+                    activate = function(tab) {
+                        var uri = tab.getAttribute('uri'),
+                            tabpane = UI.select('[uri="'+uri+'"]', tabpanes)
+                            iframe = UI.select('iframe', tabpane),
+                            activeTab = UI.select('.active', tabs),
+                            activeTabpane = UI.select('.active', tabpanes);
+
+                        if (!iframe.hasAttribute('src')) iframe.setAttribute('src', uri);
+                        activeTab && activeTab.classList.remove('active');
+                        tab.classList.add('active');
+                        tab.classList.add('loaded');
+                        activeTabpane && activeTabpane.classList.remove('active');
+                        tabpane.classList.add('active');
+                    };
 
                 tabs.addEventListener('click', UI.delegate('.tab', function(e) {
-                    var tab = e.target,
-                        tabpane = UI.select('[uri="'+tab.getAttribute('uri')+'"]', tabpanes)
-                        iframe = UI.select('iframe', tabpane),
-                        activeTab = UI.select('.active', tabs),
-                        activeTabpane = UI.select('.active', tabpanes);
-
-                    if (!iframe.hasAttribute('src')) iframe.setAttribute('src', tab.getAttribute('uri'));
-                    activeTab && activeTab.classList.remove('active');
-                    tab.classList.add('active');
-                    tab.classList.add('loaded');
-                    activeTabpane && activeTabpane.classList.remove('active');
-                    tabpane.classList.add('active');
-
+                    activate(e.target);
                     e.preventDefault();
                 }));
 
@@ -121,6 +123,8 @@
                     var data = JSON.parse(json),
                         link;
 
+                    UI.toNodes(tabs, tabTpl)(data.tabs);
+                    UI.toNodes(tabpanes, tabpaneTpl)(data.tabs);
                     if (data.favicon) {
                         link = document.createElement('link');
                         link.type = 'image/png';
@@ -128,8 +132,9 @@
                         link.href = data.favicon;
                         document.head.appendChild(link);
                     }
-                    UI.toNodes(tabs, tabTpl)(data.tabs);
-                    UI.toNodes(tabpanes, tabpaneTpl)(data.tabs);
+                    if (data.deftab !== 'undefined') {
+                        activate(UI.select('[uri="'+data.tabs[data.deftab].uri+'"]', tabs));
+                    }
                 }, true);
             });
         </script>
