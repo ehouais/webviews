@@ -10,7 +10,11 @@
             }, {});
         },
         uriData = function(uri) {
-            return decodeURIComponent(uri.replace(/^data:[^,]+,/, ''));
+            var match = uri.match(/^data:([^,;]+)(;[^,]+)?,(.*)/)
+            return {
+                type: match[1],
+                data: decodeURIComponent(match[3])
+            };
         },
         debounce = function(fn, delay) {
             var timer = null;
@@ -25,15 +29,21 @@
         Webviews = {
             data: function() {
                 var local,
+                    ltype,
                     handlers = [],
                     dataUri = uriParams(window.location.href).datauri,
                     dataScheme = dataUri.substr(0, 5) == 'data:',
                     lastModified,
                     cipher = (function() {
-                        var password;
+                        var password,
+                            publish = function(data, type) {
+                                local = data;
+                                ltype = type;
+                                d.trigger();
+                            };
 
                         return {
-                            in: function(data, cb) {
+                            in: function(data, type) {
                                 var $overlay;
 
                                 try {
@@ -49,7 +59,7 @@
                                                         backgroundSize: ''
                                                     }).off('dblclick').on('dblclick', function() {
                                                         try {
-                                                            cb(sjcl.decrypt(password = password || prompt('Enter password for data \''+dataUri+'\''), data));
+                                                            publish(sjcl.decrypt(password = password || prompt('Enter password for data \''+dataUri+'\''), data), type);
                                                             unlock();
                                                         } catch(e) {
                                                             alert(e.message);
@@ -78,7 +88,7 @@
                                                 right: 0,
                                                 cursor: 'pointer'
                                             }).appendTo(document.body);
-                                            if (password) cb(sjcl.decrypt(password, data));
+                                            if (password) publish(sjcl.decrypt(password, data), type);
                                             else lock();
                                         });
                                         return;
@@ -86,7 +96,8 @@
                                 } catch(e) {
                                     // hide non significant error that only means that data is not JSON (and thus, not ciphered)
                                 }
-                                cb(data);
+
+                                publish(data, type);
                             },
                             out: function(data) {
                                 return password ? sjcl.encrypt(password, data, {ks: 256}) : data;
@@ -111,7 +122,7 @@
                                         save_ = $.ajax({
                                             url: dataUri,
                                             type: 'PUT',
-                                            contentType: 'text/plain',
+                                            contentType: 'text/plain', // TODO: use proper MIME type (application/octet-stream when ciphered)
                                             data: local,
                                             xhrFields: {withCredentials: true}
                                         });
@@ -125,7 +136,7 @@
                         })(),
                         bind: function(handler) {
                             handlers.push(handler);
-                            if (local) handler(local); // publish data if already fetched
+                            if (local) handler(local, ltype); // publish data if already fetched
                             return d;
                         },
                         unbind: function(handler) {
@@ -136,20 +147,24 @@
                         },
                         trigger: function() {
                             handlers.forEach(function(handler) {
-                                handler(local);
+                                handler(local, ltype);
                             });
                             return d;
                         }
                     },
-                    publish = function(data) {
-                        local = data;
-                        d.trigger();
-                    },
                     load = function() {
                         if (dataScheme) {
                             // data: URIs are (for now...) parsed and not fetched because browsers have difficulties handling them in a CORS context
-                            cipher.in(uriData(dataUri), publish);
+                            var data = uriData(dataUri);
+                            cipher.in(data.data, data.type);
                         } else {
+                            var ext = dataUri.match(/\.([^\.]+)$/),
+                                // guess MIME type from resource URI 'extension'
+                                type = ext && {
+                                    csv: 'text/csv',
+                                    md: 'text/markdown',
+                                }[ext[1]] || 'application/json';
+
                             $.ajax({
                                 url: dataUri,
                                 dataType: 'text',
@@ -159,7 +174,7 @@
                                 var lm = xhr.getResponseHeader("Last-Modified");
                                 if (lm != lastModified) {
                                     lastModified = lm;
-                                    cipher.in(data, publish);
+                                    cipher.in(data, type);
                                 }
                             }).always(function() {
                                 !dataScheme && setNextLoad();
