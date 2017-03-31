@@ -12,7 +12,7 @@
                 font-style: normal;
             }
             body {
-				font-family: gotham;
+                font-family: gotham;
                 background-color: transparent;
             }
             #container {
@@ -58,7 +58,7 @@
             }
         </style>
         <script>
-			var Form = Webviews.data(),
+            var Form = Webviews.data(),
                 msg = function(type, data) {
                     parent.postMessage({type: type, data: data}, '*');
                 };
@@ -122,20 +122,20 @@
 
                     // Send resize event to parent now that content is stable
                     msg('resize', {height: $('.inner', $form).outerHeight()});
-				});
+                });
             });
         </script>
     </head>
     <body>
         <div id="container">
-    		<form>
+            <form>
                 <div class="inner">
                     <input type="text" class="form-control input-sm template"/>
                     <div class="buttons">
                         <input type="button" class="btn btn-default btn-sm template"/>
                         <input type="submit" class="btn btn-default btn-sm" value="Submit"/></div>
                 </div>
-    		</form>
+            </form>
         </div>
     </body>
 </html>
