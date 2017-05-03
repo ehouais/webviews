@@ -1,26 +1,13 @@
 define(['ui-utils', 'text!templates.html'], function($, html) {
-    document.body.innerHTML = html;
-    var templates = $.extract('template-id');
+    var templates = $.extract('template-id', $.fragmentFromHtml(html));
 
-    var template = function(dom, impl) {
-            return function(data) {
-                if (data) {
-                    var node = document.contains(dom) ? dom : dom.cloneNode(true);
-
-                    impl.call(node, data);
-
-                    return node;
-                }
-            };
-        };
-
-    var todoTpl = template(templates['todo'], function(todo) {
+    var todoTpl = $.template(templates['todo'], function(todo) {
             this.classList.add('list-group-item-'+{high: 'danger', low: 'warning', done: 'success'}[todo.status]);
             $.select('.description', this).textContent = todo.description;
             $.select('.id', this).textContent = todo.id;
             $.select('.sprint', this).textContent = todo.sprint;
         }),
-        todosTpl = template(templates['todos'], function(todos) {
+        todosTpl = $.template(templates['todos'], function(todos) {
             $.toNodes(this, todoTpl)(todos);
         });
 
@@ -28,7 +15,7 @@ define(['ui-utils', 'text!templates.html'], function($, html) {
         update: function(components) {
             document.body.innerHTML = '';
 
-            $.toNodes(document.body, template(templates['component'], function(component) {
+            $.toNodes(document.body, $.template(templates['component'], function(component) {
                 $.select('h2', this).textContent = component.name;
 
                 // Sort todos

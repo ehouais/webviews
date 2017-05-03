@@ -132,7 +132,7 @@
                         link.href = data.favicon;
                         document.head.appendChild(link);
                     }
-                    if (data.deftab !== 'undefined') {
+                    if (data.deftab !== undefined) {
                         activate(UI.select('[uri="'+data.tabs[data.deftab].uri+'"]', tabs));
                     }
                 }, true);

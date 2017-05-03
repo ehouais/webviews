@@ -1,6 +1,6 @@
 define(['tablesort'], function(Tablesort) {
     return {
-        update: function(rows) {
+        update: function(data) {
             var $table = document.createElement('table'),
                 $tbody = document.createElement('tbody'),
                 $row = function(row, header) {
@@ -12,8 +12,13 @@ define(['tablesort'], function(Tablesort) {
                     }, document.createElement('tr'))
                 };
 
-            $table.appendChild($row(rows.shift(), true));
-            rows.forEach(function(row) {
+            if (data.cols) {
+                $table.appendChild($row(data.cols.map(function(col) {
+                    return col.label;
+                }), true));
+                data = data.rows;
+            }
+            data.forEach(function(row) {
                 $tbody.appendChild($row(row));
             });
             $table.appendChild($tbody);
