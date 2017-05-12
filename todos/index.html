@@ -100,17 +100,45 @@
             .new:after {
                 content: 'D';
             }
-            #popup {
-                border: none;
-                position: absolute;
-                top: 0;
-                width: 100%;
-                height: 100%;
-                display: none;
-            }
             #container {
                 height: 100%;
                 position: relative;
+            }
+
+            #form {
+                width: 400px;
+                padding: 10px;
+                background-color: #eee;
+                border-radius: 4px;
+                font-family: sans-serif;
+                font-size: 13px;
+            }
+            #form input {
+                margin-bottom: 2px;
+                padding: 5px;
+                font: inherit;
+                border: 1px solid #ccc;
+            }
+            #form input[type=text] {
+                width: 100%
+            }
+            #form input:focus {
+                border-color: #66afe9;
+                outline: 0;
+                box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102,175,233,.6);
+                transition: border-color ease-in-out .15s,box-shadow ease-in-out .15s;
+            }
+            #form button {
+                font: inherit;
+                padding: 4px 10px;
+                border: none;
+                border-radius: 3px;
+                cursor: pointer;
+                background-color: #ccc;
+                border: 1px solid #ccc;
+            }
+            #form button:hover {
+                background-color: #ddd;
             }
         </style>
     </head>
@@ -124,36 +152,38 @@
                 <li class="new" template-id="new"></new>
             </ul>
         </div>
-        <iframe id="popup" src="../forms/?datauri=data:text/plain,description:Description,[cancel]:Cancel"></iframe>
+        <div id="form"></div>
         <script>
-            require(['/cdn/js-data-libs/0.1/http.js', '/cdn/js-ui-utils/0.1/ui-utils.js'], function(Http, UI) {
+            require.config({
+                paths: {
+                    'http': '/cdn/js-data-libs/0.1/http',
+                    'ui-utils': '/cdn/js-ui-utils/0.3.0/ui-utils',
+                    'overlay': '/cdn/js-ui-utils/0.3.0/overlay',
+                    'form': '/cdn/js-ui-utils/0.3.0/form',
+                }
+            });
+            require(['http', 'ui-utils', 'overlay', 'form'], function(Http, $, Overlay, Form) {
                 var todos = [],
                     domain = document.location.origin,
-                    listDom = UI.select('#todos', document.body);
-                    dataUri = UI.uri(window.location.href).params.datauri,
-                    popupDom = UI.select('#popup', document.body),
-                    popup = function(description, onsubmit) {
-                        var onMessage = function(e) {
-                                var msg = e.data;
-
-                                if (e.origin == domain && msg.type != 'resize') {
-                                    if (msg.type == 'submit' && msg.data.description) {
-                                        onsubmit(msg.data.description);
-                                    }
-                                    popupDom.style.display = 'none';
-                                    window.removeEventListener('message', onMessage, false);
-                                }
-                            };
-
-                        popupDom.contentWindow.postMessage({
-                            type: 'set',
-                            values: {description: description}
-                        }, domain);
-                        popupDom.style.display = 'block';
-                        window.addEventListener('message', onMessage, false);
-                    }
-                    templates = UI.extract('template-id'),
-                    todoTpl = UI.template2(templates['todo'], function(todo) {
+                    listDom = $.select('#todos', document.body),
+                    dataUri = $.uri(window.location.href).params.datauri,
+                    $form = $.select('#form'),
+                    form = Form($form, {fields: {description: 'Description'}}, function(data) {
+                        if (data) {
+                            if (edited) {
+                                edited.description = data.description;
+                            } else {
+                                todos.push({description: data.description});
+                            }
+                            save();
+                        }
+                        edited = null;
+                        overlay.hide();
+                    }),
+                    edited,
+                    overlay = Overlay($form, {'background-color': 'rgba(0,0,0,0.5)'}),
+                    templates = $.extract('template-id'),
+                    todoTpl = $.template(templates['todo'], function(todo) {
                         delete todo.tags; // temporary for data migration
                         this.appendChild(document.createTextNode(todo.description));
                         todo.active && this.classList.add("active");
@@ -161,7 +191,7 @@
                     }),
                     newTpl = templates['new'],
                     update = function() {
-                        UI.toNodes(listDom, todoTpl)(todos);
+                        $.toNodes(listDom, todoTpl)(todos);
                         listDom.appendChild(newTpl);
                     },
                     load = function() {
@@ -176,13 +206,17 @@
                         });
                     };
 
-                listDom.addEventListener('click', UI.delegate('.status', function(e) {
+                listDom.addEventListener('click', function(e) {
+                    overlay.hide();
+                });
+
+                listDom.addEventListener('click', $.delegate('.status', function(e) {
                     var todo = e.target.parentElement.todo;
                     todo.active = !todo.active;
                     save();
                 }));
 
-                listDom.addEventListener('click', UI.delegate('.delete', function(e) {
+                listDom.addEventListener('click', $.delegate('.delete', function(e) {
                     if (window.confirm('Do you really want to delete this todo ?')) {
                         var todo = e.target.parentElement.todo;
                         todos = todos.filter(function(el) { return el !== todo });
@@ -190,19 +224,22 @@
                     }
                 }));
 
-                listDom.addEventListener('click', UI.delegate('.todo', function(e) {
-                    var dom = e.target;
-                    popup(dom.textContent.trim(), function(description) {
-                        dom.todo.description = description;
-                        save();
-                    });
+                listDom.addEventListener('click', $.delegate('.todo', function(e) {
+                    edited = e.target.todo;
+                    form({description: edited.description});
+                    overlay.show();
                 }));
 
                 newTpl.addEventListener('click', function(e) {
-                    popup('', function(description) {
-                        todos.push({description: description});
-                        save();
-                    });
+                    form({});
+                    overlay.show();
+                    e.stopPropagation();
+                });
+
+                document.addEventListener('keyup', function(e) {
+                    if (e.which == 27) {
+                        overlay.hide();
+                    }
                 });
 
                 load();
