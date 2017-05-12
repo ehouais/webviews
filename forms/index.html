@@ -1,9 +1,7 @@
 <html>
     <head>
         <meta charset="utf-8">
-        <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
-        <link href="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
-        <script src="../webviews.js"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/require.js/2.3.2/require.min.js"></script>
         <style>
             @font-face {
                 font-family: 'gotham';
@@ -12,8 +10,8 @@
                 font-style: normal;
             }
             body {
-                font-family: gotham;
                 background-color: transparent;
+                font-family: gotham;
             }
             #container {
                 display: table;
@@ -35,107 +33,139 @@
             }
             input {
                 margin-bottom: 2px;
-            }
-            .template {
-                display: none;
+                padding: 5px;
+                font: inherit;
+                border: 1px solid #ccc;
             }
             input[type=text] {
                 width: 100%
             }
-            .input-sm, .btn-sm {
-                font-size: 13px;
-            }
-            input.btn-danger {
-                float: right;
+            input:focus {
+                border-color: #66afe9;
+                outline: 0;
+                box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102,175,233,.6);
+                transition: border-color ease-in-out .15s,box-shadow ease-in-out .15s;
             }
             .inner {
                 padding: 10px;
                 background-color: #eee;
                 border-radius: 5px;
+                font-size: 13px;
             }
-            .buttons input {
-                margin-right: 2px;
+            button {
+                font: inherit;
+                padding: 4px 10px;
+                border: none;
+                border-radius: 3px;
+                cursor: pointer;
+                background-color: #ccc;
+                border: 1px solid #ccc;
+            }
+            button:hover {
+                background-color: #ddd;
             }
         </style>
-        <script>
-            var Form = Webviews.data(),
-                msg = function(type, data) {
-                    parent.postMessage({type: type, data: data}, '*');
-                };
-
-            $(function() {
-                var form = {},
-                    $form = $('form'),
-                    $btns = $('.buttons', $form),
-                    $tpl = $('input[type=text]', $form).removeClass('template').detach(),
-                    $gen_btn = $('input.template', $btns).removeClass('template').detach(),
-                    $submit_btn = $('input[type=submit]', $btns);
-
-                $btns.on('click', 'input[type=button]', function(e) {
-                    msg($(e.target).data('id'));
-                });
-                // Bind submit event to parent handler
-                $submit_btn.on('click', function(e) {
-                    var data = {},
-                        id;
-
-                    for (id in form) {
-                        data[id] = form[id].dom.val()
-                    }
-                    msg('submit', data);
-                    e.preventDefault();
-                })
-                $(document).on('keyup', function(e) {
-                    if (e.which == 27) {
-                        msg('cancel');
-                    }
-                });
-
-                $(window).on('message', function(e) {
-                    var key,
-                        data = e.originalEvent.data;
-
-                    if (data.type == 'set') {
-                        $('input[type=text]', $form).val('');
-                        for (key in data.values) {
-                            form[key].dom.val(data.values[key]);
-                        }
-                    }
-                });
-
-                Form.bind(function(data) {
-                    // Build form using provided params
-                    data.split(',').forEach(function(field) {
-                        var tokens = field.split(':'),
-                            id = tokens[0],
-                            label = tokens[1];
-
-                        if (id.match(/^\[[^\]]+\]$/)) {
-                            $gen_btn.clone().data('id', id.substr(1, id.length-2)).val(label).appendTo($btns);
-                        } else {
-                            form[id] = {label: label, dom: $tpl.clone().attr({id: id, placeholder: label}).insertBefore($btns)};
-                        }
-                    })
-
-                    // Put submit button at the bottom
-                    $submit_btn.show();
-
-                    // Send resize event to parent now that content is stable
-                    msg('resize', {height: $('.inner', $form).outerHeight()});
-                });
-            });
-        </script>
     </head>
     <body>
         <div id="container">
             <form>
                 <div class="inner">
-                    <input type="text" class="form-control input-sm template"/>
+                    <div class="inputs"></div>
                     <div class="buttons">
-                        <input type="button" class="btn btn-default btn-sm template"/>
-                        <input type="submit" class="btn btn-default btn-sm" value="Submit"/></div>
+                        <button class="submit"/>Submit</div>
                 </div>
             </form>
         </div>
+        <script>
+            require.config({
+                paths: {
+                    'ui-utils': 'http://ehouais.net.local/cdn/js-ui-utils/dev/ui-utils',
+                    'jquery': 'http://ehouais.net.local/cdn/jquery/3.1.0/jquery.min',
+                    'sjcl': 'http://ehouais.net.local/cdn/sjcl/1.0.6/sjcl.min',
+                    'webviews': 'http://ehouais.net.local/cdn/webviews/dev/webviews'
+                },
+                shim: {
+                    webviews: {
+                        deps: ['jquery', 'sjcl'],
+                        exports: 'Webviews'
+                    }
+                }
+            });
+            require(['ui-utils', 'webviews'], function($, Webviews) {
+                var msg = function(type, data) {
+                        parent.postMessage({type: type, data: data}, '*');
+                    };
+
+                var form = {},
+                    $form = $.select('form'),
+                    $inner = $.select('.inner', $form),
+                    $inputs = $.select('.inputs', $inner),
+                    $btns = $.select('.buttons', $inner),
+                    $submit_btn = $.select('button.submit', $btns);
+
+                $btns.addEventListener('click', $.delegate('button', function(e) {
+                    msg(e.target.dataset.id);
+                    e.preventDefault();
+                }));
+                // Bind submit event to parent handler
+                $submit_btn.addEventListener('click', function(e) {
+                    var data = {},
+                        id;
+
+                    for (id in form) {
+                        data[id] = form[id].dom.value;
+                    }
+                    msg('submit', data);
+                    e.preventDefault();
+                })
+                document.addEventListener('keyup', function(e) {
+                    if (e.which == 27) {
+                        msg('cancel');
+                    }
+                });
+
+                window.addEventListener('message', function(e) {
+                    var key,
+                        data = e.data;
+
+                    if (data.type == 'set') {
+                        $.selectAll('input[type=text]', $form).forEach(function($node) {
+                            $node.value = '';
+                        });
+                        for (key in data.values) {
+                            form[key].dom.value = data.values[key];
+                        }
+                    }
+                });
+
+                // Build form using provided params
+                var uri = $.uri(window.location.href);
+                data.split(',').forEach(function(field) {
+                    var tokens = field.split(':'),
+                        id = tokens[0],
+                        label = tokens[1],
+                        $btn;
+
+                    if (id.match(/^\[[^\]]+\]$/)) {
+                        $btn = $.element('button');
+                        $btn.dataset.id = id.substr(1, id.length-2);
+                        $btn.textContent = label;
+                        $.prepend($btns, $btn);
+                    } else {
+                        $btn = $.element('input', {type: 'text', placeholder: label});
+                        $btn.dataset.id = id;
+                        $.prepend($inner, $btn);
+                        $inputs.appendChild($btn);
+                        form[id] = {label: label, dom: $btn};
+                    }
+                })
+
+                // Put submit button at the bottom
+                //$submit_btn.show();
+
+                // Send resize event to parent now that content is stable
+                msg('resize', {height: $.select('.inner', $form).offsetHeight}); // jQuery outerHeight
+            });
+        </script>
     </body>
 </html>
