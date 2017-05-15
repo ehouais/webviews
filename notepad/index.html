@@ -1,12 +1,7 @@
 <html>
     <head>
         <meta charset="utf-8">
-        <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
-        <script src="//cdnjs.cloudflare.com/ajax/libs/sjcl/1.0.6/sjcl.min.js"></script>
-        <script src="//cdnjs.cloudflare.com/ajax/libs/markdown-it/8.0.0/markdown-it.min.js"></script>
-        <script src="//cdnjs.cloudflare.com/ajax/libs/jquery.perfect-scrollbar/0.6.15/js/perfect-scrollbar.jquery.min.js"></script>
-        <script src="../webviews.js"></script>
-        <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/jquery.perfect-scrollbar/0.6.15/css/perfect-scrollbar.min.css"/>
+        <script src="/cdn/require.js/2.3.2/require.min.js"></script>
         <style>
             @font-face {
                 font-family: 'gotham';
@@ -18,13 +13,13 @@
                 font-family: gotham;
                 margin: 2px 0 0 4px;
             }
-            #source, #render {
+            .source, .render {
                 position: relative;
                 font-size: 13px;
                 width: 100%;
                 height: 100%;
             }
-            #source {
+            .source {
                 border: none;
                 resize: none;
                 background-color: #fff;
@@ -35,71 +30,85 @@
                 white-space: pre;
                 word-wrap: normal;
             }
-            #render {
+            .edition .source {
+                display: block;
+            }
+            .render {
                 -moz-user-select: none;
                 -webkit-user-select: none;
                 -ms-user-select: none;
             }
-            #render a {
+            .edition .render {
+                display: none;
+            }
+            .render a {
                 padding: 0 2px;
                 text-decoration: none;
                 border-radius: 2px;
                 color: #00f;
                 white-space: nowrap;
             }
-            #render a:hover {
+            .render a:hover {
                 background-color: #fff;
             }
-            #render ul {
+            .render ul {
                 padding-left: 25px;
             }
-            #render hr {
+            .render hr {
                 border-style: none;
                 border-top: 1px solid #e2e2e2;
             }
         </style>
+    </head>
+    <body>
         <script>
-            var Notes = Webviews.data(),
-                md = window.markdownit({
-                    linkify: true,
-                    typographer: true
-                }),
-                modified = false;
+            require.config({
+                paths: {
+                    'jquery': '/cdn/jquery/3.1.0/jquery.min',
+                    'sjcl': '/cdn/sjcl/1.0.6/sjcl.min',
+                    'webviews': '/cdn/webviews/dev/webviews',
+                    'markdownit': '/cdn/markdown-it/8.0.0/markdown-it.min',
+                    'ui-utils': '/cdn/js-ui-utils/0.3.0/ui-utils',
+                }
+            });
+            require(['webviews', 'markdownit', 'ui-utils'], function(Webviews, Markdownit, $) {
+                var markdownit = Markdownit({
+                        linkify: true,
+                        typographer: true
+                    });
 
-            $(function() {
-                var $source = $('#source'),
-                    $render = $('#render'),
-                    update = function() {
-                        $render.html(md.render($source.val()));
-                    },
-                    toggle = function() {
-                        $source.toggle();
-                        $render.toggle();
+                var modified = false,
+                    $container = document.body,
+                    $source = $.element('textarea', {'class': 'source'}),
+                    $render = $.element('div', {'class': 'render'});
+
+                $container.appendChild($source);
+                $container.appendChild($render);
+
+                var update = function() {
+                        $render.innerHTML = markdownit.render($source.value);
                     };
 
-                $render.perfectScrollbar();
+                var Notes = Webviews.data();
+
                 Notes.bind(function(data) {
-                    $source.val(data);
+                    $source.value = data;
                     update();
                 });
-                $render.on('dblclick', function() {
-                    toggle();
+                $render.addEventListener('dblclick', function() {
+                    $container.classList.toggle('edition');
                     $source.focus();
                 });
-                $source.on('keyup', function(e) {
+                $source.addEventListener('keyup', function(e) {
                     if (e.which == 27) {
                         modified && update();
-                        toggle();
+                        $container.classList.toggle('edition');
                     } else {
                         modified = true;
-                        Notes.save($source.val());
+                        Notes.save($source.value);
                     }
                 });
             });
         </script>
-    </head>
-    <body>
-        <textarea id="source"></textarea>
-        <div id="render"></div>
     </body>
 </html>
