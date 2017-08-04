@@ -10,7 +10,7 @@ define(['ui-utils'], function($) {
                     div.appendChild($.element('iframe'));
                     return div;
                 },
-                tabpanes = $.element('div', {class: 'tabspanes'}),
+                tabpanes = $.element('div', {class: 'tabpanes'}),
                 activate = function(tab) {
                     var uri = tab.getAttribute('uri'),
                         tabpane = $.select('[uri="'+uri+'"]', tabpanes)
