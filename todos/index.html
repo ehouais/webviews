@@ -2,7 +2,7 @@
     <head>
         <meta charset="utf-8">
         <link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAMhSURBVFhHtZc/aBNxFMcPO4igoIO2uogQETGl+d+kiB0cHTrUotBJAg6im2uJm4PZFHQQiuBYHCTgIog4iODgpLZ1cNCllGJqKYIm8fM93oXL9Xq5wN0XHr+7997vfb+/9/vlLucEUSqVbmKfi8ViL8oKhUKoP8I61P2AzRvVIKampi4QfIt1y+VyLw2jtoT8ZXzB/YRRO04+nz9PYLNarfYqlYpW18bWsFUbQ405oX5ZIKY669ju9PR0TzzEv+ZyueOegPdySiFJS6buQKPRSMRUa2FhYYzFnYH4kbohPrieOTjqIraVN1xFKUPE6gRjWzffbG9+cQ6OWk6qgC+LdeDsqQPuAUHIqsUTA1vbZKUf4ZgzlwvtPXy/tfABAbZfiQDyebVZWyuD7Mns7OxhxfCPw7cdFLCWlACtkLobqqv6spmZmR6ibiieugBqrWj1HrmIGEV4TvFUBVBn0U8u0z1dqVtKegJo8SnqbflbL3L8LUtxkZoAarT8q7fWb0mYpbhIRQB16n5yme6pu2gpfSQugBWepo5bUPWo5ZGvWMoABgQoeYiAMRv3BXNf+1dvZ2Cj/7IJIHYH8N0neZUVXjPXHhC77SeX6R5/+HsfxBKA/4EK6SmmOAWvW6gPVniWvF2v9T7y55YSiqEC8NVrtVq/qBLDRDDnnQR6ecph/Dk5OXnMUkIRR8BVrcS/sqAI8u8qx4vL7JV+RfEoDBUgQHTHXiKK9UVw3SF2zyvgkUsMvqc2PRKxBAjE+iI8Ipm/7TJr/XdeOEdsaiRiCxCIh4rwm23NZZsyFCMJEPzbESS31j+01FgYWYBA3h4RthVr/ME8ZGmxsJ+Aof+I/J2QaR7zL1o4NviJn4CvHRSwbvFIkHeLiX/Ueh5ES+YeCXpEU2fHFcDFJ10gZCebzY5bTiT0BKQbJbsdGXBVWHQX7q6KzakLdpgeW06qgO+V8W16jpfeZxnXywSKOihJmTpLzZN07RJjSzz2ZdR0BdCOCbbhi5xMcA8Ywe0ETd+a7neA6hv5m4Ffjw4GCcvYBl3oKjlpo+4/xh+QNzOZzEHHcZz/Yu4UxPJ023QAAAAASUVORK5CYII=">
-        <script src="/cdn/require.js/2.3.2/require.min.js"></script>
+        <script src="../webviews.js"></script>
         <style>
             @font-face {
                 font-family: 'gotham';
@@ -100,17 +100,45 @@
             .new:after {
                 content: 'D';
             }
-            #popup {
-                border: none;
-                position: absolute;
-                top: 0;
-                width: 100%;
-                height: 100%;
-                display: none;
-            }
             #container {
                 height: 100%;
                 position: relative;
+            }
+
+            #form {
+                width: 400px;
+                padding: 10px;
+                background-color: #eee;
+                border-radius: 4px;
+                font-family: sans-serif;
+                font-size: 13px;
+            }
+            #form input {
+                margin-bottom: 2px;
+                padding: 5px;
+                font: inherit;
+                border: 1px solid #ccc;
+            }
+            #form input[type=text] {
+                width: 100%
+            }
+            #form input:focus {
+                border-color: #66afe9;
+                outline: 0;
+                box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102,175,233,.6);
+                transition: border-color ease-in-out .15s,box-shadow ease-in-out .15s;
+            }
+            #form button {
+                font: inherit;
+                padding: 4px 10px;
+                border: none;
+                border-radius: 3px;
+                cursor: pointer;
+                background-color: #ccc;
+                border: 1px solid #ccc;
+            }
+            #form button:hover {
+                background-color: #ddd;
             }
         </style>
     </head>
@@ -124,36 +152,38 @@
                 <li class="new" template-id="new"></new>
             </ul>
         </div>
-        <iframe id="popup" src="https://ehouais.net/webviews/forms/?datauri=data:text/plain,description:Description,[cancel]:Cancel"></iframe>
+        <div id="form"></div>
         <script>
-            require(['/cdn/js-data-libs/0.1/http.js', '/cdn/js-ui-utils/0.1/ui-utils.js'], function(Http, UI) {
-                var todos = [],
+            require.config({
+                paths: {
+                    'ui-utils': 'https://cdn.rawgit.com/ehouais/js-ui-utils/v0.4.1/ui-utils',
+                    overlay: 'https://cdn.rawgit.com/ehouais/js-ui-utils/v0.4.1/overlay',
+                    form: 'https://cdn.rawgit.com/ehouais/js-ui-utils/v0.4.1/form',
+                }
+            });
+            require(['ui-utils', 'overlay', 'form'], function($, Overlay, Form) {
+                var dataSource = Webviews.data(),
+                    todos = [],
                     domain = document.location.origin,
-                    listDom = UI.select('#todos', document.body);
-                    dataUri = UI.uri(window.location.href).params.datauri,
-                    popupDom = UI.select('#popup', document.body),
-                    popup = function(description, onsubmit) {
-                        var onMessage = function(e) {
-                                var msg = e.data;
-
-                                if (e.origin == domain && msg.type != 'resize') {
-                                    if (msg.type == 'submit' && msg.data.description) {
-                                        onsubmit(msg.data.description);
-                                    }
-                                    popupDom.style.display = 'none';
-                                    window.removeEventListener('message', onMessage, false);
-                                }
-                            };
-
-                        popupDom.contentWindow.postMessage({
-                            type: 'set',
-                            values: {description: description}
-                        }, domain);
-                        popupDom.style.display = 'block';
-                        window.addEventListener('message', onMessage, false);
-                    }
-                    templates = UI.extract('template-id'),
-                    todoTpl = UI.template2(templates['todo'], function(todo) {
+                    listDom = $.select('#todos', document.body),
+                    dataUri = $.uri(window.location.href).params.datauri,
+                    $form = $.select('#form'),
+                    form = Form($form, {fields: {description: 'Description'}}, function(data) {
+                        if (data) {
+                            if (edited) {
+                                edited.description = data.description;
+                            } else {
+                                todos.push({description: data.description});
+                            }
+                            save();
+                        }
+                        edited = null;
+                        overlay.hide();
+                    }),
+                    edited,
+                    overlay = Overlay($form, {'background-color': 'rgba(0,0,0,0.5)'}),
+                    templates = $.extract('template-id'),
+                    todoTpl = $.template(templates['todo'], function(todo) {
                         delete todo.tags; // temporary for data migration
                         this.appendChild(document.createTextNode(todo.description));
                         todo.active && this.classList.add("active");
@@ -161,28 +191,24 @@
                     }),
                     newTpl = templates['new'],
                     update = function() {
-                        UI.toNodes(listDom, todoTpl)(todos);
+                        $.toNodes(listDom, todoTpl)(todos);
                         listDom.appendChild(newTpl);
                     },
-                    load = function() {
-                        Http.get(dataUri, {}, function(json) {
-                            todos = JSON.parse(json);
-                            update();
-                        });
-                    },
-                    save = function(cb) {
-                        Http.put(dataUri, {}, JSON.stringify(todos), function() {
-                            update();
-                        });
+                    save = function() {
+                        dataSource.save(JSON.stringify(todos));
                     };
 
-                listDom.addEventListener('click', UI.delegate('.status', function(e) {
+                listDom.addEventListener('click', function(e) {
+                    overlay.hide();
+                });
+
+                listDom.addEventListener('click', $.delegate('.status', function(e) {
                     var todo = e.target.parentElement.todo;
                     todo.active = !todo.active;
                     save();
                 }));
 
-                listDom.addEventListener('click', UI.delegate('.delete', function(e) {
+                listDom.addEventListener('click', $.delegate('.delete', function(e) {
                     if (window.confirm('Do you really want to delete this todo ?')) {
                         var todo = e.target.parentElement.todo;
                         todos = todos.filter(function(el) { return el !== todo });
@@ -190,22 +216,28 @@
                     }
                 }));
 
-                listDom.addEventListener('click', UI.delegate('.todo', function(e) {
-                    var dom = e.target;
-                    popup(dom.textContent.trim(), function(description) {
-                        dom.todo.description = description;
-                        save();
-                    });
+                listDom.addEventListener('click', $.delegate('.todo', function(e) {
+                    edited = e.target.todo;
+                    form({description: edited.description});
+                    overlay.show();
                 }));
 
                 newTpl.addEventListener('click', function(e) {
-                    popup('', function(description) {
-                        todos.push({description: description});
-                        save();
-                    });
+                    form({});
+                    overlay.show();
+                    e.stopPropagation();
                 });
 
-                load();
+                document.addEventListener('keyup', function(e) {
+                    if (e.which == 27) {
+                        overlay.hide();
+                    }
+                });
+
+                dataSource.bind(function(json) {
+                    todos = JSON.parse(json);
+                    update();
+                });
             });
         </script>
     </body>
